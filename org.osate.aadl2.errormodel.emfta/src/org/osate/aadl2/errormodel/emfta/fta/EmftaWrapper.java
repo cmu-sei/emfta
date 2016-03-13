@@ -777,7 +777,7 @@ public class EmftaWrapper {
 		subEvents = new ArrayList<Event>();
 
 		for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(component)) {
-			if (opc.getOutgoing() == propagation) {
+			if (EMV2Util.isSame(opc.getOutgoing(), propagation)) {
 				ConditionExpression conditionExpression = opc.getCondition();
 				OsateDebug.osateDebug("condition expression" + conditionExpression);
 				subEvents.add(processCondition(component, conditionExpression));
