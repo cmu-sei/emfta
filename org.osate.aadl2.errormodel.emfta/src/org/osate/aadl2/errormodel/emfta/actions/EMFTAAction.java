@@ -104,8 +104,10 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				sh = window.getShell();
 
-				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
-					stateNames.add(prefixState + ebs.getName());
+				if (EMV2Util.hasCompositeErrorBehavior(si)) {
+					for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
+						stateNames.add(prefixState + ebs.getName());
+					}
 				}
 
 				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
@@ -170,7 +172,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
-
 					Feature feat = (Feature) opc.getOutgoing().getFeatureorPPRef().getFeatureorPP();
 					if (feat.getName().equalsIgnoreCase(toProcess)) {
 						errorPropagation = opc.getOutgoing();
