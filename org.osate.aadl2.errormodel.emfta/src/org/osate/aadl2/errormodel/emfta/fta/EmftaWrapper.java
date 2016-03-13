@@ -779,8 +779,23 @@ public class EmftaWrapper {
 		for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(component)) {
 			if (EMV2Util.isSame(opc.getOutgoing(), propagation)) {
 				ConditionExpression conditionExpression = opc.getCondition();
-				OsateDebug.osateDebug("condition expression" + conditionExpression);
-				subEvents.add(processCondition(component, conditionExpression));
+				if (conditionExpression != null) {
+					OsateDebug.osateDebug("condition expression" + conditionExpression);
+					subEvents.add(processCondition(component, conditionExpression));
+				} else {
+					// empty condition. At least look at the state on the lefthand side
+					// How did we end up in this state
+					// Should we do this always?
+					for (ErrorBehaviorTransition ebt : EMV2Util.getAllErrorBehaviorTransitions(component)) {
+						if (EMV2Util.isSame(opc.getState(), ebt.getTarget())) {
+							conditionExpression = ebt.getCondition();
+							if (conditionExpression != null) {
+								OsateDebug.osateDebug("condition expression" + conditionExpression);
+								subEvents.add(processCondition(component, conditionExpression));
+							}
+						}
+					}
+				}
 			}
 		}
 
