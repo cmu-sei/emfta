@@ -24,7 +24,6 @@ import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
-import org.osate.xtext.aadl2.errormodel.errorModel.FeatureorPPReference;
 import org.osate.xtext.aadl2.errormodel.errorModel.TypeSet;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
@@ -32,8 +31,7 @@ import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 import edu.cmu.emfta.Event;
 
 public class Utils {
-	
-	
+
 	/**
 	 * Fill an Event with all the properties from the AADL model. Likely, all the related
 	 * values in the Hazard property from EMV2.
@@ -50,37 +48,29 @@ public class Utils {
 
 		if (propertyDescription == null) {
 			event.setDescription(getDescription(component, errorModelArtifact, typeSet));
-		}
-		else
-		{
+		} else {
 			event.setDescription(propertyDescription + "(component " + component.getName() + ")");
 		}
 
 		event.setProbability(EMV2Properties.getProbability(component, errorModelArtifact, typeSet));
 	}
-	
-	
-	public static String getDescription (ComponentInstance component, NamedElement errorModelArtifact,
-			TypeSet typeSet)
-	{
+
+	public static String getDescription(ComponentInstance component, NamedElement errorModelArtifact, TypeSet typeSet) {
 		String description;
 		description = "";
 
-		if (errorModelArtifact instanceof ErrorSource)
-		{
+		if (errorModelArtifact instanceof ErrorSource) {
 			ErrorSource errorSource = (ErrorSource) errorModelArtifact;
 
 			description += "Error source";
 
-			if (errorSource.getName() != null)
-			{
-				 description += " " + errorSource.getName();
+			if (errorSource.getName() != null) {
+				description += " " + errorSource.getName();
 			}
 			description += " on component " + component.getName();
 
-
-			if ((errorSource.getOutgoing().getFeatureorPPRef() != null) && (errorSource.getOutgoing().getFeatureorPPRef().getFeatureorPP() != null))
-			{
+			if ((errorSource.getOutgoing().getFeatureorPPRef() != null)
+					&& (errorSource.getOutgoing().getFeatureorPPRef().getFeatureorPP() != null)) {
 				NamedElement el = errorSource.getOutgoing().getFeatureorPPRef().getFeatureorPP();
 				description += " from ";
 				description += el.getName();
@@ -90,8 +80,7 @@ public class Utils {
 
 		}
 
-		if (errorModelArtifact instanceof ErrorEvent)
-		{
+		if (errorModelArtifact instanceof ErrorEvent) {
 			ErrorEvent errorEvent = (ErrorEvent) errorModelArtifact;
 			description += "Error";
 			description += " event " + errorEvent.getName();
@@ -100,26 +89,18 @@ public class Utils {
 
 		}
 
-		if (errorModelArtifact instanceof ErrorBehaviorState)
-		{
+		if (errorModelArtifact instanceof ErrorBehaviorState) {
 			ErrorBehaviorState ebs = (ErrorBehaviorState) errorModelArtifact;
 			description = "component " + component.getName() + " in state " + ebs.getName();
 		}
 
 		return description;
 	}
-	
-	
+
 	public static boolean propagationEndsMatches(ErrorPropagation propagationSource,
 			ErrorPropagation propagationDestination) {
 
-		if (EMV2Util.isBinding(propagationSource) && EMV2Util.isBinding(propagationDestination)) {
-			return true;
-		}
-
-		if ((propagationSource.getFeatureorPPRef() != null) && (propagationDestination.getFeatureorPPRef() != null)
-				&& (propagationSource.getFeatureorPPRef().getFeatureorPP() == propagationDestination.getFeatureorPPRef()
-				.getFeatureorPP())) {
+		if (EMV2Util.getPrintName(propagationSource).equalsIgnoreCase(EMV2Util.getPrintName(propagationDestination))) {
 			return true;
 		}
 
