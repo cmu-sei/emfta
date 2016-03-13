@@ -73,7 +73,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	@Override
 	public void doAaxlAction(IProgressMonitor monitor, Element obj) {
 
-
 		monitor.beginTask("Fault Tree Analysis", IProgressMonitor.UNKNOWN);
 
 		si = null;
@@ -87,8 +86,9 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			monitor.done();
 		}
 
-		if (!EMV2Util.hasCompositeErrorBehavior(si)) {
-			Dialog.showInfo("Fault Tree Analysis", "Your system instance does not have a composite error behavior");
+		if (!EMV2Util.hasCompositeErrorBehavior(si) && !EMV2Util.hasOutgoingPropagationCondition(si)) {
+			Dialog.showInfo("Fault Tree Analysis",
+					"Your system instance must have a composite state or outgoing propagation condition declaration.");
 			monitor.done();
 		}
 
@@ -99,7 +99,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			public void run() {
 				IWorkbenchWindow window;
 				Shell sh;
-				List<String> stateNames = new ArrayList<String> ();
+				List<String> stateNames = new ArrayList<String>();
 
 				window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				sh = window.getShell();
@@ -108,17 +108,13 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					stateNames.add(prefixState + ebs.getName());
 				}
 
-				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si))
-				{
-					if ( ! (opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature))
-					{
+				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
+					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
 					Feature feat = (Feature) opc.getOutgoing().getFeatureorPPRef().getFeatureorPP();
-					stateNames.add (prefixOutgoingPropagation + feat.getName());
+					stateNames.add(prefixOutgoingPropagation + feat.getName());
 				}
-
-
 
 				FTADialog diag = new FTADialog(sh);
 				diag.setValues(stateNames);
@@ -142,8 +138,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			boolean processState;
 
-			if (ERROR_STATE_NAME.startsWith(prefixState))
-			{
+			if (ERROR_STATE_NAME.startsWith(prefixState)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixState, "");
 				processState = true;
 				OsateDebug.osateDebug("Will process a state" + toProcess);
@@ -164,24 +159,20 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					}
 				}
 
-
 			}
 
-			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation))
-			{
+			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixOutgoingPropagation, "");
 				processState = false;
 				OsateDebug.osateDebug("Will process an outgoing propagation" + toProcess);
 
 				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-					if (! (opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature))
-					{
+					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
 
 					Feature feat = (Feature) opc.getOutgoing().getFeatureorPPRef().getFeatureorPP();
-					if (feat.getName().equalsIgnoreCase(toProcess))
-					{
+					if (feat.getName().equalsIgnoreCase(toProcess)) {
 						errorPropagation = opc.getOutgoing();
 					}
 				}
@@ -192,19 +183,16 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			if ((errorState != null) || (errorPropagation != null)) {
 
-				if (errorState != null)
-				{
+				if (errorState != null) {
 					wrapper = new EmftaWrapper(si, errorState, errorType);
 				}
-				if (errorPropagation != null)
-				{
+				if (errorPropagation != null) {
 					wrapper = new EmftaWrapper(si, errorPropagation, errorType);
 				}
 
 				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment(si.getName().toLowerCase() + ".emfta");
 
-				serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource())
-						.getProject());
+				serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
 
 			} else {
 				Dialog.showInfo("Fault Tree Analysis",
