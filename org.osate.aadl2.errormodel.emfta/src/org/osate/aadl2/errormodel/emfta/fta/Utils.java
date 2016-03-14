@@ -100,12 +100,7 @@ public class Utils {
 	public static boolean propagationEndsMatches(ErrorPropagation propagationSource,
 			ErrorPropagation propagationDestination) {
 
-		if (EMV2Util.getPrintName(propagationSource).equalsIgnoreCase(EMV2Util.getPrintName(propagationDestination))) {
-			return true;
-		}
-
-		return false;
-
+		return EMV2Util.isSame(propagationSource,propagationDestination);
 	}
 
 	public static String getFeatureFromErrorPropagation(ErrorPropagation errorPropagation) {
