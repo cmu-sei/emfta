@@ -28,7 +28,7 @@
      <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
-            id="org.osate.analysis.fault.actionSet"
+            id="org.osate.analysis.emfta.actionSet"
             label="%actionSet.label"
             visible="false">
 
@@ -88,7 +88,7 @@
    	   <perspectiveExtension
    		   targetID="org.osate.ui.perspective.AadlPerspective">
    		   <actionSet
-   		 	   id="org.osate.analysis.fault.actionSet"/>
+   		 	   id="org.osate.analysis.emfta.actionSet"/>
    	   </perspectiveExtension>
    </extension>
    
