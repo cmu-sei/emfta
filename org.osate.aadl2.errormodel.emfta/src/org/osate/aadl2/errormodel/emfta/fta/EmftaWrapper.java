@@ -94,7 +94,7 @@ public class EmftaWrapper {
 			identifier += EMV2Util.getPrintName(namedElement);
 		}
 
-		if (type != null) {
+		if (type == null) {
 //			identifier+="-notypes";
 		} else if (type.getName() != null) {
 			identifier += "-" + type.getName();
@@ -393,7 +393,10 @@ public class EmftaWrapper {
 					ErrorPath ep = (ErrorPath) ef;
 					if (EMV2Util.isSame(ep.getOutgoing(), errorPropagation)
 							&& EM2TypeSetUtil.contains(type, ep.getTargetToken())) {
-						subEvents.add(processIncomingErrorPropagation(component, ep.getIncoming(), type));
+						Event result = processIncomingErrorPropagation(component, ep.getIncoming(), type);
+						if (result != null) {
+							subEvents.add(result);
+						}
 					}
 				} else if (ef instanceof ErrorSource) {
 					ErrorSource errorSource = (ErrorSource) ef;
@@ -441,14 +444,15 @@ public class EmftaWrapper {
 			Event result = processOutgoingErrorPropagation(componentSource, propagationSource, type);
 			if (result != null) {
 				subEvents.add(result);
-			} else {
-				// create event to represent external incoming.
-				Event emftaEvent = createEvent(component, errorPropagation, errorPropagation.getTypeSet());
-				emftaEvent.setType(EventType.EXTERNAL);
-				Utils.fillProperties(emftaEvent, component, errorPropagation, errorPropagation.getTypeSet());
-				subEvents.add(emftaEvent);
 			}
 
+		}
+		// create event to represent external incoming.
+		if (subEvents.isEmpty()) {
+			Event emftaEvent = createEvent(component, errorPropagation, errorPropagation.getTypeSet());
+			emftaEvent.setType(EventType.EXTERNAL);
+			Utils.fillProperties(emftaEvent, component, errorPropagation, errorPropagation.getTypeSet());
+			return emftaEvent;
 		}
 		return finalizeAsGatedEvents(subEvents, GateType.OR);
 	}
