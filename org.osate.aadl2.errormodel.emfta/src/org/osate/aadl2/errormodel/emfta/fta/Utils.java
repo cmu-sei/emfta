@@ -24,7 +24,7 @@ import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
-import org.osate.xtext.aadl2.errormodel.errorModel.TypeSet;
+import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
@@ -39,23 +39,23 @@ public class Utils {
 	 * @param event					- the event related to the EMV2 artifact
 	 * @param component             - the component from the event
 	 * @param errorModelArtifact    - the EMV2 artifact (error event, error propagation, etc)
-	 * @param typeSet               - the type set (null if none)
+	 * @param type               - the type set (null if none)
 	 */
 	public static void fillProperties(Event event, ComponentInstance component, NamedElement errorModelArtifact,
-			TypeSet typeSet) {
+			ErrorTypes type) {
 		String propertyDescription;
 		propertyDescription = EMV2Properties.getDescription(errorModelArtifact, component);
 
 		if (propertyDescription == null) {
-			event.setDescription(getDescription(component, errorModelArtifact, typeSet));
+			event.setDescription(getDescription(component, errorModelArtifact, type));
 		} else {
 			event.setDescription(propertyDescription + "(component " + component.getName() + ")");
 		}
 
-		event.setProbability(EMV2Properties.getProbability(component, errorModelArtifact, typeSet));
+		event.setProbability(EMV2Properties.getProbability(component, errorModelArtifact, type));
 	}
 
-	public static String getDescription(ComponentInstance component, NamedElement errorModelArtifact, TypeSet typeSet) {
+	public static String getDescription(ComponentInstance component, NamedElement errorModelArtifact, ErrorTypes type) {
 		String description;
 		description = "";
 
@@ -76,7 +76,7 @@ public class Utils {
 				description += el.getName();
 			}
 
-			description += " with types " + EMV2Util.getPrintName(typeSet);
+			description += " with types " + EMV2Util.getPrintName(type);
 
 		}
 
@@ -84,7 +84,7 @@ public class Utils {
 			ErrorEvent errorEvent = (ErrorEvent) errorModelArtifact;
 			description += "Error";
 			description += " event " + errorEvent.getName();
-			description += " with types " + EMV2Util.getPrintName(typeSet);
+			description += " with types " + EMV2Util.getPrintName(type);
 			description += " on component " + component.getName();
 
 		}
@@ -100,7 +100,7 @@ public class Utils {
 	public static boolean propagationEndsMatches(ErrorPropagation propagationSource,
 			ErrorPropagation propagationDestination) {
 
-		return EMV2Util.isSame(propagationSource,propagationDestination);
+		return EMV2Util.isSame(propagationSource, propagationDestination);
 	}
 
 	public static String getFeatureFromErrorPropagation(ErrorPropagation errorPropagation) {
