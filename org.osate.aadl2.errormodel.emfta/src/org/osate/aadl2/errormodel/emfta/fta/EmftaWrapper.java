@@ -315,6 +315,9 @@ public class EmftaWrapper {
 	 */
 	public Event processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state, ErrorTypes type) {
 		List<Event> subEvents = new ArrayList<Event>();
+		if (state == null) {
+			return null;
+		}
 		for (ErrorBehaviorTransition ebt : EMV2Util.getAllErrorBehaviorTransitions(component)) {
 			Event conditionEvent = null;
 			if (EMV2Util.isSame(state, ebt.getTarget())) {
