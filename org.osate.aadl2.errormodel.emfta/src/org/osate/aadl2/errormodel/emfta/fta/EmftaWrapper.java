@@ -514,19 +514,8 @@ public class EmftaWrapper {
 					 * hierarchy and add all its contributors to the returned
 					 * events.
 					 */
-					// OsateDebug.osateDebug("[EmftaWrapper] processCondition
-					// subcomponents are present, size=" +
-					// conditionElement.getSubcomponents().size());
 					QualifiedErrorBehaviorState qs = sconditionElement.getQualifiedState();
-					ComponentInstance referencedInstance;
-					referencedInstance = component;
-					// OsateDebug.osateDebug("[EmftaWrapper] subcomponent=" +
-					// subcomponent);
-					while (qs != null && referencedInstance != null) {
-						referencedInstance = referencedInstance
-								.findSubcomponentInstance(qs.getSubcomponent().getSubcomponent());
-						qs = qs.getNext();
-					}
+					ComponentInstance referencedInstance = EMV2Util.getLastComponentInstance(qs, component);
 					Event result = null;
 					ErrorTypes referencedErrorType = getTargetType(sconditionElement.getConstraint(), type);
 					if (referencedInstance != null) {
