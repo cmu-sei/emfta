@@ -22,6 +22,7 @@ import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
+import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
@@ -74,8 +75,9 @@ public class Utils {
 				description += " from ";
 				description += el.getName();
 			}
-
-			description += " with types " + EMV2Util.getPrintName(type);
+			if (type != null) {
+				description += " with types " + EMV2Util.getPrintName(type);
+			}
 
 		}
 
@@ -83,7 +85,9 @@ public class Utils {
 			ErrorEvent errorEvent = (ErrorEvent) errorModelArtifact;
 			description += "Error";
 			description += " event " + errorEvent.getName();
-			description += " with types " + EMV2Util.getPrintName(type);
+			if (type != null) {
+				description += " with types " + EMV2Util.getPrintName(type);
+			}
 			description += " on component " + component.getName();
 
 		}
@@ -91,6 +95,12 @@ public class Utils {
 		if (errorModelArtifact instanceof ErrorBehaviorState) {
 			ErrorBehaviorState ebs = (ErrorBehaviorState) errorModelArtifact;
 			description = "component " + component.getName() + " in state " + ebs.getName();
+		}
+
+		if (errorModelArtifact instanceof ErrorPropagation) {
+			ErrorPropagation ep = (ErrorPropagation) errorModelArtifact;
+			description = "component " + component.getName() + " with " + ep.getDirection() + " propagation "
+					+ EMV2Util.getPropagationName(ep);
 		}
 
 		return description;

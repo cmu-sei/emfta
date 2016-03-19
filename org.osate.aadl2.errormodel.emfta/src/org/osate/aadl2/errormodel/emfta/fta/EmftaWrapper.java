@@ -205,11 +205,19 @@ public class EmftaWrapper {
 	public Event processOutgoingErrorPropagation(final ComponentInstance component,
 			final ErrorPropagation errorPropagation, final ErrorTypes type) {
 		ErrorTypes targetType = getTargetType(errorPropagation.getTypeSet(), type);
-		Event result = processOutgoingErrorPropagationConditions(component, errorPropagation, targetType);
+		Event result = getFromCache(component, errorPropagation, targetType);
+		if (result != null) {
+			return result;
+		}
+		result = processOutgoingErrorPropagationConditions(component, errorPropagation, targetType);
 		if (result == null) {
 			result = processReverseErrorFlow(component, errorPropagation, targetType);
 		}
-		// XXX here we want to cache
+		if (result != null) {
+			result.setType(EventType.BASIC);
+			result.setName(buildName(component, errorPropagation, type));
+			putInCache(component, errorPropagation, type, result);
+		}
 		return result;
 	}
 
@@ -264,11 +272,6 @@ public class EmftaWrapper {
 			}
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
-		if (result != null) {
-			result.setType(EventType.BASIC);
-			result.setName(buildName(component, propagation, type));
-			putInCache(component, propagation, type, result);
-		}
 		return result;
 	}
 
@@ -380,7 +383,7 @@ public class EmftaWrapper {
 	/**
 	 * process error flows in reverse direction that match the outgoing error propagation.
 	 * The flows can be a path or source and are treated as an OR. 
-	 * An error source is treated as an EXTERNAL event with probability values on the error source
+	 * An error source is treated as an BASIC event with probability values on the error source
 	 * XXX possible TODO: look at the when.
 	 * @param component ComponentInstance
 	 * @param errorPropagation ErrorPropagation
@@ -407,15 +410,9 @@ public class EmftaWrapper {
 					if (EMV2Util.isSame(errorSource.getOutgoing(), errorPropagation)) {
 						if (EM2TypeSetUtil.contains(errorSource.getTypeTokenConstraint(), type)) {
 
-							Event newEvent;
-
-							newEvent = getFromCache(component, errorSource, ef.getTypeTokenConstraint());
-							if (newEvent == null) {
-								newEvent = this.createEvent(component, errorSource, ef.getTypeTokenConstraint());
-								newEvent.setType(EventType.EXTERNAL);
-								Utils.fillProperties(newEvent, component, errorSource, ef.getTypeTokenConstraint());
-							}
-
+							Event newEvent = this.createEvent(component, errorSource, ef.getTypeTokenConstraint());
+							newEvent.setType(EventType.BASIC);
+							Utils.fillProperties(newEvent, component, errorSource, ef.getTypeTokenConstraint());
 							subEvents.add(newEvent);
 						}
 					}
@@ -452,9 +449,10 @@ public class EmftaWrapper {
 		}
 		// create event to represent external incoming.
 		if (subEvents.isEmpty()) {
-			Event emftaEvent = createEvent(component, errorPropagation, errorPropagation.getTypeSet());
+			Event emftaEvent = createEvent(component, errorPropagation, type);
 			emftaEvent.setType(EventType.EXTERNAL);
-			Utils.fillProperties(emftaEvent, component, errorPropagation, errorPropagation.getTypeSet());
+			emftaEvent.setDescription(Utils.getDescription(component, errorPropagation, type));
+			Utils.fillProperties(emftaEvent, component, errorPropagation, type);
 			return emftaEvent;
 		}
 		return finalizeAsGatedEvents(subEvents, GateType.OR);
@@ -535,24 +533,10 @@ public class EmftaWrapper {
 			}
 
 			if (conditionElement.getQualifiedErrorPropagationReference() != null) {
-				OsateDebug.osateDebug("conditionElement" + conditionElement.getQualifiedErrorPropagationReference());
 				EMV2Path path = conditionElement.getQualifiedErrorPropagationReference();
 
 				ComponentInstance relatedComponent = EMV2Util.getLastComponentInstance(path, component);
 				NamedElement errorModelElement = EMV2Util.getErrorModelElement(path);
-				OsateDebug.osateDebug("actualComponent   =" + component);
-				OsateDebug.osateDebug("errorModelElement =" + errorModelElement);
-				OsateDebug.osateDebug("relatedComponent  =" + relatedComponent);
-
-				// OsateDebug.osateDebug("emv el = " + EMV2Util.getErrorModelElement(path));
-				// OsateDebug.osateDebug("path" + path);
-				// OsateDebug.osateDebug("ne=" + pe.getNamedElement());
-				// OsateDebug.osateDebug("me2"+ path.getElementRoot());
-				// OsateDebug.osateDebug("kind=" + pe.getEmv2PropagationKind());
-
-				// OsateDebug.osateDebug("[EmftaWrapper] processCondition incoming="
-				// + conditionElement.getIncoming());
-
 				/**
 				 * Here, we have an error event. Likely, this is something we
 				 * can get when we are analyzing error component behavior.
