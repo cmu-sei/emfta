@@ -266,7 +266,6 @@ public class EmftaWrapper {
 			if (EMV2Util.isSame(opc.getOutgoing(), propagation)) {
 				ConditionExpression conditionExpression = opc.getCondition();
 				if (conditionExpression != null) {
-					OsateDebug.osateDebug("condition expression" + conditionExpression);
 					conditionEvent = processCondition(component, conditionExpression, type);
 				}
 			}
@@ -358,12 +357,6 @@ public class EmftaWrapper {
 				}
 				Event stateEvent = EMV2Util.isSame(ebt.getSource(), state) ? null
 						: processErrorBehaviorState(component, ebt.getSource(), type);
-// PHF: without this trick we get a null as subevent element
-				if (stateEvent != null && stateEvent.getType() == EventType.UNDEVELOPPED) {
-					// operational state that has not been entered by an error event is ignored.
-					removeEvent(stateEvent);
-					stateEvent = null;
-				}
 				// previous contributors as probability product
 				Event consolidated = consolidateAsAnd(stateEvent, conditionEvent);
 				if (consolidated != null) {
@@ -373,10 +366,7 @@ public class EmftaWrapper {
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
 		if (result == null) {
-			// PHF: without this trick we get a null as subevent element
-			// create a state Event to indicate operational state as source.
-			result = createEvent(component, state, type);
-			result.setType(EventType.UNDEVELOPPED);
+			return result;
 		}
 		return result;
 	}
@@ -527,6 +517,16 @@ public class EmftaWrapper {
 		return processCondition(component, condition, type, 1);
 	}
 
+	/**
+	 * create the appropriate EMFTA events according to the expression.
+	 * When calculating the probability apply the specified scale to each probability..
+	 * Used to perform scaling according to the transition branch probability.
+	 * @param component
+	 * @param condition
+	 * @param type
+	 * @param scale
+	 * @return
+	 */
 	public Event processCondition(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale) {
 
@@ -540,7 +540,10 @@ public class EmftaWrapper {
 			List<Event> subEvents = new ArrayList<Event>();
 
 			for (ConditionExpression ce : expression.getOperands()) {
-				subEvents.add(processCondition(component, ce, type, scale));
+				Event res = processCondition(component, ce, type, scale);
+				if (res != null) {
+					subEvents.add(res);
+				}
 			}
 
 			return finalizeAsGatedEvents(subEvents, GateType.AND);
@@ -551,7 +554,10 @@ public class EmftaWrapper {
 			List<Event> subEvents = new ArrayList<Event>();
 
 			for (ConditionExpression ce : expression.getOperands()) {
-				subEvents.add(processCondition(component, ce, type, scale));
+				Event res = processCondition(component, ce, type, scale);
+				if (res != null) {
+					subEvents.add(res);
+				}
 			}
 			return finalizeAsGatedEvents(subEvents, GateType.OR);
 		}
@@ -655,7 +661,10 @@ public class EmftaWrapper {
 		// should only match one composite state declaration.
 		for (CompositeState cs : EMV2Util.getAllCompositeStates(component)) {
 			if (cs.getState() == state) {
-				subEvents.add(processCondition(component, cs.getCondition(), type));
+				Event res = processCondition(component, cs.getCondition(), type);
+				if (res != null) {
+					subEvents.add(res);
+				}
 			}
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
