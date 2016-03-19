@@ -42,7 +42,7 @@ public class Utils {
 	 * @param type               - the type set (null if none)
 	 */
 	public static void fillProperties(Event event, ComponentInstance component, NamedElement errorModelArtifact,
-			ErrorTypes type) {
+			ErrorTypes type, double scale) {
 		String propertyDescription;
 		propertyDescription = EMV2Properties.getDescription(errorModelArtifact, component);
 
@@ -52,7 +52,12 @@ public class Utils {
 			event.setDescription(propertyDescription + "(component " + component.getName() + ")");
 		}
 
-		event.setProbability(EMV2Properties.getProbability(component, errorModelArtifact, type));
+		event.setProbability(EMV2Properties.getProbability(component, errorModelArtifact, type) * scale);
+	}
+
+	public static void fillProperties(Event event, ComponentInstance component, NamedElement errorModelArtifact,
+			ErrorTypes type) {
+		fillProperties(event, component, errorModelArtifact, type, 1);
 	}
 
 	public static String getDescription(ComponentInstance component, NamedElement errorModelArtifact, ErrorTypes type) {

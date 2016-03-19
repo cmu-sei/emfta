@@ -24,15 +24,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
+import org.osate.aadl2.ComponentClassifier;
 import org.osate.aadl2.DirectionType;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.util.OsateDebug;
 import org.osate.xtext.aadl2.errormodel.errorModel.AndExpression;
+import org.osate.xtext.aadl2.errormodel.errorModel.BranchValue;
 import org.osate.xtext.aadl2.errormodel.errorModel.CompositeState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ConditionElement;
 import org.osate.xtext.aadl2.errormodel.errorModel.ConditionExpression;
 import org.osate.xtext.aadl2.errormodel.errorModel.EMV2Path;
+import org.osate.xtext.aadl2.errormodel.errorModel.EMV2PropertyAssociation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorTransition;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
@@ -45,9 +48,11 @@ import org.osate.xtext.aadl2.errormodel.errorModel.OrExpression;
 import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
 import org.osate.xtext.aadl2.errormodel.errorModel.QualifiedErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.SConditionElement;
+import org.osate.xtext.aadl2.errormodel.errorModel.TransitionBranch;
 import org.osate.xtext.aadl2.errormodel.errorModel.TypeSet;
 import org.osate.xtext.aadl2.errormodel.util.AnalysisModel;
 import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
+import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 import org.osate.xtext.aadl2.errormodel.util.PropagationPathEnd;
 
@@ -322,28 +327,53 @@ public class EmftaWrapper {
 			return null;
 		}
 		for (ErrorBehaviorTransition ebt : EMV2Util.getAllErrorBehaviorTransitions(component)) {
-			Event conditionEvent = null;
-			if (EMV2Util.isSame(state, ebt.getTarget())) {
-				ConditionExpression conditionExpression = ebt.getCondition();
-				if (conditionExpression != null) {
-					conditionEvent = processCondition(component, conditionExpression, type);
+			if (!EMV2Util.isSame(ebt.getSource(), state)) {
+				Event conditionEvent = null;
+				ConditionExpression conditionExpression = null;
+				double scale = 1;
+				if (ebt.getTarget() != null && EMV2Util.isSame(state, ebt.getTarget())) {
+					conditionExpression = ebt.getCondition();
+				} else {
+					// deal with transition branches
+					EList<TransitionBranch> tbs = ebt.getDestinationBranches();
+					for (TransitionBranch transitionBranch : tbs) {
+						if (EMV2Util.isSame(transitionBranch.getTarget(), state)) {
+							conditionExpression = ebt.getCondition();
+							BranchValue val = transitionBranch.getValue();
+							if (val.getRealvalue() != null) {
+								scale = Double.valueOf(val.getRealvalue());
+							} else if (val.getSymboliclabel() != null) {
+								ComponentClassifier cl = EMV2Util.getAssociatedClassifier(ebt);
+								List<EMV2PropertyAssociation> pa = EMV2Properties
+										.getProperty(val.getSymboliclabel().getQualifiedName(), cl, ebt, null);
+								for (EMV2PropertyAssociation emv2PropertyAssociation : pa) {
+									scale = scale + EMV2Properties.getRealValue(emv2PropertyAssociation);
+								}
+							}
+						}
+					}
 				}
-			}
-			Event stateEvent = EMV2Util.isSame(ebt.getSource(), state) ? null
-					: processErrorBehaviorState(component, ebt.getSource(), type);
-			if (stateEvent != null && stateEvent.getType() == EventType.UNDEVELOPPED) {
-				// operational state that has not been entered by an error event is ignored.
-				removeEvent(stateEvent);
-				stateEvent = null;
-			}
-			// previous contributors as probability product
-			Event consolidated = consolidateAsAnd(stateEvent, conditionEvent);
-			if (consolidated != null) {
-				subEvents.add(consolidated);
+				if (conditionExpression != null) {
+					conditionEvent = processCondition(component, conditionExpression, type, scale);
+				}
+				Event stateEvent = EMV2Util.isSame(ebt.getSource(), state) ? null
+						: processErrorBehaviorState(component, ebt.getSource(), type);
+// PHF: without this trick we get a null as subevent element
+				if (stateEvent != null && stateEvent.getType() == EventType.UNDEVELOPPED) {
+					// operational state that has not been entered by an error event is ignored.
+					removeEvent(stateEvent);
+					stateEvent = null;
+				}
+				// previous contributors as probability product
+				Event consolidated = consolidateAsAnd(stateEvent, conditionEvent);
+				if (consolidated != null) {
+					subEvents.add(consolidated);
+				}
 			}
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
 		if (result == null) {
+			// PHF: without this trick we get a null as subevent element
 			// create a state Event to indicate operational state as source.
 			result = createEvent(component, state, type);
 			result.setType(EventType.UNDEVELOPPED);
@@ -494,6 +524,11 @@ public class EmftaWrapper {
 	 * @return a list of events related to the condition
 	 */
 	public Event processCondition(ComponentInstance component, ConditionExpression condition, ErrorTypes type) {
+		return processCondition(component, condition, type, 1);
+	}
+
+	public Event processCondition(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
+			double scale) {
 
 		// OsateDebug.osateDebug("[EmftaWrapper] condition=" + condition);
 
@@ -505,7 +540,7 @@ public class EmftaWrapper {
 			List<Event> subEvents = new ArrayList<Event>();
 
 			for (ConditionExpression ce : expression.getOperands()) {
-				subEvents.add(processCondition(component, ce, type));
+				subEvents.add(processCondition(component, ce, type, scale));
 			}
 
 			return finalizeAsGatedEvents(subEvents, GateType.AND);
@@ -516,7 +551,7 @@ public class EmftaWrapper {
 			List<Event> subEvents = new ArrayList<Event>();
 
 			for (ConditionExpression ce : expression.getOperands()) {
-				subEvents.add(processCondition(component, ce, type));
+				subEvents.add(processCondition(component, ce, type, scale));
 			}
 			return finalizeAsGatedEvents(subEvents, GateType.OR);
 		}
@@ -573,7 +608,7 @@ public class EmftaWrapper {
 					errorEvent = (ErrorEvent) errorModelElement;
 					emftaEvent = this.createEvent(relatedComponent, errorEvent, errorEvent.getTypeSet());
 					ErrorTypes referencedErrorType = getTargetType(conditionElement.getConstraint(), type);
-					Utils.fillProperties(emftaEvent, relatedComponent, errorEvent, referencedErrorType);
+					Utils.fillProperties(emftaEvent, relatedComponent, errorEvent, referencedErrorType, scale);
 
 					return emftaEvent;
 				}
