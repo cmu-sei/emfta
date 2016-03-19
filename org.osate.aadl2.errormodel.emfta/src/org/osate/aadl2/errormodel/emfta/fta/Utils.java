@@ -22,7 +22,6 @@ import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
-import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
@@ -95,19 +94,5 @@ public class Utils {
 		}
 
 		return description;
-	}
-
-	public static boolean propagationEndsMatches(ErrorPropagation propagationSource,
-			ErrorPropagation propagationDestination) {
-
-		return EMV2Util.isSame(propagationSource, propagationDestination);
-	}
-
-	public static String getFeatureFromErrorPropagation(ErrorPropagation errorPropagation) {
-// FIXME
-//for (FeatureorPPReference fp : EMV2Util.getFeature(errorPropagation)) {
-//			return fp.getFeatureorPP().getName();
-//		}
-		return "unknown feature";
 	}
 }
