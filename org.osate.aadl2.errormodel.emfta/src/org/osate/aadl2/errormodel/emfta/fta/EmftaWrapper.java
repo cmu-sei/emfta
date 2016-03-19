@@ -326,16 +326,17 @@ public class EmftaWrapper {
 			if (EMV2Util.isSame(state, ebt.getTarget())) {
 				ConditionExpression conditionExpression = ebt.getCondition();
 				if (conditionExpression != null) {
-					OsateDebug.osateDebug("condition expression" + conditionExpression);
 					conditionEvent = processCondition(component, conditionExpression, type);
 				}
 			}
 			Event stateEvent = EMV2Util.isSame(ebt.getSource(), state) ? null
 					: processErrorBehaviorState(component, ebt.getSource(), type);
 			if (stateEvent != null && stateEvent.getType() == EventType.UNDEVELOPPED) {
+				// operational state that has not been entered by an error event is ignored.
 				removeEvent(stateEvent);
 				stateEvent = null;
 			}
+			// previous contributors as probability product
 			Event consolidated = consolidateAsAnd(stateEvent, conditionEvent);
 			if (consolidated != null) {
 				subEvents.add(consolidated);
@@ -343,10 +344,9 @@ public class EmftaWrapper {
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
 		if (result == null) {
-			// create a state Event with probability
+			// create a state Event to indicate operational state as source.
 			result = createEvent(component, state, type);
 			result.setType(EventType.UNDEVELOPPED);
-			Utils.fillProperties(result, component, state, type);
 		}
 		return result;
 	}
@@ -378,6 +378,31 @@ public class EmftaWrapper {
 			}
 		}
 		return combined;
+	}
+
+	private boolean hasAndGate(Event event) {
+		return event.getGate() != null && event.getGate().getType() == GateType.AND;
+	}
+
+	private boolean hasOrGate(Event event) {
+		return event.getGate() != null && event.getGate().getType() == GateType.OR;
+	}
+
+	private Event pullUpCommonAndEvents(Event root) {
+		if (root.getGate() == null)
+			return root;
+		Gate rootGate = root.getGate();
+		if (rootGate.getEvents().isEmpty()) {
+			root.setGate(null);
+			return root;
+		}
+		if (rootGate.getType() == GateType.AND) {
+			for (Event event : rootGate.getEvents()) {
+
+			}
+		}
+
+		return root;
 	}
 
 	/**
