@@ -28,7 +28,6 @@ import org.osate.aadl2.ComponentClassifier;
 import org.osate.aadl2.DirectionType;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
-import org.osate.aadl2.util.OsateDebug;
 import org.osate.xtext.aadl2.errormodel.errorModel.AndExpression;
 import org.osate.xtext.aadl2.errormodel.errorModel.BranchValue;
 import org.osate.xtext.aadl2.errormodel.errorModel.CompositeState;
@@ -529,9 +528,6 @@ public class EmftaWrapper {
 	 */
 	public Event processCondition(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale) {
-
-		// OsateDebug.osateDebug("[EmftaWrapper] condition=" + condition);
-
 		/**
 		 * We have an AND expression, so, we create an EVENT to AND' sub events.
 		 */
@@ -571,7 +567,6 @@ public class EmftaWrapper {
 			if (condition instanceof SConditionElement) {
 				SConditionElement sconditionElement = (SConditionElement) condition;
 				if (sconditionElement.getQualifiedState() != null) {
-					OsateDebug.osateDebug("conditionElement" + sconditionElement.getQualifiedState());
 					/**
 					 * In the following, it seems that we reference another
 					 * component. This is typically the case when the condition is

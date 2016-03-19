@@ -43,7 +43,6 @@ import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EmftaWrapper;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -143,7 +142,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			if (ERROR_STATE_NAME.startsWith(prefixState)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixState, "");
 				processState = true;
-				OsateDebug.osateDebug("Will process a state" + toProcess);
 
 				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
 					if (ebs.getName().equalsIgnoreCase(toProcess)) {
@@ -166,7 +164,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixOutgoingPropagation, "");
 				processState = false;
-				OsateDebug.osateDebug("Will process an outgoing propagation" + toProcess);
 
 				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
 					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
