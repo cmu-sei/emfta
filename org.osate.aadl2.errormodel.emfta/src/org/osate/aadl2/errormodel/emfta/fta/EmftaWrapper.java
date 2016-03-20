@@ -325,37 +325,39 @@ public class EmftaWrapper {
 			return null;
 		}
 		for (ErrorBehaviorTransition ebt : EMV2Util.getAllErrorBehaviorTransitions(component)) {
-			if (!EMV2Util.isSame(ebt.getSource(), state)) {
-				Event conditionEvent = null;
-				ConditionExpression conditionExpression = null;
-				double scale = 1;
-				if (ebt.getTarget() != null && EMV2Util.isSame(state, ebt.getTarget())) {
+			Event conditionEvent = null;
+			ConditionExpression conditionExpression = null;
+			double scale = 1;
+			if (ebt.getTarget() != null && EMV2Util.isSame(state, ebt.getTarget())) {
+				if (!EMV2Util.isSame(ebt.getSource(), state)) {
 					conditionExpression = ebt.getCondition();
-				} else {
-					// deal with transition branches
-					EList<TransitionBranch> tbs = ebt.getDestinationBranches();
-					for (TransitionBranch transitionBranch : tbs) {
-						if (EMV2Util.isSame(transitionBranch.getTarget(), state)) {
-							conditionExpression = ebt.getCondition();
-							BranchValue val = transitionBranch.getValue();
-							if (val.getRealvalue() != null) {
-								scale = Double.valueOf(val.getRealvalue());
-							} else if (val.getSymboliclabel() != null) {
+				}
+			} else {
+				// deal with transition branches
+				EList<TransitionBranch> tbs = ebt.getDestinationBranches();
+				for (TransitionBranch transitionBranch : tbs) {
+					if (EMV2Util.isSame(transitionBranch.getTarget(), state)) {
+						conditionExpression = ebt.getCondition();
+						BranchValue val = transitionBranch.getValue();
+						if (val.getRealvalue() != null) {
+							scale = Double.valueOf(val.getRealvalue());
+						} else if (val.getSymboliclabel() != null) {
+							if (!EMV2Util.isSame(ebt.getSource(), state)) {
 								ComponentClassifier cl = EMV2Util.getAssociatedClassifier(ebt);
 								List<EMV2PropertyAssociation> pa = EMV2Properties
 										.getProperty(val.getSymboliclabel().getQualifiedName(), cl, ebt, null);
 								for (EMV2PropertyAssociation emv2PropertyAssociation : pa) {
 									scale = scale + EMV2Properties.getRealValue(emv2PropertyAssociation);
 								}
+								break;
 							}
 						}
 					}
 				}
-				if (conditionExpression != null) {
-					conditionEvent = processCondition(component, conditionExpression, type, scale);
-				}
-				Event stateEvent = EMV2Util.isSame(ebt.getSource(), state) ? null
-						: processErrorBehaviorState(component, ebt.getSource(), type);
+			}
+			if (conditionExpression != null) {
+				conditionEvent = processCondition(component, conditionExpression, type, scale);
+				Event stateEvent = processErrorBehaviorState(component, ebt.getSource(), type);
 				// previous contributors as probability product
 				Event consolidated = consolidateAsAnd(stateEvent, conditionEvent);
 				if (consolidated != null) {
