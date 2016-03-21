@@ -58,6 +58,12 @@
               <color xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='white']"/>
             </style>
           </conditionnalStyles>
+          <conditionnalStyles predicateExpression="[self.type.toString().equalsIgnoreCase('XOR')/]">
+            <style xsi:type="style:WorkspaceImageDescription" showIcon="false" labelExpression="XOR" sizeComputationExpression="-1" labelPosition="node" resizeKind="NSEW" workspacePath="/emfta.design/imgs/xor.png">
+              <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            </style>
+          </conditionnalStyles>
         </nodeMappings>
         <nodeMappings name="EventNode" semanticCandidatesExpression="[eAllContents()/]" domainClass="emfta.Event">
           <style xsi:type="style:SquareDescription" borderSizeComputationExpression="1" showIcon="false" labelExpression="[name + 'bla'/]" sizeComputationExpression="6" labelPosition="node" resizeKind="NSEW" width="20" height="5">
