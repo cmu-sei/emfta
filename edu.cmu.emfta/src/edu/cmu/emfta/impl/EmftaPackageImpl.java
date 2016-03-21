@@ -178,6 +178,15 @@ public class EmftaPackageImpl extends EPackageImpl implements EmftaPackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EAttribute getEvent_RelatedObject() {
+		return (EAttribute)eventEClass.getEStructuralFeatures().get(5);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public EClass getGate() {
 		return gateEClass;
 	}
@@ -315,6 +324,7 @@ public class EmftaPackageImpl extends EPackageImpl implements EmftaPackage {
 		createEAttribute(eventEClass, EVENT__PROBABILITY);
 		createEAttribute(eventEClass, EVENT__DESCRIPTION);
 		createEReference(eventEClass, EVENT__GATE);
+		createEAttribute(eventEClass, EVENT__RELATED_OBJECT);
 
 		gateEClass = createEClass(GATE);
 		createEAttribute(gateEClass, GATE__TYPE);
@@ -369,6 +379,7 @@ public class EmftaPackageImpl extends EPackageImpl implements EmftaPackage {
 		initEAttribute(getEvent_Probability(), ecorePackage.getEDouble(), "probability", null, 0, 1, Event.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getEvent_Description(), ecorePackage.getEString(), "description", null, 0, 1, Event.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getEvent_Gate(), this.getGate(), null, "gate", null, 0, 1, Event.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getEvent_RelatedObject(), ecorePackage.getEJavaObject(), "relatedObject", null, 0, -1, Event.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(gateEClass, Gate.class, "Gate", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getGate_Type(), this.getGateType(), "type", null, 0, 1, Gate.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

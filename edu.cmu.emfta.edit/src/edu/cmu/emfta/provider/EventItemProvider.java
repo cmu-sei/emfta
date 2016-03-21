@@ -66,6 +66,7 @@ public class EventItemProvider
 			addNamePropertyDescriptor(object);
 			addProbabilityPropertyDescriptor(object);
 			addDescriptionPropertyDescriptor(object);
+			addRelatedObjectPropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -159,6 +160,28 @@ public class EventItemProvider
 	}
 
 	/**
+	 * This adds a property descriptor for the Related Object feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addRelatedObjectPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Event_relatedObject_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Event_relatedObject_feature", "_UI_Event_type"),
+				 EmftaPackage.Literals.EVENT__RELATED_OBJECT,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.GENERIC_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
 	 * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
 	 * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
@@ -230,6 +253,7 @@ public class EventItemProvider
 			case EmftaPackage.EVENT__NAME:
 			case EmftaPackage.EVENT__PROBABILITY:
 			case EmftaPackage.EVENT__DESCRIPTION:
+			case EmftaPackage.EVENT__RELATED_OBJECT:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 			case EmftaPackage.EVENT__GATE:

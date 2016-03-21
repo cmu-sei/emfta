@@ -6,12 +6,15 @@ import edu.cmu.emfta.EmftaPackage;
 import edu.cmu.emfta.Event;
 import edu.cmu.emfta.EventType;
 import edu.cmu.emfta.Gate;
+import java.util.Collection;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
+import org.eclipse.emf.ecore.util.EDataTypeUniqueEList;
 
 /**
  * <!-- begin-user-doc -->
@@ -26,6 +29,7 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
  *   <li>{@link edu.cmu.emfta.impl.EventImpl#getProbability <em>Probability</em>}</li>
  *   <li>{@link edu.cmu.emfta.impl.EventImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link edu.cmu.emfta.impl.EventImpl#getGate <em>Gate</em>}</li>
+ *   <li>{@link edu.cmu.emfta.impl.EventImpl#getRelatedObject <em>Related Object</em>}</li>
  * </ul>
  *
  * @generated
@@ -120,6 +124,16 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 	 * @ordered
 	 */
 	protected Gate gate;
+
+	/**
+	 * The cached value of the '{@link #getRelatedObject() <em>Related Object</em>}' attribute list.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getRelatedObject()
+	 * @generated
+	 * @ordered
+	 */
+	protected EList<Object> relatedObject;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -272,6 +286,18 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EList<Object> getRelatedObject() {
+		if (relatedObject == null) {
+			relatedObject = new EDataTypeUniqueEList<Object>(Object.class, this, EmftaPackage.EVENT__RELATED_OBJECT);
+		}
+		return relatedObject;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
@@ -299,6 +325,8 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 				return getDescription();
 			case EmftaPackage.EVENT__GATE:
 				return getGate();
+			case EmftaPackage.EVENT__RELATED_OBJECT:
+				return getRelatedObject();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -327,6 +355,10 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 			case EmftaPackage.EVENT__GATE:
 				setGate((Gate)newValue);
 				return;
+			case EmftaPackage.EVENT__RELATED_OBJECT:
+				getRelatedObject().clear();
+				getRelatedObject().addAll((Collection<? extends Object>)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -354,6 +386,9 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 			case EmftaPackage.EVENT__GATE:
 				setGate((Gate)null);
 				return;
+			case EmftaPackage.EVENT__RELATED_OBJECT:
+				getRelatedObject().clear();
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -376,6 +411,8 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 				return DESCRIPTION_EDEFAULT == null ? description != null : !DESCRIPTION_EDEFAULT.equals(description);
 			case EmftaPackage.EVENT__GATE:
 				return gate != null;
+			case EmftaPackage.EVENT__RELATED_OBJECT:
+				return relatedObject != null && !relatedObject.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}
@@ -398,6 +435,8 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 		result.append(probability);
 		result.append(", description: ");
 		result.append(description);
+		result.append(", relatedObject: ");
+		result.append(relatedObject);
 		result.append(')');
 		return result.toString();
 	}

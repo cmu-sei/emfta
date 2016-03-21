@@ -2,6 +2,7 @@
  */
 package edu.cmu.emfta;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 
 /**
@@ -18,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link edu.cmu.emfta.Event#getProbability <em>Probability</em>}</li>
  *   <li>{@link edu.cmu.emfta.Event#getDescription <em>Description</em>}</li>
  *   <li>{@link edu.cmu.emfta.Event#getGate <em>Gate</em>}</li>
+ *   <li>{@link edu.cmu.emfta.Event#getRelatedObject <em>Related Object</em>}</li>
  * </ul>
  *
  * @see edu.cmu.emfta.EmftaPackage#getEvent()
@@ -158,5 +160,21 @@ public interface Event extends EObject {
 	 * @generated
 	 */
 	void setGate(Gate value);
+
+	/**
+	 * Returns the value of the '<em><b>Related Object</b></em>' attribute list.
+	 * The list contents are of type {@link java.lang.Object}.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Related Object</em>' attribute list isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Related Object</em>' attribute list.
+	 * @see edu.cmu.emfta.EmftaPackage#getEvent_RelatedObject()
+	 * @model
+	 * @generated
+	 */
+	EList<Object> getRelatedObject();
 
 } // Event
