@@ -286,7 +286,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			Utils.fillProperties(newEvent, component, state, targetType);
 			return newEvent;
 		}
-
 		return result;
 	}
 
@@ -294,6 +293,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	protected EObject postProcessErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
 			ErrorTypes type, List<EObject> subResults) {
 		Event result = finalizeAsGatedEvents(subResults, GateType.OR);
+		if (result != null && result.getType() == EventType.INTERMEDIATE) {
+			result.setType(EventType.BASIC);
+			result.setName(buildName(component, state, type));
+		}
 		return result;
 	}
 
