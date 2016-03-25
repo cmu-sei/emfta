@@ -40,7 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
-import org.osate.aadl2.errormodel.emfta.fta.EmftaWrapper;
+import org.osate.aadl2.errormodel.emfta.fta.EMFTAGenerator;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
@@ -176,16 +176,16 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				}
 			}
 
-			EmftaWrapper wrapper;
+			EMFTAGenerator wrapper;
 			wrapper = null;
 
 			if ((errorState != null) || (errorPropagation != null)) {
 
 				if (errorState != null) {
-					wrapper = new EmftaWrapper(si, errorState, errorType);
+					wrapper = new EMFTAGenerator(si, errorState, errorType);
 				}
 				if (errorPropagation != null) {
-					wrapper = new EmftaWrapper(si, errorPropagation, errorType);
+					wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
 				}
 
 				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment(si.getName().toLowerCase() + ".emfta");

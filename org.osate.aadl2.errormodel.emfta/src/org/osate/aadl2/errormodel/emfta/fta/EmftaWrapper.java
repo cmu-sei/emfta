@@ -48,7 +48,6 @@ import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
 import org.osate.xtext.aadl2.errormodel.errorModel.QualifiedErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.SConditionElement;
 import org.osate.xtext.aadl2.errormodel.errorModel.TransitionBranch;
-import org.osate.xtext.aadl2.errormodel.errorModel.TypeSet;
 import org.osate.xtext.aadl2.errormodel.util.AnalysisModel;
 import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Properties;
@@ -62,10 +61,6 @@ import edu.cmu.emfta.Gate;
 import edu.cmu.emfta.GateType;
 
 public class EmftaWrapper {
-	class PropagationRecord {
-		ErrorPropagation ep;
-		TypeSet constraint;
-	}
 
 	private edu.cmu.emfta.FTAModel emftaModel;
 	private AnalysisModel currentAnalysisModel;
@@ -366,9 +361,6 @@ public class EmftaWrapper {
 			}
 		}
 		Event result = finalizeAsGatedEvents(subEvents, GateType.OR);
-		if (result == null) {
-			return result;
-		}
 		return result;
 	}
 
@@ -399,31 +391,6 @@ public class EmftaWrapper {
 			}
 		}
 		return combined;
-	}
-
-	private boolean hasAndGate(Event event) {
-		return event.getGate() != null && event.getGate().getType() == GateType.AND;
-	}
-
-	private boolean hasOrGate(Event event) {
-		return event.getGate() != null && event.getGate().getType() == GateType.OR;
-	}
-
-	private Event pullUpCommonAndEvents(Event root) {
-		if (root.getGate() == null)
-			return root;
-		Gate rootGate = root.getGate();
-		if (rootGate.getEvents().isEmpty()) {
-			root.setGate(null);
-			return root;
-		}
-		if (rootGate.getType() == GateType.AND) {
-			for (Event event : rootGate.getEvents()) {
-
-			}
-		}
-
-		return root;
 	}
 
 	/**
@@ -589,8 +556,13 @@ public class EmftaWrapper {
 					if (result != null) {
 						return result;
 					}
-					return processErrorBehaviorState(referencedInstance, EMV2Util.getState(sconditionElement),
-							referencedErrorType);
+					ErrorBehaviorState state = EMV2Util.getState(sconditionElement);
+					result = processErrorBehaviorState(referencedInstance, state, referencedErrorType);
+					if (result == null) {
+						Event newEvent = createEvent(component, state, referencedErrorType);
+						Utils.fillProperties(newEvent, component, state, referencedErrorType);
+						return newEvent;
+					}
 				}
 
 			}
