@@ -238,7 +238,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessErrorFlows(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType, List<EObject> subResults) {
-		return finalizeAsGatedEvents(subResults, GateType.OR);
+		Event result = finalizeAsGatedEvents(subResults, GateType.OR);
+		result.setType(EventType.BASIC);
+		result.setName(buildName(component, errorPropagation, targetType));
+		putInCache(component, errorPropagation, targetType, result);
+		return result;
 	}
 
 	@Override
