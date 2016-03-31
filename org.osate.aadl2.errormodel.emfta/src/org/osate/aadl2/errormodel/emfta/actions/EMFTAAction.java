@@ -170,6 +170,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 							+ EMV2Util.getPrintName(opc.getTypeToken());
 					if (longName.equalsIgnoreCase(toProcess)) {
 						errorPropagation = opc.getOutgoing();
+						errorType = opc.getTypeToken();
 					}
 				}
 			}
