@@ -113,8 +113,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
-					Feature feat = (Feature) opc.getOutgoing().getFeatureorPPRef().getFeatureorPP();
-					stateNames.add(prefixOutgoingPropagation + feat.getName());
+					stateNames.add(prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
+							+ EMV2Util.getPrintName(opc.getTypeToken()));// feat.getName());
 				}
 
 				FTADialog diag = new FTADialog(sh);
@@ -166,11 +166,9 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				processState = false;
 
 				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
-						continue;
-					}
-					Feature feat = (Feature) opc.getOutgoing().getFeatureorPPRef().getFeatureorPP();
-					if (feat.getName().equalsIgnoreCase(toProcess)) {
+					String longName = EMV2Util.getPrintName(opc.getOutgoing())
+							+ EMV2Util.getPrintName(opc.getTypeToken());
+					if (longName.equalsIgnoreCase(toProcess)) {
 						errorPropagation = opc.getOutgoing();
 					}
 				}
