@@ -21,6 +21,7 @@ import org.osate.xtext.aadl2.errormodel.util.PropagationGraphBackwardTraversal;
 import edu.cmu.emfta.EmftaFactory;
 import edu.cmu.emfta.Event;
 import edu.cmu.emfta.EventType;
+import edu.cmu.emfta.FTAModel;
 import edu.cmu.emfta.Gate;
 import edu.cmu.emfta.GateType;
 
@@ -134,20 +135,32 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		eventIdentifier = 0;
 	}
 
-	public edu.cmu.emfta.FTAModel getEmftaModel() {
+	public FTAModel getEmftaModel() {
 		if (emftaModel == null) {
 			edu.cmu.emfta.Event emftaRootEvent;
 
 			emftaModel = EmftaFactory.eINSTANCE.createFTAModel();
 			emftaModel.setName(getRootComponent().getName());
 			emftaModel.setDescription("Top Level Failure");
+			NamedElement ne = null;
 
 			if (rootComponentState != null) {
 				emftaRootEvent = (Event) traverseCompositeErrorState(getRootComponent(), rootComponentState,
 						rootComponentTypes);
+				ne = rootComponentState;
 			} else {
 				emftaRootEvent = (Event) traverseOutgoingErrorPropagation(getRootComponent(), rootComponentPropagation,
 						rootComponentTypes);
+				ne = rootComponentPropagation;
+			}
+			String longName = buildName(getRootComponent(), ne, rootComponentTypes);
+			if (emftaRootEvent.getGate() == null && !emftaRootEvent.getName().equals(longName)) {
+				Gate top = EmftaFactory.eINSTANCE.createGate();
+				top.setType(GateType.OR);
+				top.getEvents().add(emftaRootEvent);
+				Event topEvent = createEvent(getRootComponent(), ne, rootComponentTypes);
+				topEvent.setGate(top);
+				emftaRootEvent = topEvent;
 			}
 			emftaModel.setRoot(emftaRootEvent);
 		}
@@ -223,8 +236,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	protected EObject postProcessOutgoingErrorPropagation(ComponentInstance component,
 			ErrorPropagation errorPropagation, ErrorTypes targetType, List<EObject> subResults) {
 		Event result = finalizeAsGatedEvents(subResults, GateType.OR);
-		result.setType(EventType.BASIC);
-		result.setName(buildName(component, errorPropagation, targetType));
+		if (result.getType() == EventType.INTERMEDIATE) {
+			result.setType(EventType.BASIC);
+			result.setName(buildName(component, errorPropagation, targetType));
+		}
 		putInCache(component, errorPropagation, targetType, result);
 		return result;
 	}
@@ -239,8 +254,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	protected EObject postProcessErrorFlows(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType, List<EObject> subResults) {
 		Event result = finalizeAsGatedEvents(subResults, GateType.OR);
-		result.setType(EventType.BASIC);
-		result.setName(buildName(component, errorPropagation, targetType));
+		if (result.getType() == EventType.INTERMEDIATE) {
+			result.setType(EventType.BASIC);
+			result.setName(buildName(component, errorPropagation, targetType));
+		}
 		putInCache(component, errorPropagation, targetType, result);
 		return result;
 	}
