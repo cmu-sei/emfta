@@ -43,6 +43,7 @@ import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTAGenerator;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
+import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -126,8 +127,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		});
 
 		if (ERROR_STATE_NAME != null) {
-			String errorStateName;
-			String errorStateTypeName;
+//			String errorStateName;
+//			String errorStateTypeName;
 			ErrorBehaviorState errorState;
 			ErrorTypes errorType;
 			ErrorPropagation errorPropagation;
@@ -137,25 +138,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			errorType = null;
 			errorPropagation = null;
 
-			boolean processState;
-
 			if (ERROR_STATE_NAME.startsWith(prefixState)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixState, "");
-				processState = true;
-
 				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
 					if (ebs.getName().equalsIgnoreCase(toProcess)) {
 						errorState = ebs;
-
-//						if (errorStateTypeName != null) {
-//							for (TypeToken tt : ebs.getTypeSet().getTypeTokens()) {
-//								for (ErrorTypes et : tt.getType()) {
-//									if (et.getName().equalsIgnoreCase(errorStateTypeName)) {
-//										errorType = et;
-//									}
-//								}
-//							}
-//						}
 					}
 				}
 
@@ -163,8 +150,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation)) {
 				toProcess = ERROR_STATE_NAME.replace(prefixOutgoingPropagation, "");
-				processState = false;
-
 				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
 					String longName = EMV2Util.getPrintName(opc.getOutgoing())
 							+ EMV2Util.getPrintName(opc.getTypeToken());
@@ -177,18 +162,21 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			EMFTAGenerator wrapper;
 			wrapper = null;
-
 			if ((errorState != null) || (errorPropagation != null)) {
-
+				String targetName = "";
 				if (errorState != null) {
 					wrapper = new EMFTAGenerator(si, errorState, errorType);
+					targetName = EMV2Util.getPrintName(errorState) + "_" + EMV2Util.getPrintName(errorType);
 				}
 				if (errorPropagation != null) {
 					wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
+					targetName = EMV2Util.getPrintName(errorPropagation) + "_" + EMV2Util.getPrintName(errorType);
 				}
+				targetName = targetName.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
 
-				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment(si.getName().toLowerCase() + ".emfta");
-
+				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
+						.appendSegment(si.getName().toLowerCase() + "_" + targetName + ".emfta");
+				AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
 				serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
 
 			} else {
