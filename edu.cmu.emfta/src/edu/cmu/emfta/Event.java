@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link edu.cmu.emfta.Event#getDescription <em>Description</em>}</li>
  *   <li>{@link edu.cmu.emfta.Event#getGate <em>Gate</em>}</li>
  *   <li>{@link edu.cmu.emfta.Event#getRelatedObject <em>Related Object</em>}</li>
+ *   <li>{@link edu.cmu.emfta.Event#getReferenceCount <em>Reference Count</em>}</li>
  * </ul>
  *
  * @see edu.cmu.emfta.EmftaPackage#getEvent()
@@ -176,5 +177,32 @@ public interface Event extends EObject {
 	 * @generated
 	 */
 	EList<Object> getRelatedObject();
+
+	/**
+	 * Returns the value of the '<em><b>Reference Count</b></em>' attribute.
+	 * The default value is <code>"0"</code>.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Reference Count</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Reference Count</em>' attribute.
+	 * @see #setReferenceCount(int)
+	 * @see edu.cmu.emfta.EmftaPackage#getEvent_ReferenceCount()
+	 * @model default="0" required="true"
+	 * @generated
+	 */
+	int getReferenceCount();
+
+	/**
+	 * Sets the value of the '{@link edu.cmu.emfta.Event#getReferenceCount <em>Reference Count</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Reference Count</em>' attribute.
+	 * @see #getReferenceCount()
+	 * @generated
+	 */
+	void setReferenceCount(int value);
 
 } // Event

@@ -122,13 +122,22 @@ public interface EmftaPackage extends EPackage {
 	int EVENT__RELATED_OBJECT = 5;
 
 	/**
+	 * The feature id for the '<em><b>Reference Count</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int EVENT__REFERENCE_COUNT = 6;
+
+	/**
 	 * The number of structural features of the '<em>Event</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int EVENT_FEATURE_COUNT = 6;
+	int EVENT_FEATURE_COUNT = 7;
 
 	/**
 	 * The number of operations of the '<em>Event</em>' class.
@@ -365,6 +374,17 @@ public interface EmftaPackage extends EPackage {
 	EAttribute getEvent_RelatedObject();
 
 	/**
+	 * Returns the meta object for the attribute '{@link edu.cmu.emfta.Event#getReferenceCount <em>Reference Count</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Reference Count</em>'.
+	 * @see edu.cmu.emfta.Event#getReferenceCount()
+	 * @see #getEvent()
+	 * @generated
+	 */
+	EAttribute getEvent_ReferenceCount();
+
+	/**
 	 * Returns the meta object for class '{@link edu.cmu.emfta.Gate <em>Gate</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -572,6 +592,14 @@ public interface EmftaPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute EVENT__RELATED_OBJECT = eINSTANCE.getEvent_RelatedObject();
+
+		/**
+		 * The meta object literal for the '<em><b>Reference Count</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute EVENT__REFERENCE_COUNT = eINSTANCE.getEvent_ReferenceCount();
 
 		/**
 		 * The meta object literal for the '{@link edu.cmu.emfta.impl.GateImpl <em>Gate</em>}' class.
