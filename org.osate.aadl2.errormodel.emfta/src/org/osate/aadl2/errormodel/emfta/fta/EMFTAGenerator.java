@@ -93,6 +93,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaModel.getEvents().add(newEvent);
 		newEvent.setName(name);
 		newEvent.setType(EventType.BASIC);
+		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
@@ -109,6 +110,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaModel.getEvents().add(newEvent);
 		newEvent.setName(name);
 		newEvent.setType(EventType.INTERMEDIATE);
+		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
@@ -124,11 +126,16 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		newEvent.setName("Intermediate" + count);
 		count++;
 		emftaModel.getEvents().add(newEvent);
+		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
 	private void removeEvent(Event event) {
-		emftaModel.getEvents().remove(event);
+		if (event.getReferenceCount() > 1) {
+			event.setReferenceCount(event.getReferenceCount() - 1);
+		} else {
+			emftaModel.getEvents().remove(event);
+		}
 	}
 
 	public EMFTAGenerator(ComponentInstance root, ErrorBehaviorState errorState, ErrorTypes errorTypes) {
@@ -210,15 +217,21 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				for (Event ev : se.getGate().getEvents()) {
 					if (!emftaGate.getEvents().add(ev)) {
 						multiple.add(ev);
+						removeEvent(ev);
 					}
 				}
+				removeEvent(se);
 			} else {
 				if (!emftaGate.getEvents().add(se)) {
 					multiple.add(se);
+					removeEvent(se);
 				}
 			}
 		}
 		emftaGate.getEvents().removeAll(multiple);
+		for (Event event : multiple) {
+			removeEvent(event);
+		}
 		return combined;
 
 	}
@@ -238,7 +251,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
-				emftaGate.getEvents().addAll(se.getGate().getEvents());
+				for (Event ev : se.getGate().getEvents()) {
+					if (!emftaGate.getEvents().add(ev)) {
+						removeEvent(ev);
+					}
+				}
 				removeEvent(se);
 			} else {
 				emftaGate.getEvents().add(se);
@@ -263,7 +280,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
-				emftaGate.getEvents().addAll(se.getGate().getEvents());
+				for (Event ev : se.getGate().getEvents()) {
+					if (!emftaGate.getEvents().add(ev)) {
+						removeEvent(ev);
+					}
+				}
 				removeEvent(se);
 			} else {
 				emftaGate.getEvents().add(se);
@@ -321,7 +342,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject preProcessOutgoingErrorPropagation(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType) {
-		return getFromCache(component, errorPropagation, targetType);
+		Event res = getFromCache(component, errorPropagation, targetType);
+		if (res != null) {
+			res.setReferenceCount(res.getReferenceCount() + 1);
+		}
+		return res;
 	}
 
 	@Override
@@ -416,6 +441,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessXor(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale, List<EObject> subResults) {
-		return finalizeAsOrEvents(subResults);
+		return finalizeAsXOrEvents(subResults);
 	}
 }
