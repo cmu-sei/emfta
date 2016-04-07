@@ -18,7 +18,9 @@
 
 package edu.cmu.emfta.actions;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
@@ -31,6 +33,104 @@ import org.eclipse.swt.widgets.MessageBox;
 
 import edu.cmu.emfta.Event;
 import edu.cmu.emfta.Gate;
+import edu.cmu.emfta.GateType;
+
+/**
+ * This class is an internal singleton class that will optimize the tree.
+ * 
+ * @author julien
+ *
+ */
+class Optimize
+{
+	private Event rootEvent;
+	private List<Event> browsedElements;
+	
+	public Optimize (Event root)
+	{
+		this.rootEvent = root;
+		browsedElements = new ArrayList<Event>();
+	}
+	
+	public void perform ()
+	{
+		optimizeCommonOrEvents (rootEvent);
+	}
+	
+	/**
+	 * Optimize event that are under several OR'd gates. We start with the top, collect
+	 * all events that are under OR gates and remove/delete events that are in deeper
+	 * or gates.
+	 * 
+	 * @param event - the event under investigation. the code will browse sub-events.
+	 */
+	private void optimizeCommonOrEvents (Event event)
+	{
+//		System.out.println("[OptimizationAction] process: "+event.getName());
+
+		Gate gate = event.getGate();
+		List<Event> toDelete = new ArrayList<Event>();
+
+		/**
+		 * if there is no event, we do not go further
+		 */
+		if (gate == null)
+		{
+			return;
+		}
+		
+
+		/**
+		 * We start to see if there is any redundant events in the sub-events.
+		 * We add the events to delete in a list, because if we delete that
+		 * directly, it might generate inconsistencies in the list members
+		 * and the iterator that browses the getEvents() call.
+		 */
+		for (Event subEvent : gate.getEvents())
+		{
+			if (browsedElements.contains(subEvent))
+			{
+				toDelete.add(subEvent);
+			}
+		}
+		
+		/**
+		 * Now, we delete the events from the list.
+		 */
+		if (toDelete.size() > 0)
+		{
+			for (Event del : toDelete)
+			{
+//				System.out.println("[OptimizationAction] delete: "+del.getName());
+				gate.getEvents().remove(del);
+			}
+		}
+		
+		/**
+		 * If this is an OR gate, we then add the events as being already browsed.
+		 * Then, these elements will be removed from further/deeper OR'd gates.
+		 */
+		if (gate.getType() == GateType.OR)
+		{
+			for (Event subEvent : gate.getEvents())
+			{
+				if (! browsedElements.contains(subEvent))
+				{
+					browsedElements.add(subEvent);
+				}
+			}
+		}
+		
+		/**
+		 * We continue and browse sub-events.
+		 */
+		for (Event subEvent : gate.getEvents())
+		{
+			optimizeCommonOrEvents (subEvent);
+		}
+		
+	}
+}
 
 public class OptimizationAction extends AbstractExternalJavaAction {
 	private StringBuffer report;
@@ -59,6 +159,7 @@ public class OptimizationAction extends AbstractExternalJavaAction {
 //				report.append("Event,declared,computed\n");
 //				performComputation((Event) target);
 //				Utils.writeFile(report, target);
+				new Optimize((Event)target).perform();
 				Utils.refreshProject(target);
 				return;
 			}
@@ -72,25 +173,6 @@ public class OptimizationAction extends AbstractExternalJavaAction {
 		}
 	}
 
-	public void performComputation(Event event) {
-		Gate gate = event.getGate();
-		double computed;
-		double declared;
-
-		if (gate != null) {
-
-			computed = Utils.getProbability(event);
-			declared = event.getProbability();
-			report.append(event.getName() + "," + declared + "," + computed + "\n");
-
-			for (Event subEvent : gate.getEvents()) {
-				performComputation(subEvent);
-			}
-		} else {
-			declared = event.getProbability();
-			report.append(event.getName() + "," + declared + "," + "n/a" + "\n");
-		}
-	}
 
 	@Override
 	public boolean canExecute(Collection<? extends EObject> selections) {
@@ -99,26 +181,17 @@ public class OptimizationAction extends AbstractExternalJavaAction {
 		 * For now, we return true all the time. Might need to optimize
 		 * it to make it more user-friendly.
 		 */
-//		System.out.println("[CutSetAction] calling canExecute");
 		for (EObject eo : selections) {
-//			System.out.println("[CutSetAction] eobject class= " + eo.getClass());
 
 			if (eo instanceof DSemanticDiagramSpec) {
 				DSemanticDiagramSpec ds = (DSemanticDiagramSpec) eo;
 				EObject target = ds.getTarget();
 
-//				System.out.println("[CutSetAction] eobject class= " + eo.getClass());
-//
-//				System.out.println("[CutSetAction] target = " + target);
 			}
 
 			if (eo instanceof DNodeSpec) {
 				DNodeSpec ds = (DNodeSpec) eo;
 				EObject target = ds.getTarget();
-
-//				System.out.println("[CutSetAction] eobject class= " + eo.getClass());
-//
-//				System.out.println("[CutSetAction] target = " + target);
 
 				if (target instanceof edu.cmu.emfta.Event) {
 					return true;
