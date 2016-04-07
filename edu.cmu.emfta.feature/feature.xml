@@ -68,7 +68,6 @@ DM-0003411
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.xtext.ui"/>
       <import plugin="org.eclipse.emf.edit.ui"/>
-      <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.resources" version="3.9.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.help"/>
       <import plugin="com.google.guava" version="12.0.0" match="greaterOrEqual"/>
@@ -101,13 +100,6 @@ DM-0003411
 
    <plugin
          id="edu.cmu.emfta.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="edu.cmu.emfta.tests"
          download-size="0"
          install-size="0"
          version="0.0.0"
