@@ -32,8 +32,67 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private ErrorPropagation rootComponentPropagation;
 	private ErrorTypes rootComponentTypes;
 	private int eventIdentifier;
+	private boolean pureTree = false;
 
 	public Map<String, edu.cmu.emfta.Event> cache;
+
+	public EMFTAGenerator(ComponentInstance root, ErrorBehaviorState errorState, ErrorTypes errorTypes) {
+		super(root);
+		emftaModel = null;
+		cache = new HashMap<String, edu.cmu.emfta.Event>();
+		rootComponentTypes = errorTypes;
+		rootComponentState = errorState;
+		rootComponentPropagation = null;
+		eventIdentifier = 0;
+	}
+
+	public EMFTAGenerator(ComponentInstance root, ErrorPropagation errorPropagation, ErrorTypes errorTypes) {
+		// TOFIX
+		super(root);
+		emftaModel = null;
+		cache = new HashMap<String, edu.cmu.emfta.Event>();
+		rootComponentTypes = errorTypes;
+		rootComponentPropagation = errorPropagation;
+		rootComponentState = null;
+		eventIdentifier = 0;
+	}
+
+	public FTAModel getEmftaModel(boolean pureTree) {
+		this.pureTree = pureTree;
+		return getEmftaModel();
+	}
+
+	public FTAModel getEmftaModel() {
+		if (emftaModel == null) {
+			edu.cmu.emfta.Event emftaRootEvent;
+
+			emftaModel = EmftaFactory.eINSTANCE.createFTAModel();
+			emftaModel.setName(getRootComponent().getName());
+			emftaModel.setDescription("Top Level Failure");
+			NamedElement ne = null;
+
+			if (rootComponentState != null) {
+				emftaRootEvent = (Event) traverseCompositeErrorState(getRootComponent(), rootComponentState,
+						rootComponentTypes);
+				ne = rootComponentState;
+			} else {
+				emftaRootEvent = (Event) traverseOutgoingErrorPropagation(getRootComponent(), rootComponentPropagation,
+						rootComponentTypes);
+				ne = rootComponentPropagation;
+			}
+			String longName = buildName(getRootComponent(), ne, rootComponentTypes);
+			if (emftaRootEvent.getGate() == null && !emftaRootEvent.getName().equals(longName)) {
+				Gate top = EmftaFactory.eINSTANCE.createGate();
+				top.setType(GateType.OR);
+				top.getEvents().add(emftaRootEvent);
+				Event topEvent = createIntermediateEvent(getRootComponent(), ne, rootComponentTypes);
+				topEvent.setGate(top);
+				emftaRootEvent = topEvent;
+			}
+			emftaModel.setRoot(emftaRootEvent);
+		}
+		return emftaModel;
+	}
 
 	private String buildName(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = eventIdentifier + "-" + buildIdentifier(component, namedElement, type);
@@ -136,59 +195,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		} else {
 			emftaModel.getEvents().remove(event);
 		}
-	}
-
-	public EMFTAGenerator(ComponentInstance root, ErrorBehaviorState errorState, ErrorTypes errorTypes) {
-		super(root);
-		emftaModel = null;
-		cache = new HashMap<String, edu.cmu.emfta.Event>();
-		rootComponentTypes = errorTypes;
-		rootComponentState = errorState;
-		rootComponentPropagation = null;
-		eventIdentifier = 0;
-	}
-
-	public EMFTAGenerator(ComponentInstance root, ErrorPropagation errorPropagation, ErrorTypes errorTypes) {
-		// TOFIX
-		super(root);
-		emftaModel = null;
-		cache = new HashMap<String, edu.cmu.emfta.Event>();
-		rootComponentTypes = errorTypes;
-		rootComponentPropagation = errorPropagation;
-		rootComponentState = null;
-		eventIdentifier = 0;
-	}
-
-	public FTAModel getEmftaModel() {
-		if (emftaModel == null) {
-			edu.cmu.emfta.Event emftaRootEvent;
-
-			emftaModel = EmftaFactory.eINSTANCE.createFTAModel();
-			emftaModel.setName(getRootComponent().getName());
-			emftaModel.setDescription("Top Level Failure");
-			NamedElement ne = null;
-
-			if (rootComponentState != null) {
-				emftaRootEvent = (Event) traverseCompositeErrorState(getRootComponent(), rootComponentState,
-						rootComponentTypes);
-				ne = rootComponentState;
-			} else {
-				emftaRootEvent = (Event) traverseOutgoingErrorPropagation(getRootComponent(), rootComponentPropagation,
-						rootComponentTypes);
-				ne = rootComponentPropagation;
-			}
-			String longName = buildName(getRootComponent(), ne, rootComponentTypes);
-			if (emftaRootEvent.getGate() == null && !emftaRootEvent.getName().equals(longName)) {
-				Gate top = EmftaFactory.eINSTANCE.createGate();
-				top.setType(GateType.OR);
-				top.getEvents().add(emftaRootEvent);
-				Event topEvent = createIntermediateEvent(getRootComponent(), ne, rootComponentTypes);
-				topEvent.setGate(top);
-				emftaRootEvent = topEvent;
-			}
-			emftaModel.setRoot(emftaRootEvent);
-		}
-		return emftaModel;
 	}
 
 	/**
@@ -342,6 +348,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject preProcessOutgoingErrorPropagation(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType) {
+		if (pureTree)
+			return null;
 		Event res = getFromCache(component, errorPropagation, targetType);
 		if (res != null) {
 			res.setReferenceCount(res.getReferenceCount() + 1);
