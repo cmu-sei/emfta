@@ -45,8 +45,17 @@
            actionClass="edu.cmu.emfta.actions.ComputeProbabilityAction"
            id="edu.cmu.emfta.actions.ComputeProbabilityAction">
      </javaActions>
+  </extension>
+
+  <extension
+        point="org.eclipse.sirius.externalJavaAction">
+     <javaActions
+           actionClass="edu.cmu.emfta.actions.OptimizationAction"
+           id="edu.cmu.emfta.actions.OptimizationAction">
+     </javaActions>
   </extension> 
-      <extension
+
+  <extension
         point="org.eclipse.sirius.externalJavaAction">
      <javaActions
            actionClass="edu.cmu.emfta.actions.UpdateProbabilityAction"

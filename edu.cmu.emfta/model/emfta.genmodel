@@ -29,11 +29,12 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute emfta.ecore#//Event/probability"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute emfta.ecore#//Event/description"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference emfta.ecore#//Event/gate"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute emfta.ecore#//Event/relatedObject"/>
     </genClasses>
     <genClasses ecoreClass="emfta.ecore#//Gate">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute emfta.ecore#//Gate/type"/>
-      <genFeatures property="None" createChild="false" ecoreFeature="ecore:EReference emfta.ecore#//Gate/events"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute emfta.ecore#//Gate/description"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EReference emfta.ecore#//Gate/events"/>
     </genClasses>
     <genClasses ecoreClass="emfta.ecore#//FTAModel">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference emfta.ecore#//FTAModel/root"/>
