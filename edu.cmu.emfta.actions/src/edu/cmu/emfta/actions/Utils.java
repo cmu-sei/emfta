@@ -16,7 +16,6 @@
  * DM-0003411
  */
 
-
 package edu.cmu.emfta.actions;
 
 import java.io.PrintWriter;
@@ -164,7 +163,23 @@ public class Utils {
 				}
 				break;
 			}
+			case XOR: {
+				double inverseProb = 1;
+				result = 0;
+				for (Event subEvent : gate.getEvents()) {
+					inverseProb *= (1 - getProbability(subEvent));
+				}
+				result = 1 - inverseProb;
+				break;
+			}
 			case OR: {
+				result = 0;
+				for (Event subEvent : gate.getEvents()) {
+					result = result + getProbability(subEvent);
+				}
+				break;
+			}
+			case INTERMEDIATE: {
 				result = 0;
 				for (Event subEvent : gate.getEvents()) {
 					result = result + getProbability(subEvent);
