@@ -218,8 +218,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
-			if (se.getGate() != null
-					&& (se.getGate().getType() == GateType.XOR || se.getGate().getType() == GateType.OR)) {
+			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
 				for (Event ev : se.getGate().getEvents()) {
 					if (!emftaGate.getEvents().add(ev)) {
 						multiple.add(ev);
@@ -379,10 +378,16 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject processIncomingErrorPropagation(ComponentInstance component, ErrorPropagation incoming,
 			ErrorTypes type) {
+		Event res = getFromCache(component, incoming, type);
+		if (res != null) {
+			res.setReferenceCount(res.getReferenceCount() + 1);
+			return res;
+		}
 		Event emftaEvent = createBasicEvent(component, incoming, type);
 		emftaEvent.setType(EventType.EXTERNAL);
 		emftaEvent.setDescription(Utils.getDescription(component, incoming, type));
 		Utils.fillProperties(emftaEvent, component, incoming, type);
+		putInCache(component, incoming, type, emftaEvent);
 		return emftaEvent;
 	}
 
@@ -450,5 +455,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	protected EObject postProcessXor(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale, List<EObject> subResults) {
 		return finalizeAsXOrEvents(subResults);
+	}
+
+	@Override
+	protected EObject postProcessOr(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
+			double scale, List<EObject> subResults) {
+		return finalizeAsOrEvents(subResults);
 	}
 }
