@@ -1,9 +1,27 @@
+/**
+ * Copyright (c) 2015 Carnegie Mellon University.
+ * All Rights Reserved.
+ * 
+ * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER.
+ * CARNEGIE MELLON UNIVERSITY EXPRESSLY DISCLAIMS TO THE FULLEST 
+ * EXTENT PERMITTEDBY LAW ALL EXPRESS, IMPLIED, AND STATUTORY 
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE WARRANTIES OF 
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND 
+ * NON-INFRINGEMENT OF PROPRIETARY RIGHTS.
+
+ * This Program is distributed under a BSD license.  
+ * Please see license.txt file or permission@sei.cmu.edu for more
+ * information. 
+ * 
+ * DM-0003411
+ */
 package org.osate.aadl2.errormodel.emfta.fta;
 
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.osate.aadl2.NamedElement;
@@ -126,17 +144,52 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return identifier;
 	}
 
+	/**
+	 * return the entry and increment the reference count on the Event
+	 * @param component
+	 * @param namedElement
+	 * @param type
+	 * @return
+	 */
 	private Event getFromCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String id = buildIdentifier(component, namedElement, type);
 		if (cache.containsKey(id)) {
-			return cache.get(id);
+			Event res = cache.get(id);
+			if (res != null) {
+				res.setReferenceCount(res.getReferenceCount() + 1);
+				return res;
+			}
 		}
 		return null;
 	}
 
+	/**
+	 * put Event into cache with (assumed) reference count of 1
+	 * @param component
+	 * @param namedElement
+	 * @param type
+	 * @param event
+	 */
 	private void putInCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type, Event event) {
 		String identifier = buildIdentifier(component, namedElement, type);
 		cache.put(identifier, event);
+	}
+
+	/**
+	 * delete Event, but only if reference count is one.
+	 * Else decrement reference count.
+	 * @param event
+	 */
+	private void removeEventReference(Event event) {
+		if (event.getReferenceCount() > 1) {
+			event.setReferenceCount(event.getReferenceCount() - 1);
+		} else {
+			emftaModel.getEvents().remove(event);
+		}
+	}
+
+	private void addEventReference(Event event) {
+		event.setReferenceCount(event.getReferenceCount() + 1);
 	}
 
 	/**
@@ -189,14 +242,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return newEvent;
 	}
 
-	private void removeEvent(Event event) {
-		if (event.getReferenceCount() > 1) {
-			event.setReferenceCount(event.getReferenceCount() - 1);
-		} else {
-			emftaModel.getEvents().remove(event);
-		}
-	}
-
 	/**
 	 * turn list of subevents into an specified gate.
 	 * In the process flatten any sub gates of the same type (one level is sufficient since we flatten at each step
@@ -214,28 +259,67 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.XOR);
 
 		combined.setGate(emftaGate);
-		List<Event> multiple = new LinkedList<Event>();
+		Set<Event> intersection = null;
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
 				for (Event ev : se.getGate().getEvents()) {
 					if (!emftaGate.getEvents().add(ev)) {
-						multiple.add(ev);
-						removeEvent(ev);
+						removeEventReference(ev);
 					}
 				}
-				removeEvent(se);
+				removeEventReference(se);
+			} else if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+				if (!emftaGate.getEvents().add(se)) {
+					removeEventReference(se);
+				}
+				if (intersection == null) {
+					intersection = new HashSet<Event>(se.getGate().getEvents());
+				} else {
+					intersection.retainAll(se.getGate().getEvents());
+				}
 			} else {
 				if (!emftaGate.getEvents().add(se)) {
-					multiple.add(se);
-					removeEvent(se);
+					removeEventReference(se);
 				}
 			}
 		}
-		emftaGate.getEvents().removeAll(multiple);
-		for (Event event : multiple) {
-			removeEvent(event);
+		if (intersection != null && !intersection.isEmpty()) {
+			// remove from lower OR and create an OR above XOR
+			Event top = this.createIntermediateEvent();
+			Gate newor = EmftaFactory.eINSTANCE.createGate();
+			newor.setType(GateType.OR);
+			top.setGate(newor);
+			newor.getEvents().add(combined);
+			for (Event event : intersection) {
+				newor.getEvents().add(event);
+				addEventReference(event);
+			}
+			for (Object seobj : subEvents) {
+				Event se = (Event) seobj;
+				if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+					for (Event event : intersection) {
+						se.getGate().getEvents().remove(event);
+						removeEventReference(event);
+					}
+					if (se.getGate().getEvents().isEmpty()) {
+						// remove event with OR gate from enclosing XOR gate
+						if (emftaGate.getEvents().remove(se)) {
+							removeEventReference(se);
+						}
+					} else if (se.getGate().getEvents().size() == 1) {
+						Event temp = se.getGate().getEvents().get(0);
+						if (!emftaGate.getEvents().add(temp)) {
+							removeEventReference(temp);
+						}
+						if (emftaGate.getEvents().remove(se)) {
+							removeEventReference(se);
+						}
+					}
+				}
+			}
+			return top;
 		}
 		return combined;
 
@@ -258,12 +342,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
 				for (Event ev : se.getGate().getEvents()) {
 					if (!emftaGate.getEvents().add(ev)) {
-						removeEvent(ev);
+						removeEventReference(ev);
 					}
 				}
-				removeEvent(se);
+				removeEventReference(se);
 			} else {
-				emftaGate.getEvents().add(se);
+				if (!emftaGate.getEvents().add(se)) {
+					removeEventReference(se);
+				}
 			}
 		}
 		return combined;
@@ -287,12 +373,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
 				for (Event ev : se.getGate().getEvents()) {
 					if (!emftaGate.getEvents().add(ev)) {
-						removeEvent(ev);
+						removeEventReference(ev);
 					}
 				}
-				removeEvent(se);
+				removeEventReference(se);
 			} else {
-				emftaGate.getEvents().add(se);
+				if (!emftaGate.getEvents().add(se)) {
+					removeEventReference(se);
+				}
 			}
 		}
 		return combined;
@@ -316,13 +404,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			inter.setGate(emftaGate);
 			if (stateEvent.getGate() != null && stateEvent.getGate().getType() == GateType.AND) {
 				emftaGate.getEvents().addAll(stateEvent.getGate().getEvents());
-				removeEvent(stateEvent);
+				removeEventReference(stateEvent);
 			} else {
 				emftaGate.getEvents().add(stateEvent);
 			}
 			if (conditionEvent.getGate() != null && conditionEvent.getGate().getType() == GateType.AND) {
 				emftaGate.getEvents().addAll(conditionEvent.getGate().getEvents());
-				removeEvent(conditionEvent);
+				removeEventReference(conditionEvent);
 			} else {
 				emftaGate.getEvents().add(conditionEvent);
 			}
@@ -350,9 +438,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (pureTree)
 			return null;
 		Event res = getFromCache(component, errorPropagation, targetType);
-		if (res != null) {
-			res.setReferenceCount(res.getReferenceCount() + 1);
-		}
 		return res;
 	}
 
@@ -380,15 +465,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			ErrorTypes type) {
 		Event res = getFromCache(component, incoming, type);
 		if (res != null) {
-			res.setReferenceCount(res.getReferenceCount() + 1);
 			return res;
 		}
-		Event emftaEvent = createBasicEvent(component, incoming, type);
-		emftaEvent.setType(EventType.EXTERNAL);
-		emftaEvent.setDescription(Utils.getDescription(component, incoming, type));
-		Utils.fillProperties(emftaEvent, component, incoming, type);
-		putInCache(component, incoming, type, emftaEvent);
-		return emftaEvent;
+		res = createBasicEvent(component, incoming, type);
+		res.setType(EventType.EXTERNAL);
+		res.setDescription(Utils.getDescription(component, incoming, type));
+		Utils.fillProperties(res, component, incoming, type);
+		putInCache(component, incoming, type, res);
+		return res;
 	}
 
 	@Override
