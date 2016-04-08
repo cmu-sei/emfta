@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>emfta</groupId>
+		<artifactId>emfta.parent</artifactId>
+		<version>2.2.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<groupId>emfta</groupId>
+	<artifactId>emfta.modules</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>../../edu.cmu.emfta</module>
+		<module>../../edu.cmu.emfta.actions</module>
+		<module>../../edu.cmu.emfta.edit</module>
+		<module>../../edu.cmu.emfta.editor</module>
+		<module>../../edu.cmu.emfta.feature</module>
+		<module>../../edu.cmu.emfta.help</module>
+		<module>../../emfta.design</module>
+		<module>../../edu.cmu.emfta.wizards</module>
+		<module>../../org.osate.aadl2.errormodel.emfta</module>
+		<module>../../org.osate.aadl2.errormodel.emfta.feature</module>
+	</modules>
+
+</project>
