@@ -83,7 +83,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			String longName = buildName(getRootComponent(), ne, rootComponentTypes);
 			if (emftaRootEvent.getGate() == null && !emftaRootEvent.getName().equals(longName)) {
 				Gate top = EmftaFactory.eINSTANCE.createGate();
-				top.setType(GateType.OR);
+				top.setType(GateType.INTERMEDIATE);
 				top.getEvents().add(emftaRootEvent);
 				Event topEvent = createIntermediateEvent(getRootComponent(), ne, rootComponentTypes);
 				topEvent.setGate(top);
