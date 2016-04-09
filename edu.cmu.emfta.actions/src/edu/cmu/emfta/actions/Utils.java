@@ -106,30 +106,7 @@ public class Utils {
 			return;
 		}
 
-		switch (gate.getType()) {
-		case AND: {
-			result = 1;
-			for (Event subEvent : gate.getEvents()) {
-				result = result * getProbability(subEvent);
-				checkProbability(subEvent);
-			}
-			break;
-		}
-		case OR: {
-			result = 0;
-			for (Event subEvent : gate.getEvents()) {
-				result = result + getProbability(subEvent);
-				checkProbability(subEvent);
-			}
-			break;
-		}
-		default: {
-			System.out.println("[Utils] Unsupported for now");
-			result = -1;
-			break;
-		}
-
-		}
+		result = getProbability(event);
 
 		if (result != event.getProbability()) {
 
@@ -150,6 +127,12 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * For leaf event it returns the probability stored with the event.
+	 * For non-leaf events (events with a gate) it recursively calculates the probability from subevents.
+	 * @param event
+	 * @return double probability
+	 */
 	public static double getProbability(Event event) {
 		Gate gate = event.getGate();
 		double result;
@@ -163,9 +146,16 @@ public class Utils {
 				}
 				break;
 			}
+			case PRIORITY_AND: {
+				// TODO need to adjust for ordered events
+				result = 1;
+				for (Event subEvent : gate.getEvents()) {
+					result = result * getProbability(subEvent);
+				}
+				break;
+			}
 			case XOR: {
 				double inverseProb = 1;
-				result = 0;
 				for (Event subEvent : gate.getEvents()) {
 					inverseProb *= (1 - getProbability(subEvent));
 				}
@@ -183,6 +173,68 @@ public class Utils {
 				result = 0;
 				for (Event subEvent : gate.getEvents()) {
 					result = result + getProbability(subEvent);
+				}
+				break;
+			}
+			default: {
+				System.out.println("[Utils] Unsupported for now");
+				result = -1;
+				break;
+			}
+			}
+			System.out.println("[Utils] Probability for " + event.getName() + ":" + result);
+
+		} else {
+			result = event.getProbability();
+		}
+		return result;
+	}
+
+	/**
+	 * return sum of probabilities of direct subevents.
+	 * @param event
+	 * @return double
+	 */
+	public static double getSubeventProbabilities(Event event) {
+		Gate gate = event.getGate();
+		double result;
+
+		if (gate != null) {
+			switch (gate.getType()) {
+			case AND: {
+				result = 1;
+				for (Event subEvent : gate.getEvents()) {
+					result = result * subEvent.getProbability();
+				}
+				break;
+			}
+			case PRIORITY_AND: {
+				// TODO need to adjust for ordered events
+				result = 1;
+				for (Event subEvent : gate.getEvents()) {
+					result = result * subEvent.getProbability();
+				}
+				break;
+			}
+			case XOR: {
+				double inverseProb = 1;
+				for (Event subEvent : gate.getEvents()) {
+					inverseProb *= (1 - subEvent.getProbability());
+				}
+				result = 1 - inverseProb;
+				break;
+			}
+			case OR: {
+				result = 0;
+				for (Event subEvent : gate.getEvents()) {
+					result = result + subEvent.getProbability();
+				}
+				break;
+			}
+			case INTERMEDIATE: {
+				result = 0;
+				for (Event subEvent : gate.getEvents()) {
+					result = result + subEvent.getProbability();
 				}
 				break;
 			}
