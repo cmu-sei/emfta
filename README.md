@@ -3,9 +3,9 @@
                              Julien Delange <jdelange@andrew.cmu.edu>
 
 ##In a Nutshell
-* Latest build : https://raw.githubusercontent.com/juli1/emfta/master/edu.cmu.emfta.updatesite/
-* Mars update site: https://raw.githubusercontent.com/juli1/emfta/mars/edu.cmu.emfta.updatesite/
-* Luna update site: https://raw.githubusercontent.com/juli1/emfta/luna/edu.cmu.emfta.updatesite/
+* Latest build : https://raw.githubusercontent.com/cmu-sei/emfta/master/edu.cmu.emfta.updatesite/
+* Mars update site: https://raw.githubusercontent.com/cmu-sei/emfta/mars/edu.cmu.emfta.updatesite/
+* Luna update site: https://raw.githubusercontent.com/cmu-sei/emfta/luna/edu.cmu.emfta.updatesite/
 
 ## What it is?
 This is an EMF-based FTA editor/visualizer. You can edit the content
@@ -44,7 +44,7 @@ or tree). Diagram and table examples are shown below (see examples).
 ## Installation with Eclipse
 * Download Eclipse Mars on http://www.eclipse.org - choose the modeling package
 * Once you start, go in the Help menu and choose "Install New Software"
-* Go to the install menu again and enter the following update site: https://raw.githubusercontent.com/juli1/emfta/mars/edu.cmu.emfta.updatesite/
+* Go to the install menu again and enter the following update site: https://raw.githubusercontent.com/cmu-sei/emfta/mars/edu.cmu.emfta.updatesite/
 
 
 ## Installation with OSATE
@@ -55,10 +55,10 @@ it consists of a big zip file to unzip on your machine.
 
 ### Start OSATE and install EMFTA inside your installation
 Once you start OSATE, go in the install menu again and enter the 
-following update site: https://raw.githubusercontent.com/juli1/emfta/master/edu.cmu.emfta.updatesite/
+following update site: https://raw.githubusercontent.com/cmu-sei/emfta/master/edu.cmu.emfta.updatesite/
 
 Select to install EMFTA and complete the installation.
-![EMFTA Installation](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/emfta-install.png "Installation of EMFTA")
+![EMFTA Installation](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/emfta-install.png "Installation of EMFTA")
 
 
 ## How to use
@@ -66,10 +66,10 @@ Select to install EMFTA and complete the installation.
 ### Using the example wizard
 Start eclipse and choose **File** and then **Others**. Then, select **EMFTA Wizards** and **EMFTA New File**.
 You should have a window similar to the following then.
-![Wizard Selection](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/wizard-selection.png "Wizard Selection")
+![Wizard Selection](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/wizard-selection.png "Wizard Selection")
 
 The wizard let you select the target project, the target file name as well as the template you want to import, as shown in the following picture.
-![New File Wizard](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/wizard-page2.png "New File Wizard")
+![New File Wizard](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/wizard-page2.png "New File Wizard")
 
 Once completed, the new file is available in the target directory. Please note that you still need to add the **Modeling Nature** to the project that contains the file to enable the graphical and table representations.
 
@@ -78,16 +78,16 @@ Once completed, the new file is available in the target directory. Please note t
 * Create a new EMFTA inside the modeling project with the root object FTA Model (New->Emfta Model)
 * Make sure to be in the Sirius perspective, by selecting the Sirius perspective as shown below
 
-![Sirius perspective](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/sirius-perspective.png "Sirius Perspective")
+![Sirius perspective](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/sirius-perspective.png "Sirius Perspective")
 
 
 * Select the EMFTA viewpoint for the project by making a right click on the project and select EMFTA as shown below
 
-![Viewpoint Selection](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/viewpoint-selection.png "Viewpoint Selection")
+![Viewpoint Selection](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/viewpoint-selection.png "Viewpoint Selection")
 
 * Select the root object of the FTA model and choose the appropriate selection (Table or Tree) as shown below
 
-![New Representation](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/new-representation.png "New Representation")
+![New Representation](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/new-representation.png "New Representation")
 
 
 ### Cutset Generation
@@ -95,7 +95,7 @@ You can generate the cutset of an FTA model. It generates a CSV file (called cut
 To generate the cutset, you have to select the top level error in the graphical view, right-click and select "Cutset"
 as shown below. Once the cutset is generated, a new file (*cutset.csv*) is generated.
 
-![Generating Cutset](https://raw.githubusercontent.com/juli1/emfta/master/doc/pics/cutset.png "Generating Cutset")
+![Generating Cutset](https://raw.githubusercontent.com/cmu-sei/emfta/master/doc/pics/cutset.png "Generating Cutset")
 
 
 ## Examples
@@ -107,10 +107,10 @@ or there is no more power. This example is a basic FTA model
 that captures these two conditions with the logical operation (the AND).
 
 
-![Diagram of the Lamp Example](https://github.com/juli1/emfta/raw/master/example.emfta/imgs/example1-diagram.png "Diagram of the lamp example")
+![Diagram of the Lamp Example](https://github.com/cmu-sei/emfta/raw/master/example.emfta/imgs/example1-diagram.png "Diagram of the lamp example")
 
 
-![Table of the Lamp Example](https://github.com/juli1/emfta/raw/master/example.emfta/imgs/example1-table.png "Table for editing the Gates/Events of the lamp example")
+![Table of the Lamp Example](https://github.com/cmu-sei/emfta/raw/master/example.emfta/imgs/example1-table.png "Table for editing the Gates/Events of the lamp example")
 
 
 ### The computer example
@@ -124,9 +124,9 @@ example, we consider the following events to be included in the FTA:
 
 The following pictures show the tables (to edit the events/gates) as well as the diagram representation.
 
-![Diagram of the Computer Example](https://github.com/juli1/emfta/raw/master/example.emfta/imgs/example2-diagram.png "Diagram of the computer example")
+![Diagram of the Computer Example](https://github.com/cmu-sei/emfta/raw/master/example.emfta/imgs/example2-diagram.png "Diagram of the computer example")
 
-![Table of the Computer Example](https://github.com/juli1/emfta/raw/master/example.emfta/imgs/example2-table.png "Table for editing the Gates/Events of the computer example")
+![Table of the Computer Example](https://github.com/cmu-sei/emfta/raw/master/example.emfta/imgs/example2-table.png "Table for editing the Gates/Events of the computer example")
 
 
 ## Documentation
