@@ -16,7 +16,6 @@
  * DM-0003411
  */
 
-
 package edu.cmu.emfta.actions;
 
 import java.util.Collection;
@@ -78,12 +77,13 @@ public class UpdateProbabilityAction extends AbstractExternalJavaAction {
 	public void performUpdate(Event event) {
 		if (event.getGate() != null) {
 			double probability;
-			probability = Utils.getProbability(event);
-			event.setProbability(probability);
+			// TODO change the order. First, recurse
 
 			for (Event e : event.getGate().getEvents()) {
 				performUpdate(e);
 			}
+			probability = Utils.getSubeventProbabilities(event);
+			event.setProbability(probability);
 		}
 	}
 
