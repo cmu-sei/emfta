@@ -26,6 +26,7 @@ import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
+import org.osate.aadl2.instance.SystemInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ConditionExpression;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
@@ -386,13 +387,43 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return combined;
 	}
 
+	private Event finalizeAsPriorityAndEvents(List<EObject> subEvents) {
+		if (subEvents.size() == 0)
+			return null;
+		if (subEvents.size() == 1) {
+			return (Event) subEvents.get(0);
+		}
+		Event combined = this.createIntermediateEvent();
+		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
+		emftaGate.setType(GateType.PRIORITY_AND);
+
+		combined.setGate(emftaGate);
+		// flatten
+		for (Object seobj : subEvents) {
+			Event se = (Event) seobj;
+			if (se.getGate() != null && se.getGate().getType() == GateType.PRIORITY_AND) {
+				for (Event ev : se.getGate().getEvents()) {
+					if (!emftaGate.getEvents().add(ev)) {
+						removeEventReference(ev);
+					}
+				}
+				removeEventReference(se);
+			} else {
+				if (!emftaGate.getEvents().add(se)) {
+					removeEventReference(se);
+				}
+			}
+		}
+		return combined;
+	}
+
 	/**
-	 * create an AND gate if both are non-null. Otherwise return the non-null Event or null if both are null.
+	 * create an PRIORITY_AND gate if both are non-null. Otherwise return the non-null Event or null if both are null.
 	 * @param stateEvent Event representing the source state of a transition or outgoing propagation condition
 	 * @param conditionEvent Event representing the condition of a transition or outgoing propagation condition
 	 * @return Event or null
 	 */
-	private Event consolidateAsAnd(Event stateEvent, Event conditionEvent) {
+	private Event consolidateAsPriorityAnd(Event stateEvent, Event conditionEvent) {
 		if (stateEvent == null && conditionEvent != null) {
 			return conditionEvent;
 		} else if (stateEvent != null && conditionEvent == null) {
@@ -400,15 +431,15 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		} else if (stateEvent != null && conditionEvent != null) {
 			Event inter = createIntermediateEvent();
 			Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
-			emftaGate.setType(GateType.AND);
+			emftaGate.setType(GateType.PRIORITY_AND);
 			inter.setGate(emftaGate);
-			if (stateEvent.getGate() != null && stateEvent.getGate().getType() == GateType.AND) {
+			if (stateEvent.getGate() != null && stateEvent.getGate().getType() == GateType.PRIORITY_AND) {
 				emftaGate.getEvents().addAll(stateEvent.getGate().getEvents());
 				removeEventReference(stateEvent);
 			} else {
 				emftaGate.getEvents().add(stateEvent);
 			}
-			if (conditionEvent.getGate() != null && conditionEvent.getGate().getType() == GateType.AND) {
+			if (conditionEvent.getGate() != null && conditionEvent.getGate().getType() == GateType.PRIORITY_AND) {
 				emftaGate.getEvents().addAll(conditionEvent.getGate().getEvents());
 				removeEventReference(conditionEvent);
 			} else {
@@ -468,7 +499,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			return res;
 		}
 		res = createBasicEvent(component, incoming, type);
-		res.setType(EventType.EXTERNAL);
+		if (component instanceof SystemInstance) {
+			res.setType(EventType.EXTERNAL);
+		} else {
+			res.setType(EventType.UNDEVELOPPED);
+		}
 		res.setDescription(Utils.getDescription(component, incoming, type));
 		Utils.fillProperties(res, component, incoming, type);
 		putInCache(component, incoming, type, res);
@@ -484,7 +519,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject processOutgoingErrorPropagationCondition(ComponentInstance component,
 			OutgoingPropagationCondition opc, ErrorTypes type, EObject conditionResult, EObject stateResult) {
-		Event consolidated = consolidateAsAnd((Event) stateResult, (Event) conditionResult);
+		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult);
 		return consolidated;
 	}
 
@@ -516,7 +551,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject processTransitionCondition(ComponentInstance component, ErrorBehaviorState source,
 			ErrorTypes type, EObject conditionResult, EObject stateResult) {
-		Event consolidated = consolidateAsAnd((Event) stateResult, (Event) conditionResult);
+		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult);
 		return consolidated;
 	}
 
