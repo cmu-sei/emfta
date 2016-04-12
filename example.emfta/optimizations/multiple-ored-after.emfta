@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" name="">
+  <events name="FAILURE-AFTER" description="">
+    <gate description="" events="//@events.1 //@events.2 //@events.3"/>
+  </events>
+  <events name="P2" description=""/>
+  <events name="P1" description=""/>
+  <events name="I1" description="">
+    <gate type="AND" description="" events="//@events.4 //@events.5"/>
+  </events>
+  <events name="B1"/>
+  <events name="B2"/>
+</emfta:FTAModel>
