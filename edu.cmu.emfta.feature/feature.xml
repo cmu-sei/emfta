@@ -51,7 +51,6 @@ DM-0003411
    </license>
 
    <url>
-      <update label="EMFTA update site" url="https://raw.githubusercontent.com/juli1/emfta/master/edu.cmu.emfta.updatesite"/>
       <discovery label="Sirius Mars update site" url="http://download.eclipse.org/sirius/updates/releases/3.0.0/mars"/>
    </url>
 
