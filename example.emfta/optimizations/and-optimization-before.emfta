@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" name="">
-  <events name="OR-OPTIM-BEFORE" description="">
-    <gate description="" events="//@events.2 //@events.5"/>
+  <events name="AND-OPTIM-BEFORE" description="">
+    <gate type="AND" description="" events="//@events.2 //@events.5"/>
   </events>
   <events name="P1" description=""/>
   <events name="I1" description="">
-    <gate type="AND" description="" events="//@events.1 //@events.3"/>
+    <gate description="" events="//@events.1 //@events.3"/>
   </events>
   <events name="A"/>
   <events name="B"/>
   <events name="I2" description="">
-    <gate type="AND" description="" events="//@events.1 //@events.4"/>
+    <gate description="" events="//@events.1 //@events.4"/>
   </events>
 </emfta:FTAModel>
