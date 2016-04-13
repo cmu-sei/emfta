@@ -368,6 +368,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.AND);
 
 		combined.setGate(emftaGate);
+		Set<Event> intersection = null;
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
@@ -378,11 +379,56 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 					}
 				}
 				removeEventReference(se);
+			} else if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+				if (!emftaGate.getEvents().add(se)) {
+					removeEventReference(se);
+				}
+				if (intersection == null) {
+					intersection = new HashSet<Event>(se.getGate().getEvents());
+				} else {
+					intersection.retainAll(se.getGate().getEvents());
+				}
 			} else {
 				if (!emftaGate.getEvents().add(se)) {
 					removeEventReference(se);
 				}
 			}
+		}
+		if (intersection != null && !intersection.isEmpty()) {
+			// remove from lower OR and create an OR above AND
+			Event top = this.createIntermediateEvent();
+			Gate newor = EmftaFactory.eINSTANCE.createGate();
+			newor.setType(GateType.OR);
+			top.setGate(newor);
+			newor.getEvents().add(combined);
+			for (Event event : intersection) {
+				newor.getEvents().add(event);
+				addEventReference(event);
+			}
+			for (Object seobj : subEvents) {
+				Event se = (Event) seobj;
+				if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+					for (Event event : intersection) {
+						se.getGate().getEvents().remove(event);
+						removeEventReference(event);
+					}
+					if (se.getGate().getEvents().isEmpty()) {
+						// remove event with OR gate from enclosing AND gate
+						if (emftaGate.getEvents().remove(se)) {
+							removeEventReference(se);
+						}
+					} else if (se.getGate().getEvents().size() == 1) {
+						Event temp = se.getGate().getEvents().get(0);
+						if (!emftaGate.getEvents().add(temp)) {
+							removeEventReference(temp);
+						}
+						if (emftaGate.getEvents().remove(se)) {
+							removeEventReference(se);
+						}
+					}
+				}
+			}
+			return top;
 		}
 		return combined;
 	}
