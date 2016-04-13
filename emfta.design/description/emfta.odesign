@@ -155,6 +155,7 @@
           <ownedTools xsi:type="tool:ExternalJavaAction" name="GenerateProbability" label="Generate Events Probability" id="edu.cmu.emfta.actions.ComputeProbabilityAction"/>
           <ownedTools xsi:type="tool:ExternalJavaAction" name="UpdateProbability" label="Update Probabilities" id="edu.cmu.emfta.actions.UpdateProbabilityAction"/>
           <ownedTools xsi:type="tool:ExternalJavaAction" name="Optimization" label="Optimize Tree" id="edu.cmu.emfta.actions.OptimizationAction"/>
+          <ownedTools xsi:type="tool:ExternalJavaAction" name="Factorization" label="Factorize Tree" id="edu.cmu.emfta.actions.FactorizationAction"/>
         </toolSections>
       </defaultLayer>
     </ownedRepresentations>
