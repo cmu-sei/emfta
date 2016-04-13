@@ -20,8 +20,10 @@ package edu.cmu.emfta.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.sirius.business.api.action.AbstractExternalJavaAction;
@@ -31,7 +33,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
+import edu.cmu.emfta.EmftaFactory;
 import edu.cmu.emfta.Event;
+import edu.cmu.emfta.FTAModel;
 import edu.cmu.emfta.Gate;
 import edu.cmu.emfta.GateType;
 
@@ -54,7 +58,167 @@ class Optimize
 	
 	public void perform ()
 	{
-		optimizeCommonOrEvents (rootEvent);
+//		optimizeCommonOrEvents (rootEvent);
+		factorizeAnd (rootEvent);
+//		factorizeOr (rootEvent);
+	}
+	
+	
+	
+	private void factorizeAnd (Event event)
+	{
+		/**
+		 * canBeOptimized specifies if we can/should optimize this
+		 * gate. The boolean will be true only if the gate is an AND gate
+		 * with multiple ORed.
+		 */
+		boolean canBeOptimized;
+		Gate gate;
+		FTAModel model;
+		
+		
+		model = (FTAModel) event.eContainer();
+
+		
+		gate = event.getGate();
+		canBeOptimized = false;
+				
+		if (gate == null)
+		{
+			return;
+		}
+		
+		/**
+		 * Here, we factorize only the AND type
+		 */
+		if (gate.getType() == GateType.AND)
+		{
+			canBeOptimized = true;
+			
+			for (Event subEvent : gate.getEvents())
+			{
+				Gate subGate = subEvent.getGate();
+				
+				if ( (subGate != null) && (subGate.getType() != GateType.OR))
+				{
+					canBeOptimized = false;
+				}
+			}
+		}
+		
+		/**
+		 * If we enter there, it means that we have an AND gate that is composed
+		 * of OR sub-gate only.
+		 */
+		if (canBeOptimized)
+		{
+			Set<Event> allTerminalEvents;
+			Set<Event> toFactorize;
+			
+			System.out.println("This AND gate can be optimized");
+			
+			allTerminalEvents = new HashSet<Event> ();
+			toFactorize = new HashSet<Event> ();
+			
+			/**
+			 * Here, we retrieve all the subEvents that can be factorized
+			 * on the sub-gates
+			 */
+			for (Event subEvent : gate.getEvents())
+			{
+				Gate subGate = subEvent.getGate();
+				
+				if (subGate != null)
+				{
+					for (Event subSubEvent : subGate.getEvents())
+					{
+						if(allTerminalEvents.contains(subSubEvent))
+						{
+							toFactorize.add(subSubEvent);
+						}
+						allTerminalEvents.add(subSubEvent);
+					}
+				}
+			}
+			
+			/**
+			 * If there are common events, then, we factorize
+			 */
+			if (toFactorize.size() > 0)
+			{
+//				for (Event e : toFactorize)
+//				{
+//					System.out.println("Event " + e.getName() + " can be factorized\n");
+//				}
+				
+				/**
+				 * First, we change the main gate type from an AND to an OR
+				 */
+				gate.setType(GateType.OR);
+				
+				/**
+				 * We remove all the intermediate sub-events of the main gate.
+				 */
+				for (Event e : gate.getEvents())
+				{
+					model.getEvents().remove(e);
+				}
+				
+				/**
+				 * We remove all the children from the gate and we will then
+				 * add manually all the common terminal events and build
+				 * a new AND gate manually.
+				 */
+				gate.getEvents().clear();
+				
+				
+				/**
+				 * Add all the events to be factorize
+				 */
+				for (Event e : toFactorize)
+				{
+					gate.getEvents().add(e);
+				}
+				
+				
+				/**
+				 * For all the events that are NOT factorized, we add them under a common
+				 * AND gate created manually.
+				 */
+				Event intermediateEvent = EmftaFactory.eINSTANCE.createEvent();
+				Gate intermediateGate = EmftaFactory.eINSTANCE.createGate();
+				
+				intermediateEvent.setName("INTERMEDIATE");
+				intermediateGate.setType(GateType.AND);
+				intermediateEvent.setGate(intermediateGate);
+				
+				gate.getEvents().add(intermediateEvent);
+				
+				model.getEvents().add(intermediateEvent);
+				
+				for (Event e1 : allTerminalEvents)
+				{
+					if (toFactorize.contains(e1) == false)
+					{
+						intermediateGate.getEvents().add (e1);
+					}
+				}
+			}
+		}
+		
+		
+		/**
+		 * We continue and browse sub-events.
+		 */
+		for (Event subEvent : gate.getEvents())
+		{
+			factorizeAnd (subEvent);
+		}
+	}
+	
+	private void factorizeOr (Event event)
+	{
+		
 	}
 	
 	/**
