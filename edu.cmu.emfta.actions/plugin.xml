@@ -54,6 +54,15 @@
            id="edu.cmu.emfta.actions.OptimizationAction">
      </javaActions>
   </extension> 
+ 
+  <extension
+        point="org.eclipse.sirius.externalJavaAction">
+     <javaActions
+           actionClass="edu.cmu.emfta.actions.FactorizationAction"
+           id="edu.cmu.emfta.actions.FactorizationAction">
+     </javaActions>
+  </extension> 
+
 
   <extension
         point="org.eclipse.sirius.externalJavaAction">
