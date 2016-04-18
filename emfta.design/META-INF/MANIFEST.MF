@@ -6,8 +6,15 @@ Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: emfta.design.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.sirius,
- org.eclipse.core.resources;bundle-version="3.9.1"
+ org.eclipse.core.resources;bundle-version="3.9.1",
+ org.eclipse.sirius.diagram,
+ org.eclipse.sirius.common,
+ org.eclipse.sirius.editor,
+ org.eclipse.sirius.ui,
+ org.eclipse.sirius.table,
+ org.eclipse.sirius.tree,
+ org.eclipse.sirius.table.ui,
+ org.eclipse.sirius.tree.ui
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: SEI-CMU
