@@ -12,7 +12,7 @@
 		<link>
 			<name>pom.xml</name>
 			<type>1</type>
-			<location>C:/home/lw/git/osate/emfta/pom.xml</location>
+			<location>PARENT-1-PROJECT_LOC/pom.xml</location>
 		</link>
 	</linkedResources>
 </projectDescription>
