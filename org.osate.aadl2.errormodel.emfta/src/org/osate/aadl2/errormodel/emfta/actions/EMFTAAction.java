@@ -19,6 +19,7 @@
 package org.osate.aadl2.errormodel.emfta.actions;
 
 import java.io.FileOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,13 +27,23 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.sirius.business.api.session.Session;
+import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
+import org.eclipse.sirius.viewpoint.description.Viewpoint;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -41,6 +52,7 @@ import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTAGenerator;
+import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
@@ -51,6 +63,8 @@ import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
+
+import edu.cmu.emfta.FTAModel;
 
 public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
@@ -188,7 +202,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		monitor.done();
 	}
 
-	public static void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, URI newURI, IProject activeProject) {
+	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
 
 //		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
 
@@ -210,10 +224,79 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 //			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
 
 			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+			
+			
+			Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					
+					monitor.beginTask("Creation of FTA tree", 100);
+			        
+			        createAndOpenFTATree(activeProject, newURI, monitor);
+			        try {
+						activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					} catch (CoreException e) {
+						// Error while refreshing the project
+					}
+			        monitor.done();
+					
+					return Status.OK_STATUS;
+				}
+			};
+			ftaTreeCreationJob.setUser(true);
+			ftaTreeCreationJob.schedule();
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
+	
+	/**
+	 * Creates and opens a FTA Tree on the specified resource
+	 * @param project
+	 * @param resourceUri
+	 * @param monitor
+	 */
+	private void createAndOpenFTATree(final IProject project, final URI resourceUri, IProgressMonitor monitor) {
+		SiriusUtil util = SiriusUtil.INSTANCE;
+		URI emftaViewpointURI = URI.createURI("viewpoint:/emfta.design/EMFTA");
+		
+		URI semanticResourceURI = URI.createPlatformResourceURI(resourceUri.toPlatformString(true), true);
+		Session existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
+		
+		if (existingSession != null) {
+			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
+			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
+			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
+			util.createAndOpenRepresentation(existingSession,
+					emftaVP,
+					description,
+					"FTA Tree",
+					model,
+					monitor);
+		}
+	}
+	
+	/**
+	 * Retrieves a FTAModel instance from a semantic resource
+	 * The FTA model must be one of the root objects in the specified semantic resource
+	 * @param session
+	 * @param uri
+	 * @return
+	 */
+	private FTAModel getFTAModelFromSession(Session session, URI uri) {
+		Resource resource = SiriusUtil.INSTANCE.getResourceFromSession(session, uri);
+		if (resource != null) {
+			for (EObject object : resource.getContents()) {
+				if (object instanceof FTAModel) {
+					return (FTAModel)object;
+				}
+			}
+		}
+		return null;
+	}
+	
 }
