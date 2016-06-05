@@ -99,6 +99,9 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 						rootComponentTypes);
 				ne = rootComponentPropagation;
 			}
+			if (emftaRootEvent == null) {
+				emftaRootEvent = createIntermediateEvent(getRootComponent(), ne, rootComponentTypes);
+			}
 			String longName = buildName(getRootComponent(), ne, rootComponentTypes);
 			if (emftaRootEvent.getGate() == null && !emftaRootEvent.getName().equals(longName)) {
 				Gate top = EmftaFactory.eINSTANCE.createGate();
@@ -496,13 +499,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return null;
 	}
 
-//	methods to be overwritten by applicaitons
+//	methods to be overwritten by applications
 
 	@Override
 	protected EObject postProcessOutgoingErrorPropagation(ComponentInstance component,
 			ErrorPropagation errorPropagation, ErrorTypes targetType, List<EObject> subResults) {
 		Event result = finalizeAsOrEvents(subResults);
-		if (result.getType() == EventType.INTERMEDIATE) {
+		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
 		putInCache(component, errorPropagation, targetType, result);
@@ -522,11 +525,24 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	protected EObject postProcessErrorFlows(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType, List<EObject> subResults) {
 		Event result = finalizeAsOrEvents(subResults);
-		if (result.getType() == EventType.INTERMEDIATE) {
+		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
+		}
+		if (result == null) {
+			Event newEvent = createBasicEvent(component, errorPropagation, targetType);
+			Utils.fillProperties(newEvent, component, errorPropagation, targetType);
+			return newEvent;
 		}
 		putInCache(component, errorPropagation, targetType, result);
 		return result;
+	}
+
+	@Override
+	protected EObject processOutgoingErrorPropagation(ComponentInstance component, ErrorPropagation errorPropagation,
+			ErrorTypes targetType) {
+		Event newEvent = createBasicEvent(component, errorPropagation, targetType);
+		Utils.fillProperties(newEvent, component, errorPropagation, targetType);
+		return newEvent;
 	}
 
 	@Override
@@ -582,6 +598,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			return newEvent;
 		}
 		return result;
+	}
+
+	@Override
+	protected EObject processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
+			ErrorTypes type) {
+		Event newEvent = createBasicEvent(component, state, type);
+		Utils.fillProperties(newEvent, component, state, type);
+		return newEvent;
 	}
 
 	@Override
