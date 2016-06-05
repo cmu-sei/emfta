@@ -15,6 +15,10 @@ Require-Bundle: org.eclipse.ui,
  org.osate.xtext.aadl2.errormodel;bundle-version="1.0.0",
  org.osate.xtext.aadl2.properties;bundle-version="1.0.0",
  edu.cmu.emfta;bundle-version="0.1.0",
- org.osate.aadl2.errormodel.analysis;bundle-version="1.0.0"
+ org.osate.aadl2.errormodel.analysis;bundle-version="1.0.0",
+ org.eclipse.sirius,
+ org.eclipse.emf.transaction,
+ org.eclipse.sirius.ext.base,
+ org.eclipse.sirius.ui
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osate.xtext.aadl2.properties
