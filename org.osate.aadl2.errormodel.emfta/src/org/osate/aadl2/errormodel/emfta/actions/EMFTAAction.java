@@ -19,7 +19,6 @@
 package org.osate.aadl2.errormodel.emfta.actions;
 
 import java.io.FileOutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +38,6 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
 import org.eclipse.sirius.viewpoint.description.Viewpoint;
@@ -178,13 +175,14 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			wrapper = null;
 			if ((errorState != null) || (errorPropagation != null)) {
 				String targetName = "";
+				String errorTypeName = (errorType == null) ? "" : ("_" + EMV2Util.getPrintName(errorType));
 				if (errorState != null) {
 					wrapper = new EMFTAGenerator(si, errorState, errorType);
-					targetName = EMV2Util.getPrintName(errorState) + "_" + EMV2Util.getPrintName(errorType);
+					targetName = EMV2Util.getPrintName(errorState) + errorTypeName;
 				}
 				if (errorPropagation != null) {
 					wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
-					targetName = EMV2Util.getPrintName(errorPropagation) + "_" + EMV2Util.getPrintName(errorType);
+					targetName = EMV2Util.getPrintName(errorPropagation) + errorTypeName;
 				}
 				targetName = targetName.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
 
@@ -224,36 +222,34 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 //			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
 
 			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-			
-			
+
 			Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
-					
+
 					monitor.beginTask("Creation of FTA tree", 100);
-			        
-			        createAndOpenFTATree(activeProject, newURI, monitor);
-			        try {
+
+					createAndOpenFTATree(activeProject, newURI, monitor);
+					try {
 						activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 					} catch (CoreException e) {
 						// Error while refreshing the project
 					}
-			        monitor.done();
-					
+					monitor.done();
+
 					return Status.OK_STATUS;
 				}
 			};
 			ftaTreeCreationJob.setUser(true);
 			ftaTreeCreationJob.schedule();
-			
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	/**
 	 * Creates and opens a FTA Tree on the specified resource
 	 * @param project
@@ -263,23 +259,18 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	private void createAndOpenFTATree(final IProject project, final URI resourceUri, IProgressMonitor monitor) {
 		SiriusUtil util = SiriusUtil.INSTANCE;
 		URI emftaViewpointURI = URI.createURI("viewpoint:/emfta.design/EMFTA");
-		
+
 		URI semanticResourceURI = URI.createPlatformResourceURI(resourceUri.toPlatformString(true), true);
 		Session existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
-		
+
 		if (existingSession != null) {
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
-			util.createAndOpenRepresentation(existingSession,
-					emftaVP,
-					description,
-					"FTA Tree",
-					model,
-					monitor);
+			util.createAndOpenRepresentation(existingSession, emftaVP, description, "FTA Tree", model, monitor);
 		}
 	}
-	
+
 	/**
 	 * Retrieves a FTAModel instance from a semantic resource
 	 * The FTA model must be one of the root objects in the specified semantic resource
@@ -292,11 +283,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		if (resource != null) {
 			for (EObject object : resource.getContents()) {
 				if (object instanceof FTAModel) {
-					return (FTAModel)object;
+					return (FTAModel) object;
 				}
 			}
 		}
 		return null;
 	}
-	
+
 }
