@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<description:Group xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:description_2="http://www.eclipse.org/sirius/table/description/1.1.0" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:tool="http://www.eclipse.org/sirius/description/tool/1.1.0" name="emfta" version="10.1.3.201511131800">
+<description:Group xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:description_2="http://www.eclipse.org/sirius/table/description/1.1.0" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:tool="http://www.eclipse.org/sirius/description/tool/1.1.0" name="emfta" version="11.0.0.201601261200">
   <ownedViewpoints name="EMFTA" label="EMFTA" modelFileExtension="emfta">
     <ownedRepresentations xsi:type="description_1:DiagramDescription" name="Tree.diagram" label="FTA Tree" domainClass="emfta.FTAModel">
       <layout xsi:type="description_1:CompositeLayout"/>
@@ -160,7 +160,7 @@
       </defaultLayer>
     </ownedRepresentations>
     <ownedRepresentations xsi:type="description_2:EditionTableDescription" name="TreeTable" label="FTA Table View" domainClass="emfta.FTAModel">
-      <ownedLineMappings name="EventLine" reusedInMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='TreeTable']/@ownedLineMappings[name='EventLine']/@ownedSubLines[name='GateLine']" domainClass="emfta.Event" semanticCandidatesExpression="[eContents()/]">
+      <ownedLineMappings name="EventLine" reusedInMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='TreeTable']/@ownedLineMappings[name='EventLine']/@ownedSubLines[name='GateLine']" domainClass="emfta.Event" semanticCandidatesExpression="service:getEvents()">
         <ownedSubLines name="GateLine" reusedSubLines="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='TreeTable']/@ownedLineMappings[name='EventLine']" domainClass="emfta.Gate" semanticCandidatesExpression="[gate/]">
           <create name="CreateEvent" label="Add event" elementsToSelect="service:stdEmptyCollection" mapping="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='TreeTable']/@ownedLineMappings[name='EventLine']">
             <variables name="root" documentation="The semantic element of the table."/>
@@ -187,5 +187,6 @@
       <ownedColumnMappings name="ProbabilityColumn" label="Probability" headerLabelExpression="Probability" featureName="probability"/>
     </ownedRepresentations>
     <ownedJavaExtensions qualifiedClassName="org.eclipse.sirius.common.tools.api.interpreter.StandardServices"/>
+    <ownedJavaExtensions qualifiedClassName="emfta.design.services.Services"/>
   </ownedViewpoints>
 </description:Group>
