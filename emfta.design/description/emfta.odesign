@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<description:Group xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:description_2="http://www.eclipse.org/sirius/table/description/1.1.0" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:tool="http://www.eclipse.org/sirius/description/tool/1.1.0" name="emfta" version="11.0.0.201601261200">
+<description:Group xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:description="http://www.eclipse.org/sirius/description/1.1.0" xmlns:description_1="http://www.eclipse.org/sirius/diagram/description/1.1.0" xmlns:description_2="http://www.eclipse.org/sirius/table/description/1.1.0" xmlns:style="http://www.eclipse.org/sirius/diagram/description/style/1.1.0" xmlns:tool="http://www.eclipse.org/sirius/description/tool/1.1.0" xmlns:tool_1="http://www.eclipse.org/sirius/diagram/description/tool/1.1.0" name="emfta" version="11.0.0.201601261200">
   <ownedViewpoints name="EMFTA" label="EMFTA" modelFileExtension="emfta">
     <ownedRepresentations xsi:type="description_1:DiagramDescription" name="Tree.diagram" label="FTA Tree" domainClass="emfta.FTAModel">
       <layout xsi:type="description_1:CompositeLayout"/>
@@ -156,6 +156,37 @@
           <ownedTools xsi:type="tool:ExternalJavaAction" name="UpdateProbability" label="Update Probabilities" id="edu.cmu.emfta.actions.UpdateProbabilityAction"/>
           <ownedTools xsi:type="tool:ExternalJavaAction" name="Optimization" label="Optimize Tree" id="edu.cmu.emfta.actions.OptimizationAction"/>
           <ownedTools xsi:type="tool:ExternalJavaAction" name="Factorization" label="Factorize Tree" id="edu.cmu.emfta.actions.FactorizationAction"/>
+          <ownedTools xsi:type="tool_1:NodeCreationDescription" name="CreateEvent" label="Create Event" nodeMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='EventNode']">
+            <variable name="container"/>
+            <viewVariable name="containerView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool:ChangeContext" browseExpression="var:container">
+                <subModelOperations xsi:type="tool:CreateInstance" typeName="emfta.Event" referenceName="events">
+                  <subModelOperations xsi:type="tool:SetValue" featureName="name" valueExpression="newevent"/>
+                </subModelOperations>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+          <ownedTools xsi:type="tool_1:NodeCreationDescription" name="CreateGate" label="Create Gate" nodeMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='GateNode']">
+            <variable name="container"/>
+            <viewVariable name="containerView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool:ChangeContext" browseExpression="var:self">
+                <subModelOperations xsi:type="tool:CreateInstance" typeName="emfta.Gate" referenceName="gate" variableName="newgate"/>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
+          <ownedTools xsi:type="tool_1:EdgeCreationDescription" name="GateToEvent" label="Connect Gate to Event" edgeMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@edgeMappings[name='GateToEventEdge']">
+            <sourceVariable name="source"/>
+            <targetVariable name="target"/>
+            <sourceViewVariable name="sourceView"/>
+            <targetViewVariable name="targetView"/>
+            <initialOperation>
+              <firstModelOperations xsi:type="tool:ChangeContext" browseExpression="var:source">
+                <subModelOperations xsi:type="tool:SetValue" featureName="events" valueExpression="var:target"/>
+              </firstModelOperations>
+            </initialOperation>
+          </ownedTools>
         </toolSections>
       </defaultLayer>
     </ownedRepresentations>
