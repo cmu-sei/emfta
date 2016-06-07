@@ -594,13 +594,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return result;
 	}
 
-	@Override
-	protected EObject processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
-			ErrorTypes type) {
-		Event newEvent = createBasicEvent(component, state, type);
-		Utils.fillProperties(newEvent, component, state, type);
-		return newEvent;
-	}
+	// do not generate event. Otherwise we get events for operational state.
+//	@Override
+//	protected EObject processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
+//			ErrorTypes type) {
+//		Event newEvent = createBasicEvent(component, state, type);
+//		Utils.fillProperties(newEvent, component, state, type);
+//		return newEvent;
+//	}
 
 	@Override
 	protected EObject postProcessErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
