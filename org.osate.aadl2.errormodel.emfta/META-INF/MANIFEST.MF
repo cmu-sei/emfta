@@ -19,6 +19,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.sirius,
  org.eclipse.emf.transaction,
  org.eclipse.sirius.ext.base,
- org.eclipse.sirius.ui
+ org.eclipse.sirius.ui,
+ edu.cmu.emfta.actions;bundle-version="0.1.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osate.xtext.aadl2.properties
+Export-Package: org.osate.aadl2.errormodel.emfta,
+ org.osate.aadl2.errormodel.emfta.actions
