@@ -11,8 +11,7 @@ import org.junit.runner.RunWith
 import org.osate.aadl2.AadlPackage
 import org.osate.aadl2.SystemImplementation
 import org.osate.aadl2.instantiation.InstantiateModel
-import org.osate.aadl2.modelsupport.errorreporting.AnalysisErrorReporterManager
-import org.osate.analysis.flows.actions.CheckFlowLatency
+
 import org.osate.core.test.Aadl2UiInjectorProvider
 import org.osate.core.test.OsateTest
 
@@ -27,9 +26,9 @@ class Emfta1Test extends OsateTest {
 	}
 
 	@Test
-	def void flows_pullprotocols() {
+	def void basicfta() {
 		val aadlFile = "changeme.aadl"
-		val state = "state Failed"
+		val state = "stateFailed"
 		createFiles(aadlFile -> aadlText) // TODO add all files to workspace
 		suppressSerialization
 		val result = testFile(aadlFile /*, referencedFile1, referencedFile2, etc. */)
@@ -42,7 +41,7 @@ class Emfta1Test extends OsateTest {
 		// instantiate
 		val sysImpl = cls.findFirst[name == 'main.i'] as SystemImplementation
 		val instance = InstantiateModel::buildInstanceModelFile(sysImpl)
-		assertEquals("fta_main_i_Instance", instance.name)
+//		assertEquals("fta_main_i_Instance", instance.name)
 
 		
 		val checker = new EMFTAAction()
