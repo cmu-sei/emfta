@@ -53,6 +53,7 @@ import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
+import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -66,8 +67,8 @@ import edu.cmu.emfta.FTAModel;
 public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 	private static String ERROR_STATE_NAME = null;
-	private static final String prefixState = "state ";
-	private static final String prefixOutgoingPropagation = "outgoing propagation on ";
+	public static final String prefixState = "state ";
+	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
 	private org.osate.aadl2.errormodel.analysis.fta.Event ftaEvent;
 
@@ -79,6 +80,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	@Override
 	protected String getActionName() {
 		return "FTA";
+	}
+	
+	public void setSystemInstance (SystemInstance s)
+	{
+		this.si = s;
 	}
 
 	@Override
@@ -138,66 +144,73 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		});
 
 		if (ERROR_STATE_NAME != null) {
-//			String errorStateName;
-//			String errorStateTypeName;
-			ErrorBehaviorState errorState;
-			ErrorTypes errorType;
-			ErrorPropagation errorPropagation;
-			String toProcess;
-
-			errorState = null;
-			errorType = null;
-			errorPropagation = null;
-
-			if (ERROR_STATE_NAME.startsWith(prefixState)) {
-				toProcess = ERROR_STATE_NAME.replace(prefixState, "");
-				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
-					if (ebs.getName().equalsIgnoreCase(toProcess)) {
-						errorState = ebs;
-					}
-				}
-
-			}
-
-			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation)) {
-				toProcess = ERROR_STATE_NAME.replace(prefixOutgoingPropagation, "");
-				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-					String longName = EMV2Util.getPrintName(opc.getOutgoing())
-							+ EMV2Util.getPrintName(opc.getTypeToken());
-					if (longName.equalsIgnoreCase(toProcess)) {
-						errorPropagation = opc.getOutgoing();
-						errorType = opc.getTypeToken();
-					}
-				}
-			}
-
-			EMFTAGenerator wrapper;
-			wrapper = null;
-			if ((errorState != null) || (errorPropagation != null)) {
-				String targetName = "";
-				String errorTypeName = (errorType == null) ? "" : ("_" + EMV2Util.getPrintName(errorType));
-				if (errorState != null) {
-					wrapper = new EMFTAGenerator(si, errorState, errorType);
-					targetName = EMV2Util.getPrintName(errorState) + errorTypeName;
-				}
-				if (errorPropagation != null) {
-					wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
-					targetName = EMV2Util.getPrintName(errorPropagation) + errorTypeName;
-				}
-				targetName = targetName.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
-
-				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
-						.appendSegment(si.getName().toLowerCase() + "_" + targetName + ".emfta");
-				AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-				serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
-
-			} else {
-				Dialog.showInfo("Fault Tree Analysis",
-						"Unable to create the Fault Tree Analysis, please read the help content");
-			}
+			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
+			createModel (ERROR_STATE_NAME);
 		}
 
 		monitor.done();
+	}
+	
+	
+	public void createModel (final String errorStateName)
+	{
+//		String errorStateName;
+//		String errorStateTypeName;
+		ErrorBehaviorState errorState;
+		ErrorTypes errorType;
+		ErrorPropagation errorPropagation;
+		String toProcess;
+
+		errorState = null;
+		errorType = null;
+		errorPropagation = null;
+
+		if (errorStateName.startsWith(prefixState)) {
+			toProcess = errorStateName.replace(prefixState, "");
+			for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
+				if (ebs.getName().equalsIgnoreCase(toProcess)) {
+					errorState = ebs;
+				}
+			}
+
+		}
+
+		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
+			toProcess = errorStateName.replace(prefixOutgoingPropagation, "");
+			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
+				String longName = EMV2Util.getPrintName(opc.getOutgoing())
+						+ EMV2Util.getPrintName(opc.getTypeToken());
+				if (longName.equalsIgnoreCase(toProcess)) {
+					errorPropagation = opc.getOutgoing();
+					errorType = opc.getTypeToken();
+				}
+			}
+		}
+
+		EMFTAGenerator wrapper;
+		wrapper = null;
+		if ((errorState != null) || (errorPropagation != null)) {
+			String targetName = "";
+			String errorTypeName = (errorType == null) ? "" : ("_" + EMV2Util.getPrintName(errorType));
+			if (errorState != null) {
+				wrapper = new EMFTAGenerator(si, errorState, errorType);
+				targetName = EMV2Util.getPrintName(errorState) + errorTypeName;
+			}
+			if (errorPropagation != null) {
+				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
+				targetName = EMV2Util.getPrintName(errorPropagation) + errorTypeName;
+			}
+			targetName = targetName.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
+
+			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
+					.appendSegment(si.getName().toLowerCase() + "_" + targetName + ".emfta");
+			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
+			serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
+
+		} else {
+			Dialog.showInfo("Fault Tree Analysis",
+					"Unable to create the Fault Tree Analysis, please read the help content");
+		}
 	}
 
 	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
