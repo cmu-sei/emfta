@@ -28,7 +28,7 @@ class Emfta1Test extends OsateTest {
 	@Test
 	def void basicfta() {
 		val aadlFile = "changeme.aadl"
-		val state = "stateFailed"
+		val state = "state Failed"
 		createFiles(aadlFile -> aadlText) // TODO add all files to workspace
 		suppressSerialization
 		val result = testFile(aadlFile /*, referencedFile1, referencedFile2, etc. */)
@@ -63,8 +63,8 @@ public
 
 system s
 annex EMV2 {**
-	use types ErrorModelLibrary;
-	use behavior ErrorModelLibrary::Simple;
+	use types fta_sample;
+	use behavior fta_sample::Simple;
 **};
 end s;
 
@@ -77,8 +77,8 @@ subcomponents
 	s2 : system s;
 
 annex EMV2 {**
-	use types ErrorModelLibrary;
-	use behavior ErrorModelLibrary::Simple;
+	use types fta_sample;
+	use behavior fta_sample::Simple;
 	
 	composite error behavior
 		states
@@ -87,6 +87,37 @@ annex EMV2 {**
 	
 **};
 end main.i;
+
+annex EMV2 {**
+	error types
+		NoValue : type;
+		BadValue : type;
+		LateValue : type;
+		NoService : type;
+	end types;
+
+	
+	error behavior Simple
+	events
+		Failure : error event ;
+	states
+		Operational : initial state ;
+		Failed : state ;
+	transitions
+		BadValueTransition : Operational -[ Failure ]-> Failed ;
+	end behavior ;
+		-- simple error model
+	error behavior Basic
+	events
+	    Failure : error event;
+	states
+	    Operational: initial state;
+	    Failed: state;
+	transitions
+	     Operational -[Failure]-> Failed;
+	end behavior;
+	
+**};
 
 end fta_sample;
 	'''
