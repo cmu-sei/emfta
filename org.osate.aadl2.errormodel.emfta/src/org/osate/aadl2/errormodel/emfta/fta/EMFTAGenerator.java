@@ -528,6 +528,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
+		putInCache(component, errorPropagation, targetType, result);
 		return result;
 	}
 
