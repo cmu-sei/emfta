@@ -20,6 +20,7 @@ package org.osate.aadl2.errormodel.emfta.fta;
 
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
+import org.osate.aadl2.instance.SystemInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
@@ -72,7 +73,8 @@ public class Utils {
 			if (errorSource.getName() != null) {
 				description += " " + errorSource.getName();
 			}
-			description += " on component " + component.getName();
+			description += " on component " + (component instanceof SystemInstance ? component.getName()
+					: component.getComponentInstancePath());
 
 			if ((errorSource.getOutgoing().getFeatureorPPRef() != null)
 					&& (errorSource.getOutgoing().getFeatureorPPRef().getFeatureorPP() != null)) {
