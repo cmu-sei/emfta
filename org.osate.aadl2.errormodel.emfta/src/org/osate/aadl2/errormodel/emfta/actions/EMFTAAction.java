@@ -142,58 +142,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		});
 
 		if (ERROR_STATE_NAME != null) {
-			ErrorBehaviorState errorState;
-			ErrorTypes errorType;
-			ErrorPropagation errorPropagation;
-			String toProcess;
-
-			errorState = null;
-			errorType = null;
-			errorPropagation = null;
-
-			if (ERROR_STATE_NAME.startsWith(prefixState)) {
-				toProcess = ERROR_STATE_NAME.replace(prefixState, "");
-				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
-					if (ebs.getName().equalsIgnoreCase(toProcess)) {
-						errorState = ebs;
-					}
-				}
-
-			}
-
-			if (ERROR_STATE_NAME.startsWith(prefixOutgoingPropagation)) {
-				toProcess = ERROR_STATE_NAME.replace(prefixOutgoingPropagation, "");
-				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-					String longName = EMV2Util.getPrintName(opc.getOutgoing())
-							+ EMV2Util.getPrintName(opc.getTypeToken());
-					if (longName.equalsIgnoreCase(toProcess)) {
-						errorPropagation = opc.getOutgoing();
-						errorType = opc.getTypeToken();
-					}
-				}
-			}
-
-			EMFTAGenerator wrapper;
-			wrapper = null;
-			if ((errorState != null) || (errorPropagation != null)) {
-				String errorTypeName = (errorType == null) ? "" : ("_" + EMV2Util.getPrintName(errorType));
-				if (errorState != null) {
-					wrapper = new EMFTAGenerator(si, errorState, errorType);
-				}
-				if (errorPropagation != null) {
-					wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
-				}
-				FTAModel ftamodel = wrapper.getEmftaModel();
-				String rootname = ftamodel.getName();
-				URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
-						.appendSegment(rootname + ".emfta");
-				AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-				serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
-
-			} else {
-				Dialog.showInfo("Fault Tree Analysis",
-						"Unable to create the Fault Tree Analysis, please read the help content");
-			}
+//			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
+			createModel(ERROR_STATE_NAME);
 		}
 
 		monitor.done();
@@ -235,20 +185,16 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		EMFTAGenerator wrapper;
 		wrapper = null;
 		if ((errorState != null) || (errorPropagation != null)) {
-			String targetName = "";
-			String errorTypeName = (errorType == null) ? "" : ("_" + EMV2Util.getPrintName(errorType));
 			if (errorState != null) {
 				wrapper = new EMFTAGenerator(si, errorState, errorType);
-				targetName = EMV2Util.getPrintName(errorState) + errorTypeName;
 			}
 			if (errorPropagation != null) {
 				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
-				targetName = EMV2Util.getPrintName(errorPropagation) + errorTypeName;
 			}
-			targetName = targetName.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
+			FTAModel ftamodel = wrapper.getEmftaModel();
+			String rootname = ftamodel.getName();
 
-			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
-					.appendSegment(si.getName().toLowerCase() + "_" + targetName + ".emfta");
+			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
 			serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
 
