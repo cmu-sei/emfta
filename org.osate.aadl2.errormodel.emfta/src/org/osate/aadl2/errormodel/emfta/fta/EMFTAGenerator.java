@@ -87,19 +87,17 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (emftaModel == null) {
 			edu.cmu.emfta.Event emftaRootEvent;
 
+			NamedElement ne = rootComponentState != null ? rootComponentState : rootComponentPropagation;
 			emftaModel = EmftaFactory.eINSTANCE.createFTAModel();
-			emftaModel.setName(getRootComponent().getName());
+			emftaModel.setName(buildIdentifier(getRootComponent(), ne, rootComponentTypes));
 			emftaModel.setDescription("Top Level Failure");
-			NamedElement ne = null;
 
 			if (rootComponentState != null) {
 				emftaRootEvent = (Event) traverseCompositeErrorState(getRootComponent(), rootComponentState,
 						rootComponentTypes);
-				ne = rootComponentState;
 			} else {
 				emftaRootEvent = (Event) traverseOutgoingErrorPropagation(getRootComponent(), rootComponentPropagation,
 						rootComponentTypes);
-				ne = rootComponentPropagation;
 			}
 			if (emftaRootEvent == null) {
 				emftaRootEvent = createIntermediateEvent(getRootComponent(), ne, rootComponentTypes);
@@ -121,8 +119,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	private String buildName(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = eventIdentifier + "-" + buildIdentifier(component, namedElement, type);
-		name = name.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
-
 		eventIdentifier = eventIdentifier + 1;
 		return name;
 	}
@@ -130,7 +126,9 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private String buildIdentifier(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String identifier;
 
-		identifier = component instanceof SystemInstance ? component.getName() : component.getComponentInstancePath();
+		identifier = component instanceof SystemInstance
+				? component.getComponentClassifier().getQualifiedName().replaceAll("::", "_").replaceAll("\\.", "_")
+				: component.getComponentInstancePath();
 		identifier += "-";
 
 		if (namedElement == null) {
@@ -147,7 +145,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		} else {
 			identifier += "-" + EMV2Util.getPrintName(type);
 		}
-
+		identifier = identifier.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
 		return identifier;
 	}
 
