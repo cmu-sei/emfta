@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
@@ -113,6 +115,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			}
 			emftaModel.setRoot(emftaRootEvent);
 		}
+		cleanupEMFTAModel(emftaModel);
 		return emftaModel;
 	}
 
@@ -127,7 +130,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private String buildIdentifier(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String identifier;
 
-		identifier = component.getName();
+		identifier = component instanceof SystemInstance ? component.getName() : component.getComponentInstancePath();
 		identifier += "-";
 
 		if (namedElement == null) {
@@ -156,11 +159,12 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @return
 	 */
 	private Event getFromCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
+		if (this.pureTree)
+			return null;
 		String id = buildIdentifier(component, namedElement, type);
 		if (cache.containsKey(id)) {
 			Event res = cache.get(id);
 			if (res != null) {
-				res.setReferenceCount(res.getReferenceCount() + 1);
 				return res;
 			}
 		}
@@ -175,25 +179,48 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param event
 	 */
 	private void putInCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type, Event event) {
+		if (this.pureTree)
+			return;
 		String identifier = buildIdentifier(component, namedElement, type);
 		cache.put(identifier, event);
 	}
 
-	/**
-	 * delete Event, but only if reference count is one.
-	 * Else decrement reference count.
-	 * @param event
-	 */
-	private void removeEventReference(Event event) {
-		if (event.getReferenceCount() > 1) {
-			event.setReferenceCount(event.getReferenceCount() - 1);
-		} else {
-			emftaModel.getEvents().remove(event);
+	private void cleanupEMFTAModel(FTAModel ftamodel) {
+		Event root = ftamodel.getRoot();
+		EList<Event> eventlist = ftamodel.getEvents();
+		resetReferenceCounts(eventlist);
+		updateReferenceCount(root);
+		removeOrphans(eventlist);
+	}
+
+	private void resetReferenceCounts(EList<Event> events) {
+		for (Event event : events) {
+			event.setReferenceCount(0);
 		}
 	}
 
-	private void addEventReference(Event event) {
-		event.setReferenceCount(event.getReferenceCount() + 1);
+	private void removeOrphans(EList<Event> events) {
+		EList<Event> orphans = new BasicEList<Event>();
+		for (Event event : events) {
+			if (event.getReferenceCount() == 0) {
+				orphans.add(event);
+			}
+		}
+		events.removeAll(orphans);
+	}
+
+	private void updateReferenceCount(Event ev) {
+		incrementReferenceCount(ev);
+		if (ev.getGate() != null) {
+			EList<Event> events = ev.getGate().getEvents();
+			for (Event event : events) {
+				updateReferenceCount(event);
+			}
+		}
+	}
+
+	private void incrementReferenceCount(Event ev) {
+		ev.setReferenceCount(ev.getReferenceCount() + 1);
 	}
 
 	/**
@@ -269,24 +296,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
 				for (Event ev : se.getGate().getEvents()) {
-					if (!emftaGate.getEvents().add(ev)) {
-						removeEventReference(ev);
+					emftaGate.getEvents().add(ev);
+				}
+			} else if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+				if (emftaGate.getEvents().add(se)) {
+					if (intersection == null) {
+						intersection = new HashSet<Event>(se.getGate().getEvents());
+					} else {
+						intersection.retainAll(se.getGate().getEvents());
 					}
 				}
-				removeEventReference(se);
-			} else if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
-				if (intersection == null) {
-					intersection = new HashSet<Event>(se.getGate().getEvents());
-				} else {
-					intersection.retainAll(se.getGate().getEvents());
-				}
 			} else {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
+				emftaGate.getEvents().add(se);
 			}
 		}
 		if (intersection != null && !intersection.isEmpty()) {
@@ -298,28 +319,20 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			newor.getEvents().add(combined);
 			for (Event event : intersection) {
 				newor.getEvents().add(event);
-				addEventReference(event);
 			}
 			for (Object seobj : subEvents) {
 				Event se = (Event) seobj;
 				if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
 					for (Event event : intersection) {
 						se.getGate().getEvents().remove(event);
-						removeEventReference(event);
 					}
 					if (se.getGate().getEvents().isEmpty()) {
 						// remove event with OR gate from enclosing XOR gate
-						if (emftaGate.getEvents().remove(se)) {
-							removeEventReference(se);
-						}
+						emftaGate.getEvents().remove(se);
 					} else if (se.getGate().getEvents().size() == 1) {
 						Event temp = se.getGate().getEvents().get(0);
-						if (!emftaGate.getEvents().add(temp)) {
-							removeEventReference(temp);
-						}
-						if (emftaGate.getEvents().remove(se)) {
-							removeEventReference(se);
-						}
+						emftaGate.getEvents().remove(se);
+						emftaGate.getEvents().add(temp);
 					}
 				}
 			}
@@ -340,20 +353,15 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.OR);
 
 		combined.setGate(emftaGate);
-		// flatten
+		// flatten OR
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
 				for (Event ev : se.getGate().getEvents()) {
-					if (!emftaGate.getEvents().add(ev)) {
-						removeEventReference(ev);
-					}
+					emftaGate.getEvents().add(ev);
 				}
-				removeEventReference(se);
 			} else {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
+				emftaGate.getEvents().add(se);
 			}
 		}
 		return combined;
@@ -377,24 +385,17 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
 				for (Event ev : se.getGate().getEvents()) {
-					if (!emftaGate.getEvents().add(ev)) {
-						removeEventReference(ev);
-					}
+					emftaGate.getEvents().add(ev);
 				}
-				removeEventReference(se);
 			} else if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
+				emftaGate.getEvents().add(se);
 				if (intersection == null) {
 					intersection = new HashSet<Event>(se.getGate().getEvents());
 				} else {
 					intersection.retainAll(se.getGate().getEvents());
 				}
 			} else {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
+				emftaGate.getEvents().add(se);
 			}
 		}
 		if (intersection != null && !intersection.isEmpty()) {
@@ -404,30 +405,20 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			newor.setType(GateType.OR);
 			top.setGate(newor);
 			newor.getEvents().add(combined);
-			for (Event event : intersection) {
-				newor.getEvents().add(event);
-				addEventReference(event);
-			}
+			newor.getEvents().addAll(intersection);
 			for (Object seobj : subEvents) {
 				Event se = (Event) seobj;
 				if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
 					for (Event event : intersection) {
 						se.getGate().getEvents().remove(event);
-						removeEventReference(event);
 					}
 					if (se.getGate().getEvents().isEmpty()) {
 						// remove event with OR gate from enclosing AND gate
-						if (emftaGate.getEvents().remove(se)) {
-							removeEventReference(se);
-						}
+						emftaGate.getEvents().remove(se);
 					} else if (se.getGate().getEvents().size() == 1) {
 						Event temp = se.getGate().getEvents().get(0);
-						if (!emftaGate.getEvents().add(temp)) {
-							removeEventReference(temp);
-						}
-						if (emftaGate.getEvents().remove(se)) {
-							removeEventReference(se);
-						}
+						emftaGate.getEvents().add(temp);
+						emftaGate.getEvents().remove(se);
 					}
 				}
 			}
@@ -452,15 +443,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			Event se = (Event) seobj;
 			if (se.getGate() != null && se.getGate().getType() == GateType.PRIORITY_AND) {
 				for (Event ev : se.getGate().getEvents()) {
-					if (!emftaGate.getEvents().add(ev)) {
-						removeEventReference(ev);
-					}
+					emftaGate.getEvents().add(ev);
 				}
-				removeEventReference(se);
 			} else {
-				if (!emftaGate.getEvents().add(se)) {
-					removeEventReference(se);
-				}
+				emftaGate.getEvents().add(se);
 			}
 		}
 		return combined;
@@ -484,13 +470,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			inter.setGate(emftaGate);
 			if (stateEvent.getGate() != null && stateEvent.getGate().getType() == GateType.PRIORITY_AND) {
 				emftaGate.getEvents().addAll(stateEvent.getGate().getEvents());
-				removeEventReference(stateEvent);
 			} else {
 				emftaGate.getEvents().add(stateEvent);
 			}
 			if (conditionEvent.getGate() != null && conditionEvent.getGate().getType() == GateType.PRIORITY_AND) {
 				emftaGate.getEvents().addAll(conditionEvent.getGate().getEvents());
-				removeEventReference(conditionEvent);
 			} else {
 				emftaGate.getEvents().add(conditionEvent);
 			}
@@ -515,8 +499,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject preProcessOutgoingErrorPropagation(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType) {
-		if (pureTree)
-			return null;
 		Event res = getFromCache(component, errorPropagation, targetType);
 		return res;
 	}
