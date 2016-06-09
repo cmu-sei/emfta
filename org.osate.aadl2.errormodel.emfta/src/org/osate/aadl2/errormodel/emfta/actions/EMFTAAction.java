@@ -66,6 +66,7 @@ import edu.cmu.emfta.FTAModel;
 public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 	private static String ERROR_STATE_NAME = null;
+	private static boolean FULL_TREE = false;
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
@@ -137,6 +138,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				diag.setValues(stateNames);
 				diag.open();
 				ERROR_STATE_NAME = diag.getValue();
+				FULL_TREE = diag.getFullTree();
 
 			}
 		});
@@ -196,7 +198,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(wrapper.getEmftaModel(), newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			serializeEmftaModel(wrapper.getEmftaModel(FULL_TREE), newURI,
+					ResourceUtil.getFile(si.eResource()).getProject());
 
 		} else {
 			Dialog.showInfo("Fault Tree Analysis",
