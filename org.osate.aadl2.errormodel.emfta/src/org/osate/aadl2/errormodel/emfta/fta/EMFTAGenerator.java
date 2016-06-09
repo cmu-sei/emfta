@@ -185,6 +185,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		cache.put(identifier, event);
 	}
 
+	/**
+	 * recomputes reference count and removes unused Events
+	 * reference counts > 1 on Event identifies common cause events.
+	 * @param ftamodel
+	 */
 	private void cleanupEMFTAModel(FTAModel ftamodel) {
 		Event root = ftamodel.getRoot();
 		EList<Event> eventlist = ftamodel.getEvents();
@@ -455,6 +460,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return combined;
 	}
 
+	/*************
+	 * Optimizations
+	 */
+
+	/**
+	 * remove subgates with a single event and place event in enclosing gate
+	 * @param topgate
+	 */
 	private void handleZeroOneEventSubGates(Gate topgate) {
 		if (topgate == null)
 			return;
@@ -474,17 +487,51 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		if (!toRemove.isEmpty()) {
 			subEvents.removeAll(toRemove);
+		}
+		if (!toAdd.isEmpty()) {
 			subEvents.addAll(toAdd);
 		}
 	}
 
+	/**
+	 * flatten subgates of same type into given gate
+	 * @param gate
+	 */
+	private void flattenSubgates(Gate gate) {
+		GateType mytype = gate.getType();
+		EList<Event> subEvents = gate.getEvents();
+		List<Event> toAdd = new LinkedList<Event>();
+		List<Event> toRemove = new LinkedList<Event>();
+		for (Event se : subEvents) {
+			if (se.getGate() != null && se.getGate().getType() == mytype) {
+				for (Event ev : se.getGate().getEvents()) {
+					toAdd.add(ev);
+				}
+				toRemove.add(se);
+			}
+		}
+		if (!toRemove.isEmpty()) {
+			subEvents.removeAll(toRemove);
+		}
+		if (!toAdd.isEmpty()) {
+			subEvents.addAll(toAdd);
+		}
+	}
+
+	/**
+	 * recursively apply optimizations on subgates.
+	 * At the end optimize gate of rootevent.
+	 * This may result in a new rootevent
+	 * @param rootevent
+	 * @return Event original or new root event
+	 */
 	private Event optimizeGates(Event rootevent) {
 		String rootname = rootevent.getName();
 		Gate gate = rootevent.getGate();
 		List<Event> subEvents = gate.getEvents();
 		for (Event event : subEvents) {
 			if (event.getGate() != null) {
-				optimizeGates(event.getGate());
+				optimizeGates(event);
 			}
 		}
 		Event res = rootevent;
@@ -494,45 +541,65 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (gate.getType() == GateType.OR || gate.getType() == GateType.XOR) {
 			res = transformSubgates(res, GateType.AND);
 		}
-		res.setName(rootname);
+		flattenSubgates(res.getGate());
+		handleZeroOneEventSubGates(res.getGate());
+		if (!rootname.startsWith("Intermediate")) {
+			res.setName(rootname);
+		}
 		return res;
 	}
 
-	private void optimizeGates(Gate gate) {
-		List<Event> subEvents = gate.getEvents();
-		for (Event event : subEvents) {
-			if (event.getGate() != null) {
-				optimizeGates(event.getGate());
-			}
-		}
-		if (gate.getType() == GateType.AND || gate.getType() == GateType.XOR) {
-			commonSubgateEvents(gate, GateType.OR);
-		}
-		if (gate.getType() == GateType.OR || gate.getType() == GateType.XOR) {
-			commonSubgateEvents(gate, GateType.AND);
-		}
-		handleZeroOneEventSubGates(gate);
-	}
+//	/**
+//	 * recursively traverse gates to optimize bottom up (common, flatten, ZeroOne)
+//	 * @param gate
+//	 */
+//	private void optimizeGates(Gate gate) {
+//		List<Event> subEvents = gate.getEvents();
+//		for (Event event : subEvents) {
+//			if (event.getGate() != null) {
+//				optimizeGates(event.getGate());
+//			}
+//		}
+//		if (gate.getType() == GateType.AND || gate.getType() == GateType.XOR) {
+//			commonSubgateEvents(gate, GateType.OR);
+//		}
+//		if (gate.getType() == GateType.OR || gate.getType() == GateType.XOR) {
+//			commonSubgateEvents(gate, GateType.AND);
+//		}
+//		flattenSubgates(gate);
+//		handleZeroOneEventSubGates(gate);
+//	}
+//
+//	/**
+//	 * Apply common optimization to all gate events.
+//	 * @param topgate
+//	 * @param subgateType
+//	 */
+//	private void commonSubgateEvents(Gate topgate, GateType subgateType) {
+//		if (topgate == null)
+//			return;
+//		List<Event> subEvents = topgate.getEvents();
+//		List<Event> toRemove = new LinkedList<Event>();
+//		List<Event> toAdd = new LinkedList<Event>();
+//		for (Event event : subEvents) {
+//			Event res = transformSubgates(event, subgateType);
+//			if (res != null) {
+//				toRemove.add(event);
+//				toAdd.add(res);
+//			}
+//		}
+//		if (!toRemove.isEmpty()) {
+//			subEvents.removeAll(toRemove);
+//			subEvents.addAll(toAdd);
+//		}
+//	}
 
-	private void commonSubgateEvents(Gate topgate, GateType subgateType) {
-		if (topgate == null)
-			return;
-		List<Event> subEvents = topgate.getEvents();
-		List<Event> toRemove = new LinkedList<Event>();
-		List<Event> toAdd = new LinkedList<Event>();
-		for (Event event : subEvents) {
-			Event res = transformSubgates(event, subgateType);
-			if (res != null) {
-				toRemove.add(event);
-				toAdd.add(res);
-			}
-		}
-		if (!toRemove.isEmpty()) {
-			subEvents.removeAll(toRemove);
-			subEvents.addAll(toAdd);
-		}
-	}
-
+	/**
+	 * find common events in subgates and move them to an enclosing gate
+	 * @param topevent
+	 * @param gt
+	 * @return Event new topevent or null if no optimization was done
+	 */
 	private Event transformSubgates(Event topevent, GateType gt) {
 		Gate topgate = topevent.getGate();
 		if (topgate == null)
