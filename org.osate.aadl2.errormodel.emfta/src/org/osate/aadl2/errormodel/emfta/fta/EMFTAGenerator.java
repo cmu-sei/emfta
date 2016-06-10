@@ -116,6 +116,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			if (!fullTree) {
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 			}
+			emftaModel.getRoot().setName(longName);
 			cleanupReferenceCounts(emftaModel);
 		}
 		return emftaModel;

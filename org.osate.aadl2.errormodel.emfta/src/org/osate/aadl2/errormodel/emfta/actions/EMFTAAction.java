@@ -199,8 +199,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
 					.appendSegment(rootname + (FULL_TREE ? "_full" : "") + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(wrapper.getEmftaModel(FULL_TREE), newURI,
-					ResourceUtil.getFile(si.eResource()).getProject());
+			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
 
 		} else {
 			Dialog.showInfo("Fault Tree Analysis",
