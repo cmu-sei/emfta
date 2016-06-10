@@ -157,40 +157,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	}
 
 	/**
-	 * return the entry and increment the reference count on the Event
-	 * @param component
-	 * @param namedElement
-	 * @param type
-	 * @return
-	 */
-	private Event getFromCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
-////		if (this.fullTree)
-////			return null;
-//		String id = buildIdentifier(component, namedElement, type);
-//		if (cache.containsKey(id)) {
-//			Event res = cache.get(id);
-//			if (res != null) {
-//				return res;
-//			}
-//		}
-		return null;
-	}
-
-	/**
-	 * put Event into cache with (assumed) reference count of 1
-	 * @param component
-	 * @param namedElement
-	 * @param type
-	 * @param event
-	 */
-	private void putInCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type, Event event) {
-////		if (this.fullTree)
-////			return;
-//		String identifier = buildIdentifier(component, namedElement, type);
-//		cache.put(identifier, event);
-	}
-
-	/**
 	 * recomputes reference count and removes unused Events
 	 * reference counts > 1 on Event identifies common cause events.
 	 * @param ftamodel
@@ -243,7 +209,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createBasicEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (result != null)
+		if (!fullTree && result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -263,7 +229,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createIntermediateEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (result != null)
+		if (!fullTree && result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -280,14 +246,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private int count = 0;
 
 	private Event createIntermediateEvent(String eventname) {
-		Event result = null;
 		if (eventname.isEmpty()) {
 			eventname = "Intermediate" + count++;
 		} else {
-			result = findEvent(eventname);
+			Event result = findEvent(eventname);
+			if (!fullTree && result != null)
+				return result;
 		}
-		if (result != null)
-			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		newEvent.setType(EventType.INTERMEDIATE);
 		newEvent.setName(eventname);
@@ -673,15 +638,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
-		putInCache(component, errorPropagation, targetType, result);
 		return result;
-	}
-
-	@Override
-	protected EObject preProcessOutgoingErrorPropagation(ComponentInstance component, ErrorPropagation errorPropagation,
-			ErrorTypes targetType) {
-		Event res = getFromCache(component, errorPropagation, targetType);
-		return res;
 	}
 
 	@Override
@@ -692,7 +649,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
-		putInCache(component, errorPropagation, targetType, result);
 		return result;
 	}
 
@@ -715,11 +671,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject processIncomingErrorPropagation(ComponentInstance component, ErrorPropagation incoming,
 			ErrorTypes type) {
-		Event res = getFromCache(component, incoming, type);
-		if (res != null) {
-			return res;
-		}
-		res = createBasicEvent(component, incoming, type);
+		Event res = createBasicEvent(component, incoming, type);
 		if (component instanceof SystemInstance) {
 			res.setType(EventType.EXTERNAL);
 		} else {
@@ -727,7 +679,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		res.setDescription(Utils.getDescription(component, incoming, type));
 		Utils.fillProperties(res, component, incoming, type);
-		putInCache(component, incoming, type, res);
 		return res;
 	}
 
