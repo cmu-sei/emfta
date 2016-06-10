@@ -54,7 +54,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private ErrorPropagation rootComponentPropagation;
 	private ErrorTypes rootComponentTypes;
 	private int eventIdentifier;
-	private boolean pureTree = false;
+	private boolean fullTree = false;
 
 	public Map<String, edu.cmu.emfta.Event> cache;
 
@@ -79,8 +79,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		eventIdentifier = 0;
 	}
 
-	public FTAModel getEmftaModel(boolean pureTree) {
-		this.pureTree = pureTree;
+	public FTAModel getEmftaModel(boolean fullTree) {
+		this.fullTree = fullTree;
 		return getEmftaModel();
 	}
 
@@ -113,7 +113,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				emftaRootEvent = topEvent;
 			}
 			emftaModel.setRoot(emftaRootEvent);
-			if (!pureTree) {
+			if (!fullTree) {
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 			}
 			cleanupReferenceCounts(emftaModel);
@@ -163,15 +163,15 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @return
 	 */
 	private Event getFromCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
-		if (this.pureTree)
-			return null;
-		String id = buildIdentifier(component, namedElement, type);
-		if (cache.containsKey(id)) {
-			Event res = cache.get(id);
-			if (res != null) {
-				return res;
-			}
-		}
+////		if (this.fullTree)
+////			return null;
+//		String id = buildIdentifier(component, namedElement, type);
+//		if (cache.containsKey(id)) {
+//			Event res = cache.get(id);
+//			if (res != null) {
+//				return res;
+//			}
+//		}
 		return null;
 	}
 
@@ -183,10 +183,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param event
 	 */
 	private void putInCache(ComponentInstance component, NamedElement namedElement, ErrorTypes type, Event event) {
-		if (this.pureTree)
-			return;
-		String identifier = buildIdentifier(component, namedElement, type);
-		cache.put(identifier, event);
+////		if (this.fullTree)
+////			return;
+//		String identifier = buildIdentifier(component, namedElement, type);
+//		cache.put(identifier, event);
 	}
 
 	/**
@@ -242,7 +242,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createBasicEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (!pureTree && result != null)
+		if (result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -262,7 +262,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createIntermediateEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (!pureTree && result != null)
+		if (result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -276,13 +276,20 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * create a generic intermediate Event
 	 * @return
 	 */
-	static private int count = 0;
+	private int count = 0;
 
-	private Event createIntermediateEvent() {
+	private Event createIntermediateEvent(String eventname) {
+		Event result = null;
+		if (eventname.isEmpty()) {
+			eventname = "Intermediate" + count++;
+		} else {
+			result = findEvent(eventname);
+		}
+		if (result != null)
+			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		newEvent.setType(EventType.INTERMEDIATE);
-		newEvent.setName("Intermediate" + count);
-		count++;
+		newEvent.setName(eventname);
 		emftaModel.getEvents().add(newEvent);
 		newEvent.setReferenceCount(1);
 		return newEvent;
@@ -303,13 +310,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param subEvents List<Event>
 	 * @return Event (or null if empty list)
 	 */
-	private Event finalizeAsXOrEvents(List<EObject> subEvents) {
+	private Event finalizeAsXOrEvents(List<EObject> subEvents, String eventname) {
 		if (subEvents.size() == 0)
 			return null;
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent();
+		Event combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.XOR);
 
@@ -333,13 +340,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	}
 
-	private Event finalizeAsOrEvents(List<EObject> subEvents) {
+	private Event finalizeAsOrEvents(List<EObject> subEvents, String eventName) {
 		if (subEvents.size() == 0)
 			return null;
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent();
+		Event combined = this.createIntermediateEvent(eventName);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.OR);
 
@@ -359,13 +366,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	}
 
-	private Event finalizeAsAndEvents(List<EObject> subEvents) {
+	private Event finalizeAsAndEvents(List<EObject> subEvents, String eventname) {
 		if (subEvents.size() == 0)
 			return null;
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent();
+		Event combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.AND);
 
@@ -385,13 +392,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return combined;
 	}
 
-	private Event finalizeAsPriorityAndEvents(List<EObject> subEvents) {
+	private Event finalizeAsPriorityAndEvents(List<EObject> subEvents, String eventname) {
 		if (subEvents.size() == 0)
 			return null;
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent();
+		Event combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.PRIORITY_AND);
 
@@ -478,17 +485,39 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event optimizeGates(Event rootevent) {
 		String rootname = rootevent.getName();
 		List<Event> subEvents = rootevent.getGate().getEvents();
+		List<Event> toAdd = new LinkedList<Event>();
+		List<Event> toRemove = new LinkedList<Event>();
 		for (Event event : subEvents) {
 			if (event.getGate() != null) {
-				optimizeGates(event);
+				Event res = optimizeGates(event);
+				if (res != event) {
+					toAdd.add(res);
+					toRemove.add(event);
+				}
 			}
 		}
 		Event res = rootevent;
+		if (!toAdd.isEmpty()) {
+			subEvents.removeAll(toRemove);
+			subEvents.addAll(toAdd);
+			flattenSubgates(res.getGate());
+			handleZeroOneEventSubGates(res.getGate());
+		}
 		if (res.getGate().getType() == GateType.AND || res.getGate().getType() == GateType.XOR) {
-			res = transformSubgates(rootevent, GateType.OR, res.getGate().getType());
+			Event tmp = transformSubgates(rootevent, GateType.OR, res.getGate().getType());
+			if (tmp != res) {
+				res = tmp;
+				flattenSubgates(res.getGate());
+				handleZeroOneEventSubGates(res.getGate());
+			}
 		}
 		if (res.getGate().getType() == GateType.OR || res.getGate().getType() == GateType.XOR) {
-			res = transformSubgates(res, GateType.AND, res.getGate().getType());
+			Event tmp = transformSubgates(res, GateType.AND, res.getGate().getType());
+			if (tmp != res) {
+				res = tmp;
+				flattenSubgates(res.getGate());
+				handleZeroOneEventSubGates(res.getGate());
+			}
 		}
 		if (res.getGate().getType() == GateType.AND || res.getGate().getType() == GateType.XOR) {
 			res = removeCommonSubEvents(res, GateType.OR);
@@ -543,25 +572,31 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		if (todo.size() > 1 && intersection != null && !intersection.isEmpty()) {
 			// remove from lower OR and create an OR above top gate
-			Event newtopevent = this.createIntermediateEvent();
+			Event newtopevent = this.createIntermediateEvent("");
 			Gate newtopgate = EmftaFactory.eINSTANCE.createGate();
+			if (!topevent.getName().startsWith("Intermediate")) {
+				String newname = newtopevent.getName();
+				newtopevent.setName(topevent.getName());
+				topevent.setName(newname);
+			}
 			newtopgate.setType(gt);
 			newtopevent.setGate(newtopgate);
-			subEvents.removeAll(todo);
-			subEvents.add(newtopevent);
+			newtopgate.getEvents().add(topevent);
 			for (Event event : intersection) {
 				newtopgate.getEvents().add(event);
 			}
 			for (Event se : todo) {
-				if (se.getGate() != null && (se.getGate().getType() == gt)) {
-					EList<Event> rem = se.getGate().getEvents();
-					rem.removeAll(intersection);
-					se.getGate().setType(topgt);
-					newtopgate.getEvents().add(se);
-				}
+				EList<Event> rem = se.getGate().getEvents();
+				rem.removeAll(intersection);
 			}
+			flattenSubgates(topgate);
 			handleZeroOneEventSubGates(topgate);
+			flattenSubgates(newtopgate);
+			handleZeroOneEventSubGates(newtopgate);
+			return newtopevent;
 		}
+		flattenSubgates(topgate);
+		handleZeroOneEventSubGates(topgate);
 		return topevent;
 
 	}
@@ -600,13 +635,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param conditionEvent Event representing the condition of a transition or outgoing propagation condition
 	 * @return Event or null
 	 */
-	private Event consolidateAsPriorityAnd(Event stateEvent, Event conditionEvent) {
+	private Event consolidateAsPriorityAnd(Event stateEvent, Event conditionEvent, String eventname) {
 		if (stateEvent == null && conditionEvent != null) {
 			return conditionEvent;
 		} else if (stateEvent != null && conditionEvent == null) {
 			return stateEvent;
 		} else if (stateEvent != null && conditionEvent != null) {
-			Event inter = createIntermediateEvent();
+			Event inter = createIntermediateEvent(eventname);
 			Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 			emftaGate.setType(GateType.PRIORITY_AND);
 			inter.setGate(emftaGate);
@@ -630,7 +665,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessOutgoingErrorPropagation(ComponentInstance component,
 			ErrorPropagation errorPropagation, ErrorTypes targetType, List<EObject> subResults) {
-		Event result = finalizeAsOrEvents(subResults);
+		String name = buildName(component, errorPropagation, targetType);
+		Event result = finalizeAsOrEvents(subResults, name);
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
@@ -648,7 +684,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessErrorFlows(ComponentInstance component, ErrorPropagation errorPropagation,
 			ErrorTypes targetType, List<EObject> subResults) {
-		Event result = finalizeAsOrEvents(subResults);
+		String name = buildName(component, errorPropagation, targetType);
+		Event result = finalizeAsOrEvents(subResults, name);
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, errorPropagation, targetType));
 		}
@@ -694,23 +731,23 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessIncomingErrorPropagation(ComponentInstance component,
 			ErrorPropagation errorPropagation, ErrorTypes targetType, List<EObject> subResults) {
-		return finalizeAsOrEvents(subResults);
+		String name = buildName(component, errorPropagation, targetType);
+		return finalizeAsOrEvents(subResults, name);
 	}
 
 	@Override
 	protected EObject processOutgoingErrorPropagationCondition(ComponentInstance component,
 			OutgoingPropagationCondition opc, ErrorTypes type, EObject conditionResult, EObject stateResult) {
-		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult);
+		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult,
+				buildName(component, opc, type));
 		return consolidated;
 	}
 
 	@Override
 	protected EObject postProcessCompositeErrorStates(ComponentInstance component, ErrorBehaviorState state,
 			ErrorTypes targetType, List<EObject> subResults) {
-		Event result = finalizeAsOrEvents(subResults);
-		if (result != null && result.getType() == EventType.INTERMEDIATE) {
-			result.setName(buildName(component, state, targetType));
-		}
+		String name = buildName(component, state, targetType);
+		Event result = finalizeAsOrEvents(subResults, name);
 		if (result == null) {
 			Event newEvent = createBasicEvent(component, state, targetType);
 			Utils.fillProperties(newEvent, component, state, targetType);
@@ -731,7 +768,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
 			ErrorTypes type, List<EObject> subResults) {
-		Event result = finalizeAsOrEvents(subResults);
+		String name = buildName(component, state, type);
+		Event result = finalizeAsOrEvents(subResults, name);
 		if (result != null && result.getType() == EventType.INTERMEDIATE) {
 			result.setName(buildName(component, state, type));
 		}
@@ -741,7 +779,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject processTransitionCondition(ComponentInstance component, ErrorBehaviorState source,
 			ErrorTypes type, EObject conditionResult, EObject stateResult) {
-		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult);
+		Event consolidated = consolidateAsPriorityAnd((Event) stateResult, (Event) conditionResult,
+				buildName(component, source, type));
 		return consolidated;
 	}
 
@@ -757,18 +796,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	@Override
 	protected EObject postProcessAnd(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale, List<EObject> subResults) {
-		return finalizeAsAndEvents(subResults);
+		return finalizeAsAndEvents(subResults, "");
 	}
 
 	@Override
 	protected EObject postProcessXor(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale, List<EObject> subResults) {
-		return finalizeAsXOrEvents(subResults);
+		return finalizeAsXOrEvents(subResults, "");
 	}
 
 	@Override
 	protected EObject postProcessOr(ComponentInstance component, ConditionExpression condition, ErrorTypes type,
 			double scale, List<EObject> subResults) {
-		return finalizeAsOrEvents(subResults);
+		return finalizeAsOrEvents(subResults, "");
 	}
 }
