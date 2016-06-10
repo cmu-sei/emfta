@@ -425,7 +425,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * remove subgates with a single event and place event in enclosing gate
 	 * @param topgate
 	 */
-	private void handleZeroOneEventSubGates(Gate topgate) {
+	private void removeZeroOneEventSubGates(Gate topgate) {
 		if (topgate == null)
 			return;
 		List<Event> subEvents = topgate.getEvents();
@@ -501,14 +501,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			subEvents.removeAll(toRemove);
 			subEvents.addAll(toAdd);
 			flattenSubgates(res.getGate());
-			handleZeroOneEventSubGates(res.getGate());
+			removeZeroOneEventSubGates(res.getGate());
 		}
 		if (res.getGate().getType() == GateType.AND || res.getGate().getType() == GateType.XOR) {
 			Event tmp = transformSubgates(rootevent, GateType.OR, res.getGate().getType());
 			if (tmp != res) {
 				res = tmp;
 				flattenSubgates(res.getGate());
-				handleZeroOneEventSubGates(res.getGate());
+				removeZeroOneEventSubGates(res.getGate());
 			}
 		}
 		if (res.getGate().getType() == GateType.OR || res.getGate().getType() == GateType.XOR) {
@@ -516,7 +516,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			if (tmp != res) {
 				res = tmp;
 				flattenSubgates(res.getGate());
-				handleZeroOneEventSubGates(res.getGate());
+				removeZeroOneEventSubGates(res.getGate());
 			}
 		}
 		if (res.getGate().getType() == GateType.AND || res.getGate().getType() == GateType.XOR) {
@@ -532,7 +532,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			res = removeCommonSubEvents(res, GateType.XOR);
 		}
 		flattenSubgates(res.getGate());
-		handleZeroOneEventSubGates(res.getGate());
+		removeZeroOneEventSubGates(res.getGate());
 		if (res.getGate().getEvents().size() == 1 && res.getGate().getType() != GateType.INTERMEDIATE) {
 			res = res.getGate().getEvents().get(0);
 		}
@@ -544,6 +544,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	/**
 	 * find common events in subgates and move them to an enclosing gate
+	 * Currently does it if all of the gates of a given type have something in common.
+	 * Could do it for various subsets of events with the matching gate type.
 	 * @param topevent
 	 * @param gt
 	 * @return Event 
@@ -590,13 +592,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				rem.removeAll(intersection);
 			}
 			flattenSubgates(topgate);
-			handleZeroOneEventSubGates(topgate);
+			removeZeroOneEventSubGates(topgate);
 			flattenSubgates(newtopgate);
-			handleZeroOneEventSubGates(newtopgate);
+			removeZeroOneEventSubGates(newtopgate);
 			return newtopevent;
 		}
 		flattenSubgates(topgate);
-		handleZeroOneEventSubGates(topgate);
+		removeZeroOneEventSubGates(topgate);
 		return topevent;
 
 	}
@@ -624,7 +626,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				}
 			}
 		}
-		handleZeroOneEventSubGates(topgate);
+		removeZeroOneEventSubGates(topgate);
 		return topevent;
 
 	}
