@@ -49,7 +49,7 @@ class Emfta1Test extends OsateTest {
 		checker.createModel(state)
 		
 		val uri = URI.createURI(
-			resourceRoot + "/fta/main_i_instance_failed.emfta")
+			resourceRoot + "/fta/fta_sample_main_i-failed.emfta")
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
@@ -124,10 +124,10 @@ end fta_sample;
 
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
-<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.2" name="main_i_Instance" description="Top Level Failure">
-  <events name="0-s1-failure" description="Error event Failure on component s1" referenceCount="1"/>
-  <events name="1-s2-failure" description="Error event Failure on component s2" referenceCount="1"/>
-  <events type="Intermediate" name="2-main_i_instance-failed" referenceCount="1">
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.2" name="fta_sample_main_i-failed" description="Top Level Failure">
+  <events name="s1-failure" description="Error event Failure on component s1" referenceCount="1"/>
+  <events name="s2-failure" description="Error event Failure on component s2" referenceCount="1"/>
+  <events type="Intermediate" name="fta_sample_main_i-failed" referenceCount="1">
     <gate type="AND" events="//@events.0 //@events.1"/>
   </events>
 </emfta:FTAModel>
