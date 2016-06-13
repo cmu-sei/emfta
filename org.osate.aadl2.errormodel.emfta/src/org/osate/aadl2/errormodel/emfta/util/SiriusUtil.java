@@ -14,6 +14,7 @@ import org.eclipse.sirius.business.api.componentization.ViewpointRegistry;
 import org.eclipse.sirius.business.api.modelingproject.AbstractRepresentationsFileJob;
 import org.eclipse.sirius.business.api.modelingproject.ModelingProject;
 import org.eclipse.sirius.business.api.query.ViewpointQuery;
+import org.eclipse.sirius.business.api.session.SessionStatus;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.business.api.session.SessionManager;
 import org.eclipse.sirius.ext.base.Option;
@@ -42,6 +43,18 @@ public class SiriusUtil {
 	private SiriusUtil() {
 		super();
 	}
+	
+		/**
+		 * 
+		 * @param session
+		 * @param monitor
+		 */
+		public void saveSession(Session session, IProgressMonitor monitor) {
+			if (SessionStatus.DIRTY.equals(session.getStatus())) {
+				session.save(monitor);
+			}
+		}
+	 
 
 	/**
 	 * Retrieves a viewpoint from its URI

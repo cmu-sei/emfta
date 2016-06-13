@@ -271,6 +271,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		Session existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
 
 		if (existingSession != null) {
+			util.saveSession(existingSession, monitor);
+			
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
