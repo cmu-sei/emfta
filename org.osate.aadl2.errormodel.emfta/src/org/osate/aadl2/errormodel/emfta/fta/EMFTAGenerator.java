@@ -17,6 +17,7 @@
  */
 package org.osate.aadl2.errormodel.emfta.fta;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -528,45 +529,99 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		Set<Event> intersection = null;
 		List<Event> todo = new LinkedList<Event>();
-		for (Event se : subEvents) {
-			if (se.getGate() != null && (se.getGate().getType() == gt)) {
-				if (intersection == null) {
-					intersection = new HashSet<Event>(se.getGate().getEvents());
-				} else {
-					intersection.retainAll(se.getGate().getEvents());
+		while (true) {
+			todo.clear();
+			for (Event se : subEvents) {
+				if (se.getGate() != null && (se.getGate().getType() == gt)) {
+					if (intersection == null) {
+						intersection = new HashSet<Event>(se.getGate().getEvents());
+						todo.add(se);
+					} else {
+						if (intersects(intersection, se.getGate().getEvents())) {
+							intersection.retainAll(se.getGate().getEvents());
+							todo.add(se);
+						}
+					}
 				}
-				todo.add(se);
 			}
-		}
-		if (todo.size() > 1 && intersection != null && !intersection.isEmpty()) {
-			// remove from lower OR and create an OR above top gate
-			Event newtopevent = this.createIntermediateEvent("");
-			Gate newtopgate = EmftaFactory.eINSTANCE.createGate();
-			if (!topevent.getName().startsWith("Intermediate")) {
-				String newname = newtopevent.getName();
-				newtopevent.setName(topevent.getName());
-				topevent.setName(newname);
-			}
-			newtopgate.setType(gt);
-			newtopevent.setGate(newtopgate);
-			newtopgate.getEvents().add(topevent);
-			for (Event event : intersection) {
-				newtopgate.getEvents().add(event);
-			}
-			for (Event se : todo) {
-				EList<Event> rem = se.getGate().getEvents();
-				rem.removeAll(intersection);
-			}
-			flattenSubgates(topgate);
-			removeZeroOneEventSubGates(topgate);
-			flattenSubgates(newtopgate);
-			removeZeroOneEventSubGates(newtopgate);
-			return newtopevent;
-		}
-		flattenSubgates(topgate);
-		removeZeroOneEventSubGates(topgate);
-		return topevent;
+			if (todo.size() > 1 && intersection != null && !intersection.isEmpty()) {
+				if (subEvents.size() == todo.size()) {
+					// all subgates are involved
+					// remove from lower OR and create an OR above top gate
+					Event newtopevent = this.createIntermediateEvent("");
+					Gate newtopgate = EmftaFactory.eINSTANCE.createGate();
+					if (!topevent.getName().startsWith("Intermediate")) {
+						String newname = newtopevent.getName();
+						newtopevent.setName(topevent.getName());
+						topevent.setName(newname);
+					}
+					newtopgate.setType(gt);
+					newtopevent.setGate(newtopgate);
+					newtopgate.getEvents().add(topevent);
+					for (Event event : intersection) {
+						newtopgate.getEvents().add(event);
+					}
+					for (Event se : todo) {
+						EList<Event> rem = se.getGate().getEvents();
+						rem.removeAll(intersection);
+					}
+					flattenSubgates(topgate);
+					removeZeroOneEventSubGates(topgate);
+					flattenSubgates(newtopgate);
+					removeZeroOneEventSubGates(newtopgate);
+					return newtopevent;
+				} else {
+					// transformed subtree to top gate replacing subset of events involved in transformation
+					Event newtopevent = this.createIntermediateEvent("");
+					Gate newxformgate = EmftaFactory.eINSTANCE.createGate();
+					if (!topevent.getName().startsWith("Intermediate")) {
+						String newname = newtopevent.getName();
+						newtopevent.setName(topevent.getName());
+						topevent.setName(newname);
+					}
+					newxformgate.setType(gt);
+					newtopevent.setGate(newxformgate);
+					topgate.getEvents().add(newtopevent);
+					// remove intersection fro subset of gates
+					for (Event event : intersection) {
+						newxformgate.getEvents().add(event);
+					}
+					for (Event se : todo) {
+						EList<Event> rem = se.getGate().getEvents();
+						rem.removeAll(intersection);
+					}
+					// create intermediate topgate for subset of gates and remove from original top gate
+					Event newsubtopevent = this.createIntermediateEvent("");
+					Gate newsubtopgate = EmftaFactory.eINSTANCE.createGate();
+					newsubtopevent.setGate(newsubtopgate);
+					newsubtopgate.setType(topgt);
+					newsubtopgate.getEvents().addAll(todo);
+					topgate.getEvents().removeAll(todo);
+					newxformgate.getEvents().add(newsubtopevent);
 
+					flattenSubgates(newsubtopgate);
+					removeZeroOneEventSubGates(newsubtopgate);
+					flattenSubgates(newxformgate);
+					removeZeroOneEventSubGates(newxformgate);
+					flattenSubgates(topgate);
+					removeZeroOneEventSubGates(topgate);
+//				return topevent;
+				}
+			} else {
+				flattenSubgates(topgate);
+				removeZeroOneEventSubGates(topgate);
+				return topevent;
+			}
+		}
+	}
+
+	private boolean intersects(Collection<Event> list1, Collection<Event> list2) {
+		for (Event event : list2) {
+			if (list1.contains(event)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
