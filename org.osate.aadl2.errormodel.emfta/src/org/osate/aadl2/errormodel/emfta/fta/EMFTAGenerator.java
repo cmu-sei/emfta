@@ -288,7 +288,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.XOR);
 
 		combined.setGate(emftaGate);
-		Set<Event> intersection = null;
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
@@ -765,14 +764,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return result;
 	}
 
-	// do not generate event. Otherwise we get events for operational state.
-//	@Override
-//	protected EObject processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
-//			ErrorTypes type) {
-//		Event newEvent = createBasicEvent(component, state, type);
-//		Utils.fillProperties(newEvent, component, state, type);
-//		return newEvent;
-//	}
+	@Override
+	protected EObject processErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
+			ErrorTypes type) {
+		Event newEvent = createBasicEvent(component, state, type);
+		Utils.fillProperties(newEvent, component, state, type);
+		return newEvent;
+	}
 
 	@Override
 	protected EObject postProcessErrorBehaviorState(ComponentInstance component, ErrorBehaviorState state,
