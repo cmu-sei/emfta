@@ -512,6 +512,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * find common events in subgates and move them to an enclosing gate
 	 * Currently does it if all of the gates of a given type have something in common.
 	 * Could do it for various subsets of events with the matching gate type.
+	 * Distributive Law 3a and 3b (se NRC Fault Tree Handbook page 80.
 	 * @param topevent
 	 * @param gt
 	 * @return Event 
@@ -625,6 +626,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	/**
 	 * find events in subgates that already exist in enclosing gate
+	 * Idempotent Law
 	 * @param topevent
 	 * @param gt
 	 * @return Event new topevent or null if no optimization was done
@@ -636,19 +638,22 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		List<Event> subEvents = topgate.getEvents();
 		if (subEvents.isEmpty())
 			return null;
-		for (Event seobj : subEvents) {
-			Event se = (Event) seobj;
-			if (se.getGate() != null && (se.getGate().getType() == gt)) {
-				Set<Event> intersection = new HashSet<Event>(se.getGate().getEvents());
-				intersection.retainAll(subEvents);
-				if (intersection != null && !intersection.isEmpty()) {
-					se.getGate().getEvents().removeAll(intersection);
+		LinkedList<Event> toRemove = new LinkedList<Event>();
+		for (Event se : subEvents) {
+			for (Event subse : subEvents) {
+				if (subse.getGate() != null && (subse.getGate().getType() == gt)) {
+
+					if (subse.getGate().getEvents().contains(se)) {
+						toRemove.add(se);
+					}
 				}
 			}
 		}
-		removeZeroOneEventSubGates(topgate);
+		if (!toRemove.isEmpty()) {
+			subEvents.removeAll(toRemove);
+			removeZeroOneEventSubGates(topgate);
+		}
 		return topevent;
-
 	}
 
 	/**
