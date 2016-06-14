@@ -449,6 +449,9 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @return Event original or new root event
 	 */
 	private Event optimizeGates(Event rootevent) {
+		if (rootevent.getGate() == null) {
+			return rootevent;
+		}
 		String rootname = rootevent.getName();
 		List<Event> subEvents = rootevent.getGate().getEvents();
 		List<Event> toAdd = new LinkedList<Event>();
