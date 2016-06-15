@@ -24,6 +24,10 @@ class Emfta1Test extends OsateTest {
 	override getProjectName() {
 		"test1"
 	}
+	
+	override void deleteProject(String projectName) {
+	}
+	
 
 /**
  * example of simple composite error state with an AND operator.

@@ -22,6 +22,9 @@ class Emfta2Test extends OsateTest {
 	override getProjectName() {
 		"test2"
 	}
+	
+	override void deleteProject(String projectName) {
+	}
 
 /**
  * This test uses a composite error state declaration with an AND that references
