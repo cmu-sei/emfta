@@ -20,7 +20,7 @@ import static org.junit.Assert.*
 @InjectWith(typeof(Aadl2UiInjectorProvider))
 class Emfta2Test extends OsateTest {
 	override getProjectName() {
-		"test"
+		"test2"
 	}
 
 /**
