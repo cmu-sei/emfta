@@ -84,10 +84,10 @@ class Redundant2Test extends OsateTest {
 		assertEquals('error', expected2.trim, actual2.trim)
 
 // third test
-		assertTrue('', cls.exists[name == 'main2.compositesametype'])
+		assertTrue('', cls.exists[name == 'main2.transition'])
 
 		// instantiate
-		val sysImpl3 = cls.findFirst[name == 'main2.compositesametype'] as SystemImplementation
+		val sysImpl3 = cls.findFirst[name == 'main2.transition'] as SystemImplementation
 		val instance3 = InstantiateModel::buildInstanceModelFile(sysImpl3)
 		val state3 = "state FailStop"
 		val checker3 = new EMFTAAction()
@@ -95,7 +95,7 @@ class Redundant2Test extends OsateTest {
 		checker3.createModel(state3,false, false)
 		
 		val uri3 = URI.createURI(
-			resourceRoot + "/fta/redundant2_main2_compositesametype-failstop.emfta")
+			resourceRoot + "/fta/redundant2_main2_transition-failstop.emfta")
 		val file3 = workspaceRoot.getFile(new Path(uri3.toPlatformString(true)))
 		val actual3 = Files.readStreamIntoString(file3.contents)
 		assertEquals('error', expected3.trim, actual3.trim)
