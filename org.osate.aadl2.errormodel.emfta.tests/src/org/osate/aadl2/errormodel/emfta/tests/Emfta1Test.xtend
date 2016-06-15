@@ -55,7 +55,7 @@ class Emfta1Test extends OsateTest {
 		
 		val checker = new EMFTAAction()
 		checker.systemInstance = instance
-		checker.createModel(state)
+		checker.createModel(state,false, false)
 		
 		val uri = URI.createURI(
 			resourceRoot + "/fta/fta_sample_main_i-failed.emfta")

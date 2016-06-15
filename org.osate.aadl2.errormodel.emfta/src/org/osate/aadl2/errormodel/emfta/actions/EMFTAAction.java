@@ -145,13 +145,13 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		if (ERROR_STATE_NAME != null) {
 //			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
-			createModel(ERROR_STATE_NAME);
+			createModel(ERROR_STATE_NAME, FULL_TREE, true);
 		}
 
 		monitor.done();
 	}
 
-	public void createModel(final String errorStateName) {
+	public void createModel(final String errorStateName, boolean fullTree, boolean autoOpenEmfta) {
 //		String errorStateName;
 //		String errorStateTypeName;
 		ErrorBehaviorState errorState;
@@ -199,7 +199,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
 					.appendSegment(rootname + (FULL_TREE ? "_full" : "") + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject(), autoOpenEmfta);
 
 		} else {
 			Dialog.showInfo("Fault Tree Analysis",
@@ -207,7 +207,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		}
 	}
 
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
+	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject,
+			boolean autoOpenEmfta) {
 
 //		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
 
@@ -230,26 +231,29 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 
-			Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
+			if (autoOpenEmfta) {
+				Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
 
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
 
-					monitor.beginTask("Creation of FTA tree", 100);
+						monitor.beginTask("Creation of FTA tree", 100);
 
-					createAndOpenFTATree(activeProject, newURI, monitor);
-					try {
-						activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-					} catch (CoreException e) {
-						// Error while refreshing the project
+						createAndOpenFTATree(activeProject, newURI, monitor);
+						try {
+							activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+						} catch (CoreException e) {
+							// Error while refreshing the project
+						}
+						monitor.done();
+
+						return Status.OK_STATUS;
 					}
-					monitor.done();
+				};
+				ftaTreeCreationJob.setUser(true);
+				ftaTreeCreationJob.schedule();
 
-					return Status.OK_STATUS;
-				}
-			};
-			ftaTreeCreationJob.setUser(true);
-			ftaTreeCreationJob.schedule();
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -272,7 +276,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		if (existingSession != null) {
 			util.saveSession(existingSession, monitor);
-			
+
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
