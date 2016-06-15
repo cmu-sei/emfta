@@ -18,7 +18,7 @@
 		</repository>
 		<repository>
 			<id>xtext-utils</id>
-			<url>http://xtext-utils.eclipselabs.org.codespot.com/git.distribution/releases/unittesting-0.9.x</url>
+			<url>http://aadl.info/aadl/osate/build/xtext-utils/</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
