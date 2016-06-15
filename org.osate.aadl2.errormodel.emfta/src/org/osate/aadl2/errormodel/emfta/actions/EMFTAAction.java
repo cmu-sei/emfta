@@ -38,6 +38,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
 import org.eclipse.sirius.viewpoint.description.Viewpoint;
@@ -53,6 +54,7 @@ import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
+import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -70,11 +72,10 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
-	private org.osate.aadl2.errormodel.analysis.fta.Event ftaEvent;
 
 	@Override
 	protected String getMarkerType() {
-		return "org.osate.analysis.errormodel.FaultImpactMarker";
+		return "org.osate.analysis.errormodel.FaultTreeMarker";
 	}
 
 	@Override
@@ -139,7 +140,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				diag.open();
 				ERROR_STATE_NAME = diag.getValue();
 				FULL_TREE = diag.getFullTree();
-
 			}
 		});
 
@@ -193,14 +193,35 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			if (errorPropagation != null) {
 				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
 			}
-			FTAModel ftamodel = wrapper.getEmftaModel(FULL_TREE);
+			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
 			String rootname = ftamodel.getName();
 
 			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
-					.appendSegment(rootname + (FULL_TREE ? "_full" : "") + ".emfta");
-			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject(), autoOpenEmfta);
-
+					.appendSegment(rootname + ".emfta");
+			
+			/**
+			 * We build URI of the new file and see if the file exists. If yes, w show a dialog. The file
+			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
+			 * version of the FTA.
+			 */
+			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+			if ((autoOpenEmfta) && (newFile.exists()))
+			{
+				/**
+				 * If the file exists, we show a dialog box.
+				 */
+				OsateDebug.osateDebug("file exists");
+				Dialog.showInfo("Fault Tree Analysis",
+						"File already exists. Please delete if you want to re-generate");
+			}
+			else
+			{
+				/**
+				 * Otherwise, we generate the model and write it.
+				 */
+				AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
+				serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject(), autoOpenEmfta);
+			}
 		} else {
 			Dialog.showInfo("Fault Tree Analysis",
 					"Unable to create the Fault Tree Analysis, please read the help content");
