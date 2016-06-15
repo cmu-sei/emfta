@@ -22,7 +22,7 @@ import org.osate.aadl2.errormodel.emfta.actions.EMFTAAction
 @InjectWith(typeof(Aadl2UiInjectorProvider))
 class Emfta1Test extends OsateTest {
 	override getProjectName() {
-		"test"
+		"test1"
 	}
 
 /**
