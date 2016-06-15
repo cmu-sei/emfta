@@ -89,13 +89,13 @@ class Redundant2Test extends OsateTest {
 		// instantiate
 		val sysImpl3 = cls.findFirst[name == 'main2.transition'] as SystemImplementation
 		val instance3 = InstantiateModel::buildInstanceModelFile(sysImpl3)
-		val state3 = "state FailStop"
+		val state3 = "outgoing propagation on externaleffect{serviceomission}"
 		val checker3 = new EMFTAAction()
 		checker3.systemInstance = instance3
 		checker3.createModel(state3,false, false)
 		
 		val uri3 = URI.createURI(
-			resourceRoot + "/fta/redundant2_main2_transition-failstop.emfta")
+			resourceRoot + "/fta/redundant2_main2_transition-externaleffect-serviceomission.emfta")
 		val file3 = workspaceRoot.getFile(new Path(uri3.toPlatformString(true)))
 		val actual3 = Files.readStreamIntoString(file3.contents)
 		assertEquals('error', expected3.trim, actual3.trim)
