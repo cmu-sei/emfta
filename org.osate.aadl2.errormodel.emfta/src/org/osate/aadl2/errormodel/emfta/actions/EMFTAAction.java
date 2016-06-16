@@ -18,7 +18,6 @@
 
 package org.osate.aadl2.errormodel.emfta.actions;
 
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,10 +34,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
 import org.eclipse.sirius.viewpoint.description.Viewpoint;
@@ -49,17 +44,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
-import org.osate.aadl2.errormodel.emfta.fta.EMFTAGenerator;
+import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
-import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
-import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
@@ -81,10 +73,6 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	@Override
 	protected String getActionName() {
 		return "FTA";
-	}
-
-	public void setSystemInstance(SystemInstance s) {
-		this.si = s;
 	}
 
 	@Override
@@ -145,136 +133,49 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		if (ERROR_STATE_NAME != null) {
 //			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
-			createModel(ERROR_STATE_NAME, FULL_TREE, true);
+			EMFTACreateModel doModel = new EMFTACreateModel();
+			URI newURI = doModel.createModel(this.si, ERROR_STATE_NAME, FULL_TREE);
+			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+			if ((newFile.exists())) {
+				/**
+				 * If the file exists, we show a dialog box.
+				 */
+				OsateDebug.osateDebug("file exists");
+				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
+			}
+			autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
+		} else {
+			Dialog.showInfo("Fault Tree Analysis",
+					"Unable to create the Fault Tree Analysis, please read the help content");
 		}
 
 		monitor.done();
 	}
 
-	public void createModel(final String errorStateName, boolean fullTree, boolean autoOpenEmfta) {
-//		String errorStateName;
-//		String errorStateTypeName;
-		ErrorBehaviorState errorState;
-		ErrorTypes errorType;
-		ErrorPropagation errorPropagation;
-		String toProcess;
-
-		errorState = null;
-		errorType = null;
-		errorPropagation = null;
-
-		if (errorStateName.startsWith(prefixState)) {
-			toProcess = errorStateName.replace(prefixState, "");
-			for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
-				if (ebs.getName().equalsIgnoreCase(toProcess)) {
-					errorState = ebs;
-				}
-			}
-
-		}
-
-		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
-			toProcess = errorStateName.replace(prefixOutgoingPropagation, "");
-			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-				String longName = EMV2Util.getPrintName(opc.getOutgoing()) + EMV2Util.getPrintName(opc.getTypeToken());
-				if (longName.equalsIgnoreCase(toProcess)) {
-					errorPropagation = opc.getOutgoing();
-					errorType = opc.getTypeToken();
-				}
-			}
-		}
-
-		EMFTAGenerator wrapper;
-		wrapper = null;
-		if ((errorState != null) || (errorPropagation != null)) {
-			if (errorState != null) {
-				wrapper = new EMFTAGenerator(si, errorState, errorType);
-			}
-			if (errorPropagation != null) {
-				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
-			}
-			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
-			String rootname = ftamodel.getName();
-
-			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta")
-					.appendSegment(rootname + ".emfta");
-			
-			/**
-			 * We build URI of the new file and see if the file exists. If yes, w show a dialog. The file
-			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
-			 * version of the FTA.
-			 */
-			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
-			if ((autoOpenEmfta) && (newFile.exists()))
-			{
-				/**
-				 * If the file exists, we show a dialog box.
-				 */
-				OsateDebug.osateDebug("file exists");
-				Dialog.showInfo("Fault Tree Analysis",
-						"File already exists. Please delete if you want to re-generate");
-			}
-			else
-			{
-				/**
-				 * Otherwise, we generate the model and write it.
-				 */
-				AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-				serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject(), autoOpenEmfta);
-			}
-		} else {
-			Dialog.showInfo("Fault Tree Analysis",
-					"Unable to create the Fault Tree Analysis, please read the help content");
-		}
-	}
-
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject,
-			boolean autoOpenEmfta) {
-
-//		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
-
-//		IFile newFile = activeProject.getFile(filename);
-//		OsateDebug.osateDebug("[EMFTAAction]", "save in file=" + newFile.getName());
-		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+	public void autoOpenEmftaModel(final URI newURI, final IProject activeProject) {
 
 		try {
 
-			ResourceSet set = new ResourceSetImpl();
+			Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
 
-			Resource res = set.createResource(URI.createURI(newFile.toString()));
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
 
-			res.getContents().add(emftaModel);
+					monitor.beginTask("Creation of FTA tree", 100);
 
-			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
-			res.save(fos, null);
-//			IWorkspaceRoot ws = ResourcesPlugin.getWorkspace().getRoot();
-//			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
-
-			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-
-			if (autoOpenEmfta) {
-				Job ftaTreeCreationJob = new Job("Creation of FTA Tree") {
-
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
-
-						monitor.beginTask("Creation of FTA tree", 100);
-
-						createAndOpenFTATree(activeProject, newURI, monitor);
-						try {
-							activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-						} catch (CoreException e) {
-							// Error while refreshing the project
-						}
-						monitor.done();
-
-						return Status.OK_STATUS;
+					createAndOpenFTATree(activeProject, newURI, monitor);
+					try {
+						activeProject.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+					} catch (CoreException e) {
+						// Error while refreshing the project
 					}
-				};
-				ftaTreeCreationJob.setUser(true);
-				ftaTreeCreationJob.schedule();
+					monitor.done();
 
-			}
+					return Status.OK_STATUS;
+				}
+			};
+			ftaTreeCreationJob.setUser(true);
+			ftaTreeCreationJob.schedule();
 
 		} catch (Exception e) {
 			e.printStackTrace();

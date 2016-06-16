@@ -16,7 +16,7 @@ import org.osate.core.test.Aadl2UiInjectorProvider
 import org.osate.core.test.OsateTest
 
 import static org.junit.Assert.*
-import org.osate.aadl2.errormodel.emfta.actions.EMFTAAction
+import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
 
 @RunWith(typeof(XtextRunner2))
 @InjectWith(typeof(Aadl2UiInjectorProvider))
@@ -56,9 +56,8 @@ class CommonError1Test extends OsateTest {
 //		assertEquals("fta_main_i_Instance", instance.name)
 
 		
-		val checker = new EMFTAAction()
-		checker.systemInstance = instance
-		checker.createModel(state,false, false)
+		val checker = new EMFTACreateModel()
+		checker.createModel(instance,state,false)
 		
 		val uri = URI.createURI(
 			resourceRoot + "/fta/common_error1_main_commonsource-failstop.emfta")
@@ -67,7 +66,7 @@ class CommonError1Test extends OsateTest {
 		assertEquals('error', expected.trim, actual.trim)
 		
 		val stateop = "state Operational"
-		checker.createModel(stateop,false, false)
+		checker.createModel(instance, stateop,false)
 		
 		val uriop = URI.createURI(
 			resourceRoot + "/fta/common_error1_main_commonsource-operational.emfta")
