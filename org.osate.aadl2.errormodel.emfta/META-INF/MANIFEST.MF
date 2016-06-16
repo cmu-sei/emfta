@@ -24,4 +24,5 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osate.xtext.aadl2.properties
 Export-Package: org.osate.aadl2.errormodel.emfta,
- org.osate.aadl2.errormodel.emfta.actions
+ org.osate.aadl2.errormodel.emfta.actions,
+ org.osate.aadl2.errormodel.emfta.fta

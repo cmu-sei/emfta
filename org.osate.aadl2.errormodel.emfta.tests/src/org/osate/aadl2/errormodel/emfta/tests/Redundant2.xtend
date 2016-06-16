@@ -17,6 +17,7 @@ import org.osate.core.test.OsateTest
 
 import static org.junit.Assert.*
 import org.osate.aadl2.errormodel.emfta.actions.EMFTAAction
+import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
 
 @RunWith(typeof(XtextRunner2))
 @InjectWith(typeof(Aadl2UiInjectorProvider))
@@ -56,9 +57,8 @@ class Redundant2Test extends OsateTest {
 //		assertEquals("fta_main_i_Instance", instance.name)
 
 		
-		val checker = new EMFTAAction()
-		checker.systemInstance = instance
-		checker.createModel(state,false, false)
+		val checker = new EMFTACreateModel()
+		checker.createModel(instance,state, false)
 		
 		val uri = URI.createURI(
 			resourceRoot + "/fta/redundant2_main2_composite-failstop.emfta")
@@ -73,9 +73,8 @@ class Redundant2Test extends OsateTest {
 		val sysImpl2 = cls.findFirst[name == 'main2.compositesametype'] as SystemImplementation
 		val instance2 = InstantiateModel::buildInstanceModelFile(sysImpl2)
 		val state2 = "state FailStop"
-		val checker2 = new EMFTAAction()
-		checker2.systemInstance = instance2
-		checker2.createModel(state2,false, false)
+		val checker2 = new EMFTACreateModel()
+		checker2.createModel(instance2,state2,false)
 		
 		val uri2 = URI.createURI(
 			resourceRoot + "/fta/redundant2_main2_compositesametype-failstop.emfta")
@@ -90,9 +89,8 @@ class Redundant2Test extends OsateTest {
 		val sysImpl3 = cls.findFirst[name == 'main2.transition'] as SystemImplementation
 		val instance3 = InstantiateModel::buildInstanceModelFile(sysImpl3)
 		val state3 = "outgoing propagation on externaleffect{serviceomission}"
-		val checker3 = new EMFTAAction()
-		checker3.systemInstance = instance3
-		checker3.createModel(state3,false, false)
+		val checker3 = new EMFTACreateModel()
+		checker3.createModel(instance3,state3, false)
 		
 		val uri3 = URI.createURI(
 			resourceRoot + "/fta/redundant2_main2_transition-externaleffect-serviceomission.emfta")
