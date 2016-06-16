@@ -26,8 +26,6 @@ class nestedCompositeTest extends OsateTest {
 		"NestedCompositeTest"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
 	
 
 /**
