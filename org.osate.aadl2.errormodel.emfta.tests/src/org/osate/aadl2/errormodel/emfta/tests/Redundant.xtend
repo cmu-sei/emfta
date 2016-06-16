@@ -26,8 +26,6 @@ class RedundantTest extends OsateTest {
 		"RedundantTest"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
 	
 
 /**

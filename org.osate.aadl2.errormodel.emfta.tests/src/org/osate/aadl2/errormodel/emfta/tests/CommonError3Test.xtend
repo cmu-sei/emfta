@@ -25,9 +25,6 @@ class CommonError3Test extends OsateTest {
 		"CommonError3Test"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
-	
 
 /**
 -- example with composite error state to the last subcomponents that affect the system error state

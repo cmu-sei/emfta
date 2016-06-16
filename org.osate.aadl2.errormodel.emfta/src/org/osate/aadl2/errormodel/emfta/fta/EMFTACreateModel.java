@@ -125,6 +125,7 @@ public final class EMFTACreateModel {
 
 			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
 			res.save(fos, null);
+			fos.close();
 //			IWorkspaceRoot ws = ResourcesPlugin.getWorkspace().getRoot();
 //			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
 

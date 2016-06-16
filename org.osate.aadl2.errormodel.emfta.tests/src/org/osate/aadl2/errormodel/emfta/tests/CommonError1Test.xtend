@@ -25,8 +25,6 @@ class CommonError1Test extends OsateTest {
 		"CommonError1Test"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
 	
 
 /**

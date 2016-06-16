@@ -26,8 +26,6 @@ class Emfta1Test extends OsateTest {
 		"test1"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
 	
 
 /**

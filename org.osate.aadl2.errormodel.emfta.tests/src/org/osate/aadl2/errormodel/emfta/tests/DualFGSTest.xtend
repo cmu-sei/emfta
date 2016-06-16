@@ -26,8 +26,6 @@ class DualFGSTest extends OsateTest {
 		"DualFGSTest"
 	}
 	
-	override void deleteProject(String projectName) {
-	}
 	
 
 /**
