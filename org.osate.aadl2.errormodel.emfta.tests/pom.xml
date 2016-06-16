@@ -18,7 +18,7 @@
 		</repository>
 		<repository>
 			<id>xtext-utils</id>
-			<url>http://aadl.info/aadl/osate/build/xtext-utils/</url>
+			<url>http://aadl.sei.cmu.edu/aadl/osate/build/xtext-utils/</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>
