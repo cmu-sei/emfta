@@ -41,14 +41,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -119,8 +117,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
-					stateNames.add(prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
-							+ EMV2Util.getPrintName(opc.getTypeToken()));// feat.getName());
+					String epName = prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
+							+ EMV2Util.getPrintName(opc.getTypeToken());
+					if (!stateNames.contains(epName)) {
+						stateNames.add(epName);
+					}
 				}
 
 				FTADialog diag = new FTADialog(sh);
@@ -140,10 +141,10 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				/**
 				 * If the file exists, we show a dialog box.
 				 */
-				OsateDebug.osateDebug("file exists");
-				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
+//				OsateDebug.osateDebug("file exists");
+//				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
 			}
-			autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
+//			autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
 		} else {
 			Dialog.showInfo("Fault Tree Analysis",
 					"Unable to create the Fault Tree Analysis, please read the help content");
@@ -202,7 +203,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
-			util.createAndOpenRepresentation(existingSession, emftaVP, description, "FTA Tree", model, monitor);
+			util.createAndOpenRepresentation(existingSession, emftaVP, description, model.getName() + " Tree", model,
+					monitor);
 		}
 	}
 

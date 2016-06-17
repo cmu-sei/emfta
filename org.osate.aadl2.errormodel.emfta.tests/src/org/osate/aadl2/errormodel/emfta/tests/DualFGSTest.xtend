@@ -305,23 +305,23 @@ end FGSErrorModelLibrary;
 
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
-<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.6" name="dualfgs_fgs_composite-criticalmodefailure" description="Top Level Failure">
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.7" name="dualfgs_fgs_composite-criticalmodefailure" description="Top Level Failure">
   <events name="ac-failure" description="Error event Failure on component AC" referenceCount="1"/>
   <events name="ap1-failure" description="Error event Failure on component AP1" referenceCount="1"/>
   <events name="fg1-failure" description="Error event Failure on component FG1" referenceCount="1"/>
   <events name="fg2-failure" description="Error event Failure on component FG2" referenceCount="1"/>
+  <events type="Intermediate" name="Intermediate2" referenceCount="1">
+    <gate type="AND" events="//@events.2 //@events.3"/>
+  </events>
   <events name="network-failure" description="Error event Failure on component network" referenceCount="1"/>
   <events type="Intermediate" name="Intermediate3" referenceCount="1">
-    <gate type="AND" events="//@events.4 //@events.7"/>
+    <gate type="AND" events="//@events.5 //@events.8"/>
   </events>
   <events type="Intermediate" name="dualfgs_fgs_composite-criticalmodefailure" referenceCount="1">
-    <gate type="XOR" events="//@events.0 //@events.5"/>
+    <gate type="XOR" events="//@events.0 //@events.6"/>
   </events>
   <events type="Intermediate" name="Intermediate5" referenceCount="1">
-    <gate events="//@events.1 //@events.8"/>
-  </events>
-  <events type="Intermediate" name="Intermediate6" referenceCount="1">
-    <gate type="AND" events="//@events.2 //@events.3"/>
+    <gate events="//@events.4 //@events.1"/>
   </events>
 </emfta:FTAModel>
 	'''

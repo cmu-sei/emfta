@@ -459,12 +459,12 @@ end FTerrorlibrary;
   </events>
   <events name="voter.thr-failure" description="Error event Failure on component thr" referenceCount="1"/>
   <events name="voter.thr-computeerror" description="Error event ComputeError on component thr" referenceCount="1"/>
-  <events type="Intermediate" name="voter.thr-degraded-itemomission" referenceCount="1">
+  <events type="Intermediate" name="voter.thr-failstop-itemomission" referenceCount="1">
     <gate type="PRIORITY_AND" events="//@events.5 //@events.4"/>
   </events>
   <events name="mem-memfail-serviceerror" description="Error source memfail on component mem with types {ServiceError}" referenceCount="1"/>
   <events type="Intermediate" name="redundant2_main2_composite-failstop" referenceCount="1">
-    <gate events="//@events.0 //@events.3 //@events.6 //@events.7"/>
+    <gate events="//@events.0 //@events.7 //@events.3 //@events.6"/>
   </events>
 </emfta:FTAModel>
 	'''
@@ -483,7 +483,7 @@ end FTerrorlibrary;
   </events>
   <events name="voter.thr-ef5-inconsistentvalue" description="Error source ef5 on component voter.thr from valueout with types {InconsistentValue}" referenceCount="1"/>
   <events type="Intermediate" name="redundant2_main2_compositesametype-failstop" referenceCount="1">
-    <gate events="//@events.0 //@events.1 //@events.2 //@events.3 //@events.6 //@events.7"/>
+    <gate events="//@events.0 //@events.6 //@events.7 //@events.1 //@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>
 	'''
@@ -498,7 +498,7 @@ end FTerrorlibrary;
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
   <events name="voter.thr-failure" description="Error event Failure on component thr" referenceCount="1"/>
-  <events type="Intermediate" name="voter.thr-degraded-itemomission" referenceCount="1">
+  <events type="Intermediate" name="voter.thr-failstop-itemomission" referenceCount="1">
     <gate type="PRIORITY_AND" events="//@events.0 //@events.4"/>
   </events>
   <events type="Intermediate" name="redundant2_main2_transition-externaleffect-serviceomission" referenceCount="1">
