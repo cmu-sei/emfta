@@ -89,15 +89,10 @@ public final class EMFTACreateModel {
 				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
 			}
 			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
-			String rootname = ftamodel.getName();
+			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
+			ftamodel.setName(rootname);
 
 			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
-
-			/**
-			 * We build URI of the new file and see if the file exists. If yes, w show a dialog. The file
-			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
-			 * version of the FTA.
-			 */
 			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
 			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());

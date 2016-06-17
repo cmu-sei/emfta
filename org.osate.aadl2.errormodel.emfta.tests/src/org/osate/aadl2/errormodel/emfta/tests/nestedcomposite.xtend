@@ -259,7 +259,7 @@ end nestedcomposite;
     <gate type="AND" events="//@events.4 //@events.5"/>
   </events>
   <events type="Intermediate" name="nestedcomposite_main_nestedstate-failstop" referenceCount="1">
-    <gate type="XOR" events="//@events.2 //@events.3 //@events.6"/>
+    <gate type="XOR" events="//@events.6 //@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>
 	'''
