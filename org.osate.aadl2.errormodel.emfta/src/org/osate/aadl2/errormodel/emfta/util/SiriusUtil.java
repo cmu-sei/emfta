@@ -4,6 +4,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -14,9 +15,9 @@ import org.eclipse.sirius.business.api.componentization.ViewpointRegistry;
 import org.eclipse.sirius.business.api.modelingproject.AbstractRepresentationsFileJob;
 import org.eclipse.sirius.business.api.modelingproject.ModelingProject;
 import org.eclipse.sirius.business.api.query.ViewpointQuery;
-import org.eclipse.sirius.business.api.session.SessionStatus;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.business.api.session.SessionManager;
+import org.eclipse.sirius.business.api.session.SessionStatus;
 import org.eclipse.sirius.ext.base.Option;
 import org.eclipse.sirius.ui.business.api.session.IEditingSession;
 import org.eclipse.sirius.ui.business.api.session.SessionUIManager;
@@ -26,6 +27,9 @@ import org.eclipse.sirius.ui.tools.api.views.ViewHelper;
 import org.eclipse.sirius.ui.tools.internal.actions.creation.CreateRepresentationAction;
 import org.eclipse.sirius.ui.tools.internal.views.common.SessionLabelProvider;
 import org.eclipse.sirius.ui.tools.internal.views.common.modelingproject.OpenRepresentationsFileJob;
+import org.eclipse.sirius.viewpoint.DAnalysis;
+import org.eclipse.sirius.viewpoint.DRepresentation;
+import org.eclipse.sirius.viewpoint.DView;
 import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
 import org.eclipse.sirius.viewpoint.description.Viewpoint;
 import org.eclipse.swt.widgets.Display;
@@ -43,18 +47,17 @@ public class SiriusUtil {
 	private SiriusUtil() {
 		super();
 	}
-	
-		/**
-		 * 
-		 * @param session
-		 * @param monitor
-		 */
-		public void saveSession(Session session, IProgressMonitor monitor) {
-			if (SessionStatus.DIRTY.equals(session.getStatus())) {
-				session.save(monitor);
-			}
+
+	/**
+	 * 
+	 * @param session
+	 * @param monitor
+	 */
+	public void saveSession(Session session, IProgressMonitor monitor) {
+		if (SessionStatus.DIRTY.equals(session.getStatus())) {
+			session.save(monitor);
 		}
-	 
+	}
 
 	/**
 	 * Retrieves a viewpoint from its URI
@@ -62,15 +65,15 @@ public class SiriusUtil {
 	 * @return Viewpoint from the viewpoints registry
 	 */
 	public Viewpoint getViewpointFromRegistry(URI viewpointURI) {
-		ViewpointRegistry registry = ViewpointRegistry.getInstance();		
+		ViewpointRegistry registry = ViewpointRegistry.getInstance();
 		try {
-			return registry.getViewpoint(viewpointURI);			
+			return registry.getViewpoint(viewpointURI);
 		} catch (Exception e) {
 			// Unable to retrieve viewpoint
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Retrieves a representation description
 	 * @param viewpoint
@@ -85,7 +88,25 @@ public class SiriusUtil {
 		}
 		return null;
 	}
-	
+
+	public DRepresentation findRepresentation(final Session existingSession, final Viewpoint viewpoint,
+			final RepresentationDescription description, final String representationName) {
+
+		// Step 2: get the DRepresentation to open
+		DAnalysis root = (DAnalysis) existingSession.getSessionResource().getContents().get(0);
+		for (DView dView : root.getOwnedViews()) {
+			if (dView.getViewpoint().getName().equals(viewpoint.getName())) {
+				EList<DRepresentation> myRepresentations = dView.getOwnedRepresentations();
+				for (DRepresentation dRepresentation : myRepresentations) {
+					if (representationName.equalsIgnoreCase(dRepresentation.getName())) {
+						return dRepresentation;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Creates and opens a representation on the specified object 
 	 * @param existingSession Sirirus session
@@ -95,48 +116,47 @@ public class SiriusUtil {
 	 * @param object Semantic object
 	 * @param monitor Progress monitor
 	 */
-	public void createAndOpenRepresentation(final Session existingSession, final Viewpoint viewpoint, final RepresentationDescription description, final String representationName, final EObject object, final IProgressMonitor monitor) {
+	public void createAndOpenRepresentation(final Session existingSession, final Viewpoint viewpoint,
+			final RepresentationDescription description, final String representationName, final EObject object,
+			final IProgressMonitor monitor) {
 		if (viewpoint != null) {
-		
-		IEditingSession uiSession = SessionUIManager.INSTANCE.getOrCreateUISession(existingSession);
-		uiSession.open();
-		
-		// Ensure the viewpoint is selected for the session
-		existingSession.getTransactionalEditingDomain().getCommandStack()
-				.execute(new RecordingCommand(existingSession.getTransactionalEditingDomain()) {
 
-					@Override
-					protected void doExecute() {
-						
-						// Check if already selected
-						if (!existingSession.getSelectedViewpoints(false).contains(viewpoint)) {
-							ViewpointSelectionCallback selection = new ViewpointSelectionCallback();
-							selection.selectViewpoint(viewpoint, existingSession, monitor);
+			IEditingSession uiSession = SessionUIManager.INSTANCE.getOrCreateUISession(existingSession);
+			uiSession.open();
+
+			// Ensure the viewpoint is selected for the session
+			existingSession.getTransactionalEditingDomain().getCommandStack()
+					.execute(new RecordingCommand(existingSession.getTransactionalEditingDomain()) {
+
+						@Override
+						protected void doExecute() {
+
+							// Check if already selected
+							if (!existingSession.getSelectedViewpoints(false).contains(viewpoint)) {
+								ViewpointSelectionCallback selection = new ViewpointSelectionCallback();
+								selection.selectViewpoint(viewpoint, existingSession, monitor);
+							}
 						}
-					}
-				});
+					});
 		}
-		
+
 		// Create and open the representation
-        Display.getDefault().syncExec(new Runnable() {
-			
+		Display.getDefault().syncExec(new Runnable() {
+
 			@Override
 			public void run() {
-				CreateRepresentationAction action = new CreateRepresentationAction(
-						existingSession,
-						object,
-						description,
+				CreateRepresentationAction action = new CreateRepresentationAction(existingSession, object, description,
 						new SessionLabelProvider(ViewHelper.INSTANCE.createAdapterFactory())) {
 					@Override
 					protected String getRepresentationName() {
 						return representationName;
 					}
 				};
-		        action.run();
+				action.run();
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns a session for the project. The session is loaded and references the URI as a semantid resource
 	 * @param project
@@ -144,9 +164,10 @@ public class SiriusUtil {
 	 * @param monitor
 	 * @return loaded session or null
 	 */
-	public Session getSessionForProjectAndResource(IProject project, URI semanticResourceURI, IProgressMonitor monitor) {
+	public Session getSessionForProjectAndResource(IProject project, URI semanticResourceURI,
+			IProgressMonitor monitor) {
 		Session existingSession = getSessionForSemanticURI(semanticResourceURI);
-		
+
 		if (existingSession == null) {
 			// Add "Modeling" nature to project
 			if (!ModelingProject.hasModelingProjectNature(project)) {
@@ -155,14 +176,14 @@ public class SiriusUtil {
 				} catch (CoreException e) {
 					// Error while converting to modeling project
 					return null;
-				}				
+				}
 			}
-	
+
 			final Option<ModelingProject> prj = ModelingProject.asModelingProject(project);
 			if (prj.some()) {
 				ModelingProject modelingProject = prj.get();
 				existingSession = modelingProject.getSession();
-				
+
 				if (existingSession == null) {
 					loadSession(modelingProject, monitor);
 				}
@@ -171,36 +192,37 @@ public class SiriusUtil {
 				if (existingSession != null) {
 					addSemanticResource(existingSession, semanticResourceURI, monitor);
 				}
-	
+
 				return existingSession;
 			}
 		}
 		return existingSession;
 	}
-	
+
 	/**
 	 * Adds a resource as a semantic resource for the session
 	 * @param session
 	 * @param semanticResourceURI
 	 * @param monitor
 	 */
-	private void addSemanticResource(final Session session, final URI semanticResourceURI, final IProgressMonitor monitor) {
+	private void addSemanticResource(final Session session, final URI semanticResourceURI,
+			final IProgressMonitor monitor) {
 		// Check whether we really have to add the resource
 		Resource resource = getResourceFromSession(session, semanticResourceURI);
 		if (resource == null) {
-			// We really have to add it 
+			// We really have to add it
 			TransactionalEditingDomain ted = session.getTransactionalEditingDomain();
 			ted.getCommandStack().execute(new RecordingCommand(ted) {
-	
+
 				@Override
 				protected void doExecute() {
 					session.addSemanticResource(semanticResourceURI, monitor);
-	
+
 				}
 			});
 		}
 	}
-	
+
 	/**
 	 * Retrieves the Sirius session referencing the URI as a semantic resource
 	 * 
@@ -221,7 +243,7 @@ public class SiriusUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Loads a Sirius session for a modeling project
 	 * @param project
@@ -235,7 +257,7 @@ public class SiriusUtil {
 			ModelingProjectManager.INSTANCE.loadAndOpenRepresentationsFile(optionalMainSessionFileURI.get());
 		}
 	}
-	
+
 	/**
 	 * Waits until all sessions are loaded
 	 * @param monitor
@@ -251,7 +273,7 @@ public class SiriusUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns a session's semantic resource from its URI 
 	 * @param session
