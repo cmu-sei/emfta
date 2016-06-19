@@ -213,8 +213,12 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			if (rep != null) {
 				DialectUIManager.INSTANCE.openEditor(existingSession, rep, new NullProgressMonitor());
 			} else {
-				util.createAndOpenRepresentation(existingSession, emftaVP, description, representationName, model,
-						monitor);
+				try {
+					util.createAndOpenRepresentation(existingSession, emftaVP, description, representationName, model,
+							monitor);
+				} catch (Exception e) {
+
+				}
 			}
 
 		}
