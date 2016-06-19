@@ -18,12 +18,7 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
-import java.io.FileOutputStream;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -92,8 +87,8 @@ public final class EMFTACreateModel {
 			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
 			ftamodel.setName(rootname);
 
-			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
-			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+			URI newURI = EcoreUtil.getURI(si).trimFragment().trimSegments(2).appendSegment("fta")
+					.appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
 			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
 			return newURI;
@@ -108,23 +103,22 @@ public final class EMFTACreateModel {
 
 //		IFile newFile = activeProject.getFile(filename);
 //		OsateDebug.osateDebug("[EMFTAAction]", "save in file=" + newFile.getName());
-		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+//XXX		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
 
 		try {
 
 			ResourceSet set = new ResourceSetImpl();
 
-			Resource res = set.createResource(URI.createURI(newFile.toString()));
+			Resource res = set.createResource(newURI);// XXX URI.createURI(newFile.toString()));
 
 			res.getContents().add(emftaModel);
 
-			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
-			res.save(fos, null);
-			fos.close();
-//			IWorkspaceRoot ws = ResourcesPlugin.getWorkspace().getRoot();
-//			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
+// XXX			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
+//			res.save(fos, null);
+//			fos.close();
+			res.save(null);
 
-			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+//			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 
 		} catch (Exception e) {
 			e.printStackTrace();
