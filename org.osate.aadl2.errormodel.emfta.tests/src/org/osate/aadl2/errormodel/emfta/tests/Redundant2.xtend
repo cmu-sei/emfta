@@ -56,10 +56,7 @@ class Redundant2Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state, false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/redundant2_main2_composite-failstop.emfta")
+		val uri =checker.createModel(instance,state, false)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
@@ -72,10 +69,7 @@ class Redundant2Test extends OsateTest {
 		val instance2 = InstantiateModel::buildInstanceModelFile(sysImpl2)
 		val state2 = "state FailStop"
 		val checker2 = new EMFTACreateModel()
-		checker2.createModel(instance2,state2,false)
-		
-		val uri2 = URI.createURI(
-			resourceRoot + "/fta/redundant2_main2_compositesametype-failstop.emfta")
+		val uri2 =checker2.createModel(instance2,state2,false)
 		val file2 = workspaceRoot.getFile(new Path(uri2.toPlatformString(true)))
 		val actual2 = Files.readStreamIntoString(file2.contents)
 		assertEquals('error', expected2.trim, actual2.trim)
@@ -88,10 +82,7 @@ class Redundant2Test extends OsateTest {
 		val instance3 = InstantiateModel::buildInstanceModelFile(sysImpl3)
 		val state3 = "outgoing propagation on externaleffect{serviceomission}"
 		val checker3 = new EMFTACreateModel()
-		checker3.createModel(instance3,state3, false)
-		
-		val uri3 = URI.createURI(
-			resourceRoot + "/fta/redundant2_main2_transition-externaleffect-serviceomission.emfta")
+		val uri3 = checker3.createModel(instance3,state3, false)
 		val file3 = workspaceRoot.getFile(new Path(uri3.toPlatformString(true)))
 		val actual3 = Files.readStreamIntoString(file3.contents)
 		assertEquals('error', expected3.trim, actual3.trim)

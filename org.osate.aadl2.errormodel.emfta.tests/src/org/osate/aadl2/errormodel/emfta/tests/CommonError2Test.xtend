@@ -53,10 +53,7 @@ class CommonError2Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state,false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/common_error2_main_commonevents-failstop.emfta")
+		val uri=checker.createModel(instance,state,false)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
@@ -66,8 +63,6 @@ class CommonError2Test extends OsateTest {
 	val aadlText = '''
 package common_error2
 public
-
-with ErrorLibrary;
 
 data mydata
 end mydata;
