@@ -18,6 +18,8 @@ import org.osate.core.test.OsateTest
 import static org.junit.Assert.*
 import org.osate.aadl2.errormodel.emfta.actions.EMFTAAction
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
+import org.eclipse.core.resources.IFile
+import org.eclipse.core.resources.ResourcesPlugin
 
 @RunWith(typeof(XtextRunner2))
 @InjectWith(typeof(Aadl2UiInjectorProvider))
@@ -53,11 +55,8 @@ class Emfta1Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state,false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/fta_sample_main_i-failed.emfta")
-		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
+		val testuri = checker.createModel(instance,state,false)
+		val file = workspaceRoot.getFile(new Path(testuri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
 	}

@@ -55,10 +55,7 @@ class nestedCompositeTest extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state, false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/nestedcomposite_main_nestedstate-failstop.emfta")
+		val uri =checker.createModel(instance,state, false)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
