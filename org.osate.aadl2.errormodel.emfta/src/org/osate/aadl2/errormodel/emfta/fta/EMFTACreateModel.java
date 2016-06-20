@@ -18,19 +18,12 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
-import java.io.FileOutputStream;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -65,7 +58,6 @@ public final class EMFTACreateModel {
 					errorState = ebs;
 				}
 			}
-
 		}
 
 		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
@@ -98,39 +90,20 @@ public final class EMFTACreateModel {
 			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
 			 * version of the FTA.
 			 */
-			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			serializeEmftaModel(ftamodel, newURI);
 			return newURI;
 		} else {
 			return null;
 		}
 	}
 
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
-
-//		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
-
-//		IFile newFile = activeProject.getFile(filename);
-//		OsateDebug.osateDebug("[EMFTAAction]", "save in file=" + newFile.getName());
-		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
-
+	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, URI newURI) {
 		try {
-
 			ResourceSet set = new ResourceSetImpl();
-
-			Resource res = set.createResource(URI.createURI(newFile.toString()));
-
+			Resource res = set.createResource(newURI);
 			res.getContents().add(emftaModel);
-
-			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
-			res.save(fos, null);
-			fos.close();
-//			IWorkspaceRoot ws = ResourcesPlugin.getWorkspace().getRoot();
-//			OsateDebug.osateDebug("[EMFTAAction]", "activeproject=" + activeProject.getName());
-
-			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-
+			res.save(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
