@@ -46,8 +46,26 @@
 								<id>org.osate.aadl2.model.editor</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
+							<requirement>
+								<!-- tests need error annex unparser-->
+								<type>eclipse-plugin</type>
+								<id>org.osate.xtext.aadl2.errormodel</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<argLine>-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog -Dorg.apache.commons.logging.simplelog.defaultlog=error</argLine>
+					<useUIHarness>true</useUIHarness>
+					<!-- Use this if there's an org.eclipse.swt.SWTException: Invalid thread 
+						access <useUIThread>true</useUIThread> -->
+					<debugPort>9999</debugPort>
 				</configuration>
 			</plugin>
 		</plugins>
