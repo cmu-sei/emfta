@@ -9,14 +9,14 @@ import org.junit.runner.RunWith
 import org.osate.aadl2.AadlPackage
 import org.osate.aadl2.SystemImplementation
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
+import org.osate.aadl2.errormodel.tests.ErrorModelUiInjectorProvider
 import org.osate.aadl2.instantiation.InstantiateModel
-import org.osate.core.test.Aadl2UiInjectorProvider
 import org.osate.core.test.OsateTest
 
 import static org.junit.Assert.*
 
 @RunWith(typeof(XtextRunner2))
-@InjectWith(typeof(Aadl2UiInjectorProvider))
+@InjectWith(typeof(ErrorModelUiInjectorProvider))
 class DualFGSTest extends OsateTest {
 	override getProjectName() {
 		"DualFGSTest"
@@ -54,7 +54,7 @@ class DualFGSTest extends OsateTest {
 		
 		val checker = new EMFTACreateModel()
 		val uri = checker.createModel(instance, state,false)
-		
+		assertTrue('No FTA file was created', uri != null)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
