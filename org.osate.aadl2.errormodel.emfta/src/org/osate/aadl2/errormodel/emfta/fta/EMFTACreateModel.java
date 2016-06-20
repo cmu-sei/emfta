@@ -18,12 +18,14 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -92,22 +94,27 @@ public final class EMFTACreateModel {
 			 * version of the FTA.
 			 */
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI);
-			return newURI;
+			URI ftauri = serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			return ftauri;
 		} else {
 			return null;
 		}
 	}
 
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, URI newURI) {
+	public URI serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
+
 		try {
 			ResourceSet set = new ResourceSetImpl();
 			Resource res = set.createResource(newURI);
 			res.getContents().add(emftaModel);
+
 			res.save(null);
+			return EcoreUtil.getURI(emftaModel);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return newURI;
 
 	}
 

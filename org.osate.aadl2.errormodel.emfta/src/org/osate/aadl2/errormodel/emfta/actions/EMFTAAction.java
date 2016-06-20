@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.sirius.business.api.session.Session;
 import org.eclipse.sirius.ui.business.api.dialect.DialectUIManager;
 import org.eclipse.sirius.viewpoint.DRepresentation;
@@ -51,6 +52,7 @@ import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
+import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -194,17 +196,27 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	 * @param resourceUri
 	 * @param monitor
 	 */
-	private void createAndOpenFTATree(final IProject project, final URI resourceUri, IProgressMonitor monitor) {
+	private void createAndOpenFTATree(final IProject project, final URI ftamodelUri, IProgressMonitor monitor) {
 		SiriusUtil util = SiriusUtil.INSTANCE;
 		URI emftaViewpointURI = URI.createURI("viewpoint:/emfta.design/EMFTA");
 
-		URI semanticResourceURI = URI.createPlatformResourceURI(resourceUri.toPlatformString(true), true);
+		URI semanticResourceURI = URI.createPlatformResourceURI(ftamodelUri.toPlatformString(true), true);
 		Session existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
 
 		if (existingSession != null) {
 			util.saveSession(existingSession, monitor);
-
+			ResourceSetImpl resset = new ResourceSetImpl();
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
+			if (model == null) {
+				EObject res = resset.getEObject(ftamodelUri, true);
+				if (res instanceof FTAModel) {
+					model = (FTAModel) res;
+				}
+			}
+			if (model == null) {
+				OsateDebug.osateDebug("Could not find FTAModel for URI " + ftamodelUri.path());
+				return;
+			}
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
 			String representationName = model.getName() + " Tree";
@@ -217,7 +229,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					util.createAndOpenRepresentation(existingSession, emftaVP, description, representationName, model,
 							monitor);
 				} catch (Exception e) {
-
+					OsateDebug.osateDebug("Could not create and open FTAModel " + model.getName());
+					return;
 				}
 			}
 
