@@ -18,10 +18,6 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
-<<<<<<< HEAD
-=======
-import org.eclipse.core.resources.IProject;
->>>>>>> refs/remotes/origin/develop
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;

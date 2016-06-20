@@ -54,13 +54,7 @@ class DualFGSTest extends OsateTest {
 		
 		val checker = new EMFTACreateModel()
 		val uri = checker.createModel(instance, state,false)
-<<<<<<< HEAD
 		assertTrue('No FTA file was created', uri != null)
-//		val uri = URI.createURI(
-//			resourceRoot + "/fta/dualfgs_fgs_composite-criticalmodefailure.emfta")
-=======
-		
->>>>>>> refs/remotes/origin/develop
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
