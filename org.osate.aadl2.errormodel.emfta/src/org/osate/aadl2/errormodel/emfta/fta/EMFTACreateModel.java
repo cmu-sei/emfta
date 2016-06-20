@@ -18,14 +18,12 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -60,7 +58,6 @@ public final class EMFTACreateModel {
 					errorState = ebs;
 				}
 			}
-
 		}
 
 		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
@@ -87,39 +84,27 @@ public final class EMFTACreateModel {
 			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
 			ftamodel.setName(rootname);
 
-			URI newURI = EcoreUtil.getURI(si).trimFragment().trimSegments(2).appendSegment("fta")
-					.appendSegment(rootname + ".emfta");
+			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
+
+			/**
+			 * We build URI of the new file and see if the file exists. If yes, w show a dialog. The file
+			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
+			 * version of the FTA.
+			 */
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			serializeEmftaModel(ftamodel, newURI);
 			return newURI;
 		} else {
 			return null;
 		}
 	}
 
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
-
-//		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
-
-//		IFile newFile = activeProject.getFile(filename);
-//		OsateDebug.osateDebug("[EMFTAAction]", "save in file=" + newFile.getName());
-//XXX		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
-
+	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, URI newURI) {
 		try {
-
 			ResourceSet set = new ResourceSetImpl();
-
-			Resource res = set.createResource(newURI);// XXX URI.createURI(newFile.toString()));
-
+			Resource res = set.createResource(newURI);
 			res.getContents().add(emftaModel);
-
-// XXX			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
-//			res.save(fos, null);
-//			fos.close();
 			res.save(null);
-
-//			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
