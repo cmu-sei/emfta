@@ -28,6 +28,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -35,6 +36,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.sirius.business.api.session.Session;
+import org.eclipse.sirius.ui.business.api.dialect.DialectUIManager;
+import org.eclipse.sirius.viewpoint.DRepresentation;
 import org.eclipse.sirius.viewpoint.description.RepresentationDescription;
 import org.eclipse.sirius.viewpoint.description.Viewpoint;
 import org.eclipse.swt.widgets.Display;
@@ -48,7 +51,6 @@ import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
@@ -119,8 +121,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
-					stateNames.add(prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
-							+ EMV2Util.getPrintName(opc.getTypeToken()));// feat.getName());
+					String epName = prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
+							+ EMV2Util.getPrintName(opc.getTypeToken());
+					if (!stateNames.contains(epName)) {
+						stateNames.add(epName);
+					}
 				}
 
 				FTADialog diag = new FTADialog(sh);
@@ -140,8 +145,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				/**
 				 * If the file exists, we show a dialog box.
 				 */
-				OsateDebug.osateDebug("file exists");
-				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
+//				OsateDebug.osateDebug("file exists");
+//				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
 			}
 			autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
 		} else {
@@ -202,7 +207,20 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
 			final Viewpoint emftaVP = util.getViewpointFromRegistry(emftaViewpointURI);
 			final RepresentationDescription description = util.getRepresentationDescription(emftaVP, "Tree.diagram");
-			util.createAndOpenRepresentation(existingSession, emftaVP, description, "FTA Tree", model, monitor);
+			String representationName = model.getName() + " Tree";
+			final DRepresentation rep = util.findRepresentation(existingSession, emftaVP, description,
+					representationName);
+			if (rep != null) {
+				DialectUIManager.INSTANCE.openEditor(existingSession, rep, new NullProgressMonitor());
+			} else {
+				try {
+					util.createAndOpenRepresentation(existingSession, emftaVP, description, representationName, model,
+							monitor);
+				} catch (Exception e) {
+
+				}
+			}
+
 		}
 	}
 

@@ -1,7 +1,6 @@
 package org.osate.aadl2.errormodel.emfta.tests
 
 import org.eclipse.core.runtime.Path
-import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.util.Files
 import org.eclipselabs.xtext.utils.unittesting.XtextRunner2
@@ -50,11 +49,8 @@ class Emfta1Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state,false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/fta_sample_main_i-failed.emfta")
-		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
+		val testuri = checker.createModel(instance,state,false)
+		val file = workspaceRoot.getFile(new Path(testuri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
 	}

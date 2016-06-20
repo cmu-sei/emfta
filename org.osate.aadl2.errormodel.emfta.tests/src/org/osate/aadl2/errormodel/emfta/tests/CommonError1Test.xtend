@@ -1,7 +1,6 @@
 package org.osate.aadl2.errormodel.emfta.tests
 
 import org.eclipse.core.runtime.Path
-import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.util.Files
 import org.eclipselabs.xtext.utils.unittesting.XtextRunner2
@@ -12,7 +11,9 @@ import org.osate.aadl2.SystemImplementation
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
 import org.osate.aadl2.errormodel.tests.ErrorModelUiInjectorProvider
 import org.osate.aadl2.instantiation.InstantiateModel
+import org.osate.aadl2.util.OsateDebug
 import org.osate.core.test.OsateTest
+import org.osate.xtext.aadl2.errormodel.util.EMV2Util
 
 import static org.junit.Assert.*
 
@@ -48,24 +49,28 @@ class CommonError1Test extends OsateTest {
 
 		// instantiate
 		val sysImpl = cls.findFirst[name == 'main.commonsource'] as SystemImplementation
+
+	// XXX get the EMV2 annex subclause
+	// Similar to the EMV2 tests
+	// When running a release build it returns null
+	// works fine when running it as JUnit plugin test
+		val res = EMV2Util.getEmbeddedEMV2Subclause(sysImpl)
+		OsateDebug.osateDebug("SysImpol "+res)
+
+
 		val instance = InstantiateModel::buildInstanceModelFile(sysImpl)
 //		assertEquals("fta_main_i_Instance", instance.name)
-
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state,false)
+		val uri =checker.createModel(instance,state,false)
 		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/common_error1_main_commonsource-failstop.emfta")
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
 		
 		val stateop = "state Operational"
-		checker.createModel(instance, stateop,false)
+		val uriop=checker.createModel(instance, stateop,false)
 		
-		val uriop = URI.createURI(
-			resourceRoot + "/fta/common_error1_main_commonsource-operational.emfta")
 		val fileop = workspaceRoot.getFile(new Path(uriop.toPlatformString(true)))
 		val actualop = Files.readStreamIntoString(fileop.contents)
 		assertEquals('error', expectedOperational.trim, actualop.trim)
@@ -74,8 +79,6 @@ class CommonError1Test extends OsateTest {
 	val aadlText = '''
 package common_error1
 public
-
-with ErrorLibrary;
 
 data mydata
 end mydata;

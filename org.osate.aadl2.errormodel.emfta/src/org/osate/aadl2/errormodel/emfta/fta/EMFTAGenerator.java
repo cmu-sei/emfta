@@ -291,17 +291,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
-			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
-				for (Event ev : se.getGate().getEvents()) {
-					emftaGate.getEvents().add(ev);
-				}
-			} else {
-				emftaGate.getEvents().add(se);
-			}
+			emftaGate.getEvents().add(se);
+//			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
+//				for (Event ev : se.getGate().getEvents()) {
+//					emftaGate.getEvents().add(ev);
+//				}
+//			} else {
+//				emftaGate.getEvents().add(se);
+//			}
 		}
-		if (combined.getGate().getEvents().size() == 1) {
-			combined = combined.getGate().getEvents().get(0);
-		}
+//		if (combined.getGate().getEvents().size() == 1) {
+//			combined = combined.getGate().getEvents().get(0);
+//		}
 		return combined;
 
 	}
@@ -320,14 +321,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		// flatten OR
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
-			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
-				for (Event ev : se.getGate().getEvents()) {
-					emftaGate.getEvents().add(ev);
-				}
-			} else {
-				emftaGate.getEvents().add(se);
-			}
+			emftaGate.getEvents().add(se);
+//			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
+//				for (Event ev : se.getGate().getEvents()) {
+//					emftaGate.getEvents().add(ev);
+//				}
+//			} else {
+//				emftaGate.getEvents().add(se);
+//			}
 		}
+//		if (combined.getGate().getEvents().size() == 1) {
+//		combined = combined.getGate().getEvents().get(0);
+//	}
 		return combined;
 
 	}
@@ -347,14 +352,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
-			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
-				for (Event ev : se.getGate().getEvents()) {
-					emftaGate.getEvents().add(ev);
-				}
-			} else {
-				emftaGate.getEvents().add(se);
-			}
+			emftaGate.getEvents().add(se);
+//			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
+//				for (Event ev : se.getGate().getEvents()) {
+//					emftaGate.getEvents().add(ev);
+//				}
+//			} else {
+//				emftaGate.getEvents().add(se);
+//			}
 		}
+//		if (combined.getGate().getEvents().size() == 1) {
+//		combined = combined.getGate().getEvents().get(0);
+//	}
 		return combined;
 	}
 
@@ -372,14 +381,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
-			if (se.getGate() != null && se.getGate().getType() == GateType.PRIORITY_AND) {
-				for (Event ev : se.getGate().getEvents()) {
-					emftaGate.getEvents().add(ev);
-				}
-			} else {
-				emftaGate.getEvents().add(se);
-			}
+			emftaGate.getEvents().add(se);
+//			if (se.getGate() != null && se.getGate().getType() == GateType.PRIORITY_AND) {
+//				for (Event ev : se.getGate().getEvents()) {
+//					emftaGate.getEvents().add(ev);
+//				}
+//			} else {
+//				emftaGate.getEvents().add(se);
+//			}
 		}
+//		if (combined.getGate().getEvents().size() == 1) {
+//		combined = combined.getGate().getEvents().get(0);
+//	}
 		return combined;
 	}
 

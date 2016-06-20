@@ -18,6 +18,10 @@
 
 package org.osate.aadl2.errormodel.emfta.fta;
 
+<<<<<<< HEAD
+=======
+import org.eclipse.core.resources.IProject;
+>>>>>>> refs/remotes/origin/develop
 import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -81,15 +85,11 @@ public final class EMFTACreateModel {
 				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
 			}
 			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
-			String rootname = ftamodel.getName();
+			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
+			ftamodel.setName(rootname);
 
-			URI newURI = EcoreUtil.getURI(si).trimSegments(2).appendSegment("fta").appendSegment(rootname + ".emfta");
-
-			/**
-			 * We build URI of the new file and see if the file exists. If yes, w show a dialog. The file
-			 * HAS to be new. This is a workaround for the issue with Sirus and the auto opening of the graphical
-			 * version of the FTA.
-			 */
+			URI newURI = EcoreUtil.getURI(si).trimFragment().trimSegments(2).appendSegment("fta")
+					.appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
 			serializeEmftaModel(ftamodel, newURI);
 			return newURI;

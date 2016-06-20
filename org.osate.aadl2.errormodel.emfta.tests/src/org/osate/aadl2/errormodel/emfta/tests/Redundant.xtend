@@ -52,10 +52,7 @@ class RedundantTest extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel()
-		checker.createModel(instance,state, false)
-		
-		val uri = URI.createURI(
-			resourceRoot + "/fta/redundant_main_compositestate-failstop.emfta")
+		val uri =checker.createModel(instance,state, false)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
@@ -238,7 +235,7 @@ end redundant;
   <events name="actuator-failure" description="Error event Failure on component actuator" referenceCount="1"/>
   <events name="voter.thr-failure" description="Error event Failure on component thr" referenceCount="1"/>
   <events type="Intermediate" name="redundant_main_compositestate-failstop" referenceCount="1">
-    <gate type="XOR" events="//@events.2 //@events.3 //@events.4"/>
+    <gate type="XOR" events="//@events.4 //@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>
 	'''
