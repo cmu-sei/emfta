@@ -17,6 +17,8 @@ import org.osate.core.test.OsateTest
 
 import static org.junit.Assert.*
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
+import org.osate.xtext.aadl2.errormodel.util.EMV2Util
+import org.osate.aadl2.util.OsateDebug
 
 @RunWith(typeof(XtextRunner2))
 @InjectWith(typeof(Aadl2UiInjectorProvider))
@@ -50,9 +52,17 @@ class CommonError1Test extends OsateTest {
 
 		// instantiate
 		val sysImpl = cls.findFirst[name == 'main.commonsource'] as SystemImplementation
+
+	// XXX get the EMV2 annex subclause
+	// Similar to the EMV2 tests
+	// When running a release build it returns null
+	// works fine when running it as JUnit plugin test
+		val res = EMV2Util.getEmbeddedEMV2Subclause(sysImpl)
+		OsateDebug.osateDebug("SysImpol "+res)
+
+
 		val instance = InstantiateModel::buildInstanceModelFile(sysImpl)
 //		assertEquals("fta_main_i_Instance", instance.name)
-
 		
 		val checker = new EMFTACreateModel()
 		val uri =checker.createModel(instance,state,false)
