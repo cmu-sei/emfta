@@ -26,6 +26,7 @@
 		<module>../../edu.cmu.emfta.wizards</module>
 		<module>../../org.osate.aadl2.errormodel.emfta</module>
 		<module>../../org.osate.aadl2.errormodel.emfta.feature</module>
+		<module>../../org.osate.aadl2.errormodel.emfta.tests</module>
 	</modules>
 
 </project>
