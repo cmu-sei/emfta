@@ -1,8 +1,6 @@
 package org.osate.aadl2.errormodel.emfta.tests
 
-import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.core.runtime.Path
-import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.junit4.InjectWith
 import org.eclipse.xtext.util.Files
 import org.eclipselabs.xtext.utils.unittesting.XtextRunner2
@@ -10,19 +8,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.osate.aadl2.AadlPackage
 import org.osate.aadl2.SystemImplementation
+import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
+import org.osate.aadl2.errormodel.tests.ErrorModelUiInjectorProvider
 import org.osate.aadl2.instantiation.InstantiateModel
-
-import org.osate.core.test.Aadl2UiInjectorProvider
 import org.osate.core.test.OsateTest
 
 import static org.junit.Assert.*
-import org.osate.aadl2.errormodel.emfta.actions.EMFTAAction
-import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel
-import org.eclipse.core.resources.IFile
-import org.eclipse.core.resources.ResourcesPlugin
 
 @RunWith(typeof(XtextRunner2))
-@InjectWith(typeof(Aadl2UiInjectorProvider))
+@InjectWith(typeof(ErrorModelUiInjectorProvider))
 class Emfta1Test extends OsateTest {
 	override getProjectName() {
 		"test1"

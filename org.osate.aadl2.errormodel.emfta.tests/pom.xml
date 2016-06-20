@@ -46,6 +46,12 @@
 								<id>org.osate.aadl2.model.editor</id>
 								<versionRange>0.0.0</versionRange>
 							</requirement>
+							<requirement>
+								<!-- tests need error annex unparser-->
+								<type>eclipse-plugin</type>
+								<id>org.osate.xtext.aadl2.errormodel</id>
+								<versionRange>0.0.0</versionRange>
+							</requirement>
 						</extraRequirements>
 					</dependency-resolution>
 				</configuration>

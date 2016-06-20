@@ -100,16 +100,11 @@ public final class EMFTACreateModel {
 	public URI serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
 
 		try {
-
 			ResourceSet set = new ResourceSetImpl();
-
 			Resource res = set.createResource(newURI);// XXX URI.createURI(newFile.toString()));
-
 			res.getContents().add(emftaModel);
-
 			res.save(null);
 			return EcoreUtil.getURI(emftaModel);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
