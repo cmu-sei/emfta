@@ -1,7 +1,6 @@
 package org.osate.aadl2.errormodel.emfta.util;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.EList;
@@ -173,8 +172,10 @@ public class SiriusUtil {
 			if (!ModelingProject.hasModelingProjectNature(project)) {
 				try {
 					ModelingProjectManager.INSTANCE.convertToModelingProject(project, monitor);
-				} catch (CoreException e) {
+				} catch (Exception e) {
 					// Error while converting to modeling project
+					// throws a class cast exception on a list.
+					// XXX not returning null is ok.
 					return null;
 				}
 			}

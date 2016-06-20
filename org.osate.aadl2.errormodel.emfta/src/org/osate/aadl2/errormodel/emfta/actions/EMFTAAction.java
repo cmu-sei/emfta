@@ -202,7 +202,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		URI semanticResourceURI = URI.createPlatformResourceURI(ftamodelUri.toPlatformString(true), true);
 		Session existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
-
+		if (existingSession == null) {
+			// give it a second try. null was returned the first time due to a class cast exception at the end of
+			// setting the Modeling perspective.
+			existingSession = util.getSessionForProjectAndResource(project, semanticResourceURI, monitor);
+		}
 		if (existingSession != null) {
 			util.saveSession(existingSession, monitor);
 			ResourceSetImpl resset = new ResourceSetImpl();
