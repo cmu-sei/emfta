@@ -207,7 +207,11 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 			util.saveSession(existingSession, monitor);
 			ResourceSetImpl resset = new ResourceSetImpl();
 			FTAModel model = getFTAModelFromSession(existingSession, semanticResourceURI);
+			// XXX this next piece of code tries to compensate for a bug in Sirius where it cannot find the FTAModel
+			// It should be there since the getSessionForProjectandResource would have put it there.
 			if (model == null) {
+				OsateDebug.osateDebug(
+						"Could not find semantic resource FTAModel in session for URI " + semanticResourceURI.path());
 				EObject res = resset.getEObject(ftamodelUri, true);
 				if (res instanceof FTAModel) {
 					model = (FTAModel) res;
