@@ -90,20 +90,14 @@ public final class EMFTACreateModel {
 			URI newURI = EcoreUtil.getURI(si).trimFragment().trimSegments(2).appendSegment("fta")
 					.appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
-			return newURI;
+			URI ftauri = serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			return ftauri;
 		} else {
 			return null;
 		}
 	}
 
-	public void serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
-
-//		OsateDebug.osateDebug("[EMFTAAction]", "serializeReqSpecModel activeProject=" + activeProject);
-
-//		IFile newFile = activeProject.getFile(filename);
-//		OsateDebug.osateDebug("[EMFTAAction]", "save in file=" + newFile.getName());
-//XXX		IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
+	public URI serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
 
 		try {
 
@@ -113,16 +107,13 @@ public final class EMFTACreateModel {
 
 			res.getContents().add(emftaModel);
 
-// XXX			FileOutputStream fos = new FileOutputStream(newFile.getRawLocation().toFile());
-//			res.save(fos, null);
-//			fos.close();
 			res.save(null);
-
-//			activeProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+			return EcoreUtil.getURI(emftaModel);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return newURI;
 
 	}
 
