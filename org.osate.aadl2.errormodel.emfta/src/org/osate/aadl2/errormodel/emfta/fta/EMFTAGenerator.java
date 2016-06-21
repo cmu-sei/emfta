@@ -54,7 +54,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private ErrorBehaviorState rootComponentState;
 	private ErrorPropagation rootComponentPropagation;
 	private ErrorTypes rootComponentTypes;
-	private int eventIdentifier;
 	private boolean fullTree = false;
 
 	public Map<String, edu.cmu.emfta.Event> cache;
@@ -66,7 +65,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		rootComponentTypes = errorTypes;
 		rootComponentState = errorState;
 		rootComponentPropagation = null;
-		eventIdentifier = 0;
 	}
 
 	public EMFTAGenerator(ComponentInstance root, ErrorPropagation errorPropagation, ErrorTypes errorTypes) {
@@ -77,7 +75,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		rootComponentTypes = errorTypes;
 		rootComponentPropagation = errorPropagation;
 		rootComponentState = null;
-		eventIdentifier = 0;
 	}
 
 	public FTAModel getEmftaModel(boolean fullTree) {
@@ -118,17 +115,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 			}
 			emftaModel.getRoot().setName(longName);
-			cleanupReferenceCounts(emftaModel);
+			removeOrphans(emftaModel);
 		}
 		return emftaModel;
 	}
 
 	private String buildName(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		return buildIdentifier(component, namedElement, type);
-//		
-//		String name = eventIdentifier + "-" + buildIdentifier(component, namedElement, type);
-//		eventIdentifier = eventIdentifier + 1;
-//		return name;
 	}
 
 	private String buildIdentifier(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
@@ -157,47 +150,21 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return identifier;
 	}
 
-	/**
-	 * recomputes reference count and removes unused Events
-	 * reference counts > 1 on Event identifies common cause events.
-	 * @param ftamodel
-	 */
-	private void cleanupReferenceCounts(FTAModel ftamodel) {
-		Event root = ftamodel.getRoot();
-		EList<Event> eventlist = ftamodel.getEvents();
-		resetReferenceCounts(eventlist);
-		updateReferenceCounts(root);
-		removeOrphans(eventlist);
-	}
-
-	private void resetReferenceCounts(EList<Event> events) {
-		for (Event event : events) {
-			event.setReferenceCount(0);
-		}
-	}
-
-	private void removeOrphans(EList<Event> events) {
-		EList<Event> orphans = new BasicEList<Event>();
-		for (Event event : events) {
-			if (event.getReferenceCount() == 0) {
-				orphans.add(event);
-			}
-		}
+	private void removeOrphans(FTAModel ftamodel) {
+		EList<Event> events = ftamodel.getEvents();
+		EList<Event> orphans = new BasicEList<Event>(events);
+		updateOrphans(ftamodel.getRoot(), orphans);
 		events.removeAll(orphans);
 	}
 
-	private void updateReferenceCounts(Event ev) {
-		incrementReferenceCount(ev);
+	private void updateOrphans(Event ev, EList<Event> orphans) {
+		orphans.remove(ev);
 		if (ev.getGate() != null) {
 			EList<Event> events = ev.getGate().getEvents();
 			for (Event event : events) {
-				updateReferenceCounts(event);
+				updateOrphans(event, orphans);
 			}
 		}
-	}
-
-	private void incrementReferenceCount(Event ev) {
-		ev.setReferenceCount(ev.getReferenceCount() + 1);
 	}
 
 	/**
@@ -216,7 +183,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaModel.getEvents().add(newEvent);
 		newEvent.setName(name);
 		newEvent.setType(EventType.BASIC);
-		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
@@ -236,7 +202,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaModel.getEvents().add(newEvent);
 		newEvent.setName(name);
 		newEvent.setType(EventType.INTERMEDIATE);
-		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
@@ -258,7 +223,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		newEvent.setType(EventType.INTERMEDIATE);
 		newEvent.setName(eventname);
 		emftaModel.getEvents().add(newEvent);
-		newEvent.setReferenceCount(1);
 		return newEvent;
 	}
 
