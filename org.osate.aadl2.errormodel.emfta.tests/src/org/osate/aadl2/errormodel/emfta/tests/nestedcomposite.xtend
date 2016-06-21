@@ -241,18 +241,18 @@ end nestedcomposite;
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.7" name="nestedcomposite_main_nestedstate-failstop" description="Top Level Failure">
-  <events name="sensor1-failure" description="Error event Failure on component sensor1" referenceCount="1"/>
-  <events name="sensor2-failure" description="Error event Failure on component sensor2" referenceCount="1"/>
-  <events type="Intermediate" name="Intermediate0" referenceCount="1">
+  <events name="sensor1-failure" description="Error event Failure on component sensor1"/>
+  <events name="sensor2-failure" description="Error event Failure on component sensor2"/>
+  <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.0 //@events.1"/>
   </events>
-  <events name="actuator-failure" description="Error event Failure on component actuator" referenceCount="1"/>
-  <events name="voter.thr1-failure" description="Error event Failure on component thr1" referenceCount="1"/>
-  <events name="voter.thr2-failure" description="Error event Failure on component thr2" referenceCount="1"/>
-  <events type="Intermediate" name="Intermediate2" referenceCount="1">
+  <events name="actuator-failure" description="Error event Failure on component actuator"/>
+  <events name="voter.thr1-failure" description="Error event Failure on component thr1"/>
+  <events name="voter.thr2-failure" description="Error event Failure on component thr2"/>
+  <events type="Intermediate" name="Intermediate2">
     <gate type="AND" events="//@events.4 //@events.5"/>
   </events>
-  <events type="Intermediate" name="nestedcomposite_main_nestedstate-failstop" referenceCount="1">
+  <events type="Intermediate" name="nestedcomposite_main_nestedstate-failstop">
     <gate type="XOR" events="//@events.6 //@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>

@@ -160,13 +160,13 @@ end common_error3;
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.4" name="common_error3_main_commoneventssingleport-failstop" description="Top Level Failure">
-  <events name="a0-failure" description="Error event Failure on component a0" referenceCount="1"/>
-  <events name="c0-failure" description="Error event Failure on component c0" referenceCount="1"/>
-  <events name="a1-failure" description="Error event Failure on component a1" referenceCount="1"/>
-  <events type="Intermediate" name="Intermediate0" referenceCount="1">
+  <events name="a0-failure" description="Error event Failure on component a0"/>
+  <events name="c0-failure" description="Error event Failure on component c0"/>
+  <events name="a1-failure" description="Error event Failure on component a1"/>
+  <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.0 //@events.2"/>
   </events>
-  <events type="Intermediate" name="common_error3_main_commoneventssingleport-failstop" referenceCount="1">
+  <events type="Intermediate" name="common_error3_main_commoneventssingleport-failstop">
     <gate events="//@events.3 //@events.1"/>
   </events>
 </emfta:FTAModel>
