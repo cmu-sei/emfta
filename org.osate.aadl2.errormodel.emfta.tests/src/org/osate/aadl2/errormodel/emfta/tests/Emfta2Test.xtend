@@ -165,17 +165,17 @@ end ErrorModelLibrary;
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.6" name="emfta2test_main_i-failed" description="Top Level Failure">
-  <events name="s1-failure" description="Error event Failure on component s1" referenceCount="1"/>
-  <events name="sens1-f0-badvalue" description="Error source f0 on component sens1 from dataout with types {BadValue}" referenceCount="1"/>
-  <events type="Intermediate" name="s1-failed" referenceCount="1">
+  <events name="s1-failure" description="Error event Failure on component s1"/>
+  <events name="sens1-f0-badvalue" description="Error source f0 on component sens1 from dataout with types {BadValue}"/>
+  <events type="Intermediate" name="s1-failed">
     <gate events="//@events.0 //@events.1"/>
   </events>
-  <events name="s2-failure" description="Error event Failure on component s2" referenceCount="1"/>
-  <events name="sens2-f0-badvalue" description="Error source f0 on component sens2 from dataout with types {BadValue}" referenceCount="1"/>
-  <events type="Intermediate" name="s2-failed" referenceCount="1">
+  <events name="s2-failure" description="Error event Failure on component s2"/>
+  <events name="sens2-f0-badvalue" description="Error source f0 on component sens2 from dataout with types {BadValue}"/>
+  <events type="Intermediate" name="s2-failed">
     <gate events="//@events.3 //@events.4"/>
   </events>
-  <events type="Intermediate" name="emfta2test_main_i-failed" referenceCount="1">
+  <events type="Intermediate" name="emfta2test_main_i-failed">
     <gate type="AND" events="//@events.2 //@events.5"/>
   </events>
 </emfta:FTAModel>

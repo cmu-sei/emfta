@@ -171,13 +171,13 @@ end common_error1;
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.4" name="common_error1_main_commonsource-failstop" description="Top Level Failure">
-  <events name="a0-failure" description="Error event Failure on component a0" referenceCount="1"/>
-  <events name="s0-ef0-latedelivery" description="Error source ef0 on component s0 from valueout with types {LateDelivery}" referenceCount="1"/>
-  <events name="a1-failure" description="Error event Failure on component a1" referenceCount="1"/>
-  <events type="Intermediate" name="Intermediate0" referenceCount="1">
+  <events name="a0-failure" description="Error event Failure on component a0"/>
+  <events name="s0-ef0-latedelivery" description="Error source ef0 on component s0 from valueout with types {LateDelivery}"/>
+  <events name="a1-failure" description="Error event Failure on component a1"/>
+  <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.0 //@events.2"/>
   </events>
-  <events type="Intermediate" name="common_error1_main_commonsource-failstop" referenceCount="1">
+  <events type="Intermediate" name="common_error1_main_commonsource-failstop">
     <gate events="//@events.3 //@events.1"/>
   </events>
 </emfta:FTAModel>
@@ -186,7 +186,7 @@ end common_error1;
 	val expectedOperational = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.0" name="common_error1_main_commonsource-operational" description="Top Level Failure">
-  <events type="Intermediate" name="common_error1_main_commonsource-operational" referenceCount="1"/>
+  <events type="Intermediate" name="common_error1_main_commonsource-operational"/>
 </emfta:FTAModel>
 	'''
 }

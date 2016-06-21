@@ -125,9 +125,9 @@ end fta_sample;
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.2" name="fta_sample_main_i-failed" description="Top Level Failure">
-  <events name="s1-failure" description="Error event Failure on component s1" referenceCount="1"/>
-  <events name="s2-failure" description="Error event Failure on component s2" referenceCount="1"/>
-  <events type="Intermediate" name="fta_sample_main_i-failed" referenceCount="1">
+  <events name="s1-failure" description="Error event Failure on component s1"/>
+  <events name="s2-failure" description="Error event Failure on component s2"/>
+  <events type="Intermediate" name="fta_sample_main_i-failed">
     <gate type="AND" events="//@events.0 //@events.1"/>
   </events>
 </emfta:FTAModel>
