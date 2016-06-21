@@ -438,21 +438,18 @@ end FTerrorlibrary;
 
 	val expected = '''
 <?xml version="1.0" encoding="ASCII"?>
-<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.8" name="redundant2_main2_composite-failstop" description="Top Level Failure">
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.7" name="redundant2_main2_composite-failstop" description="Top Level Failure">
   <events name="actuator-failure" description="Error event Failure on component actuator" referenceCount="1"/>
   <events name="sensor1-valueout-latedelivery,outofrange" description="component sensor1 with out propagation valueout" referenceCount="1"/>
   <events name="sensor2-valueout-latedelivery,outofrange" description="component sensor2 with out propagation valueout" referenceCount="1"/>
   <events type="Intermediate" name="Intermediate0" referenceCount="1">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
-  <events name="voter.thr-failure" description="Error event Failure on component thr" referenceCount="1"/>
+  <events name="voter.thr-failstop-itemomission" description="Error event Failure on component thr" referenceCount="1"/>
   <events name="voter.thr-computeerror" description="Error event ComputeError on component thr" referenceCount="1"/>
-  <events type="Intermediate" name="voter.thr-failstop-itemomission" referenceCount="1">
-    <gate type="PRIORITY_AND" events="//@events.5 //@events.4"/>
-  </events>
   <events name="mem-memfail-serviceerror" description="Error source memfail on component mem with types {ServiceError}" referenceCount="1"/>
   <events type="Intermediate" name="redundant2_main2_composite-failstop" referenceCount="1">
-    <gate events="//@events.0 //@events.7 //@events.3 //@events.6"/>
+    <gate events="//@events.0 //@events.6 //@events.5 //@events.3 //@events.4"/>
   </events>
 </emfta:FTAModel>
 	'''
@@ -478,19 +475,16 @@ end FTerrorlibrary;
 	
 	val expected3 = '''
 <?xml version="1.0" encoding="ASCII"?>
-<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.6" name="redundant2_main2_transition-externaleffect-serviceomission" description="Top Level Failure">
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.5" name="redundant2_main2_transition-externaleffect-serviceomission" description="Top Level Failure">
   <events name="voter.thr-computeerror" description="Error event ComputeError on component thr" referenceCount="1"/>
   <events name="sensor1-valueout-latedelivery,outofrange" description="component sensor1 with out propagation valueout" referenceCount="1"/>
   <events name="sensor2-valueout-latedelivery,outofrange" description="component sensor2 with out propagation valueout" referenceCount="1"/>
   <events type="Intermediate" name="Intermediate0" referenceCount="1">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
-  <events name="voter.thr-failure" description="Error event Failure on component thr" referenceCount="1"/>
-  <events type="Intermediate" name="voter.thr-failstop-itemomission" referenceCount="1">
-    <gate type="PRIORITY_AND" events="//@events.0 //@events.4"/>
-  </events>
+  <events name="voter.thr-failstop-itemomission" description="Error event Failure on component thr" referenceCount="1"/>
   <events type="Intermediate" name="redundant2_main2_transition-externaleffect-serviceomission" referenceCount="1">
-    <gate events="//@events.3 //@events.5"/>
+    <gate events="//@events.0 //@events.3 //@events.4"/>
   </events>
 </emfta:FTAModel>
 	'''
