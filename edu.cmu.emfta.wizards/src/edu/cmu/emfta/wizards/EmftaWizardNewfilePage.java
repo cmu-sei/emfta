@@ -65,6 +65,7 @@ public class EmftaWizardNewfilePage extends org.eclipse.ui.dialogs.WizardNewFile
 
 		// sample section generation group
 		Group group = new Group(composite, SWT.NONE);
+	
 		group.setLayout(new GridLayout());
 		group.setText("Fault-Tree to add");
 		group.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -79,6 +80,7 @@ public class EmftaWizardNewfilePage extends org.eclipse.ui.dialogs.WizardNewFile
 		useIsolette.setText("Isolette");
 		useIsolette.setSelection(false);
 //		useIsolette.addListener(SWT.Selection, this);
+		
 	}
 
 	public boolean canFinish() {
@@ -119,11 +121,14 @@ public class EmftaWizardNewfilePage extends org.eclipse.ui.dialogs.WizardNewFile
 
 		File examplesDirectory = new File(FileLocator.toFileURL(rootURL).getFile());
 
-		if (this.useComputer.isEnabled()) {
+		if (this.useComputer.getSelection()) {
 			toCopy = "computer.emfta";
+			System.out.println("computer selected");
 		}
-		if (this.useIsolette.isEnabled()) {
+		
+		if (this.useIsolette.getSelection()) {
 			toCopy = "isolette.emfta";
+			System.out.println("isolatte selected");
 		}
 
 //		System.out.println("[EmftaWizardNewfilePage] tocopy" + toCopy);
