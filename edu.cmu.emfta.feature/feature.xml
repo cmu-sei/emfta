@@ -78,6 +78,7 @@ DM-0003411
       <import feature="org.eclipse.sirius.runtime" version="3.0.0.201506090807" match="greaterOrEqual"/>
       <import feature="org.eclipse.sirius.runtime.ide.ui" version="3.0.0.201506090807" match="greaterOrEqual"/>
       <import feature="org.eclipse.sirius.runtime.ide.xtext" version="3.0.0.201506090807" match="greaterOrEqual"/>
+      <import feature="org.eclipse.sirius.specifier" version="3.1.2.201511030845"/>
    </requires>
 
    <plugin
