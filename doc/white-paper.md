@@ -325,7 +325,7 @@ The next step is to refine the functional (application) architecture of the GPS 
 We can now generate EMFTA files from the instance model of GPS.ComputeError for Location{NoService}, Location{LowPrecision}, and Location{IncorrectData).
 Note that the fault tree can be generated for the specific error type of interest.
 
-![FTA COMPUTATIONAL](imgs/fta-with-computational.png "FTA Computational Error")
+![FTA COMPUTATIONAL](imgs/fta-computational.png "FTA Computational Error")
 
 
 Note also, that in the case of low precision data, we have an XOR gate that only includes the two sensor failures (see Figure 13). Power or network failure affects both sensors, thus does not satisfy the XOR.
