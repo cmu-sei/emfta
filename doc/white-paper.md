@@ -90,9 +90,8 @@ The EMFTA generator maps EMV2 constructs into fault tree Events and Gates as fol
   * AND maps to EMFTA AND
   * OR maps to EMFTA XOR (Note we will have an errata on EMV2 to allow XOR as keyword)
   * 1 ORMORE maps into EMFTA OR
-  * X ORMORE will map into appropriate combinations as EMFTA XOR of EMFTA AND combinations (not supported yet)
+  * X ORMORE will map into a voting k of n gate or translated into appropriate combinations of XOR and AND gate combinations (not supported yet)
   * ALL maps into EMTFA AND
-  * ALL – x will map into appropriate combinations as EMFTA XOR of EMFTA AND combinations (not supported yet)
 
 In the case of state-based EMFTA, the condition logic of composite error state declarations are reflected according to the above mapping. For each subcomponent state its composite state declaration is interpreted if present. Otherwise, the state is traced to the error events that trigger transition into the state by interpreting the transition conditions that lead to the error state (OR of multiple transitions), and recursively transitions triggered by error events leading to those states (PRIORITY_AND of multiple transitions). Error events are BASIC events. If the model does not include transitions triggered by error events that lead to the error state, the state itself is shown as BASIC event.
 
