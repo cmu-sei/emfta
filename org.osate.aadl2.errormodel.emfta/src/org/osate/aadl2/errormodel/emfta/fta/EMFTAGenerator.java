@@ -398,6 +398,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param gate
 	 */
 	private void flattenSubgates(Gate gate) {
+		if (gate == null)
+			return;
 		GateType mytype = gate.getType();
 		EList<Event> subEvents = gate.getEvents();
 		List<Event> toAdd = new LinkedList<Event>();
@@ -508,12 +510,12 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event transformSubgates(Event topevent, GateType gt, GateType topgt) {
 		Gate topgate = topevent.getGate();
 		if (topgate == null)
-			return null;
+			return topevent;
 		List<Event> subEvents = topgate.getEvents();
 		if (subEvents.isEmpty())
-			return null;
+			return topevent;
 		if (subEvents.size() == 1) {
-			return (Event) subEvents.get(0);
+			return topevent;// (Event) subEvents.get(0);
 		}
 		Set<Event> intersection = null;
 		List<Event> todo = new LinkedList<Event>();
@@ -613,7 +615,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	}
 
 	/**
-	 * find common events in subgates and remove them 
+	 * find common events in subgates and remove them.
+	 * This is done for an XOR gate, which should not include common events.
 	 * Currently does it if all of the gates of a given type have something in common.
 	 * also for various subsets of events with the matching gate type.
 	 * Distributive Law 3a and 3b (se NRC Fault Tree Handbook page 80.
@@ -624,12 +627,12 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event removeCommonEventsFromSubgates(Event topevent, GateType gt) {
 		Gate topgate = topevent.getGate();
 		if (topgate == null)
-			return null;
+			return topevent;
 		List<Event> subEvents = topgate.getEvents();
 		if (subEvents.isEmpty())
-			return null;
+			return topevent;
 		if (subEvents.size() == 1) {
-			return (Event) subEvents.get(0);
+			return topevent;// (Event) subEvents.get(0);
 		}
 		Set<Event> intersection = null;
 		List<Event> todo = new LinkedList<Event>();
