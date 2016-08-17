@@ -112,6 +112,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			}
 			emftaModel.setRoot(emftaRootEvent);
 			if (!fullTree) {
+				cleanupXORGates(emftaModel.getRoot());
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 			}
 			emftaModel.getRoot().setName(longName);
@@ -252,21 +253,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.XOR);
 
 		combined.setGate(emftaGate);
-		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			emftaGate.getEvents().add(se);
-//			if (se.getGate() != null && (se.getGate().getType() == GateType.XOR)) {
-//				for (Event ev : se.getGate().getEvents()) {
-//					emftaGate.getEvents().add(ev);
-//				}
-//			} else {
-//				emftaGate.getEvents().add(se);
-//			}
 		}
-//		if (combined.getGate().getEvents().size() == 1) {
-//			combined = combined.getGate().getEvents().get(0);
-//		}
 		return combined;
 
 	}
@@ -282,21 +272,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.OR);
 
 		combined.setGate(emftaGate);
-		// flatten OR
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			emftaGate.getEvents().add(se);
-//			if (se.getGate() != null && se.getGate().getType() == GateType.OR) {
-//				for (Event ev : se.getGate().getEvents()) {
-//					emftaGate.getEvents().add(ev);
-//				}
-//			} else {
-//				emftaGate.getEvents().add(se);
-//			}
 		}
-//		if (combined.getGate().getEvents().size() == 1) {
-//		combined = combined.getGate().getEvents().get(0);
-//	}
 		return combined;
 
 	}
@@ -312,22 +291,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.AND);
 
 		combined.setGate(emftaGate);
-		Set<Event> intersection = null;
-		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			emftaGate.getEvents().add(se);
-//			if (se.getGate() != null && se.getGate().getType() == GateType.AND) {
-//				for (Event ev : se.getGate().getEvents()) {
-//					emftaGate.getEvents().add(ev);
-//				}
-//			} else {
-//				emftaGate.getEvents().add(se);
-//			}
 		}
-//		if (combined.getGate().getEvents().size() == 1) {
-//		combined = combined.getGate().getEvents().get(0);
-//	}
 		return combined;
 	}
 
@@ -342,21 +309,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		emftaGate.setType(GateType.PRIORITY_AND);
 
 		combined.setGate(emftaGate);
-		// flatten
 		for (Object seobj : subEvents) {
 			Event se = (Event) seobj;
 			emftaGate.getEvents().add(se);
-//			if (se.getGate() != null && se.getGate().getType() == GateType.PRIORITY_AND) {
-//				for (Event ev : se.getGate().getEvents()) {
-//					emftaGate.getEvents().add(ev);
-//				}
-//			} else {
-//				emftaGate.getEvents().add(se);
-//			}
 		}
-//		if (combined.getGate().getEvents().size() == 1) {
-//		combined = combined.getGate().getEvents().get(0);
-//	}
 		return combined;
 	}
 
@@ -427,6 +383,29 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param rootevent
 	 * @return Event original or new root event
 	 */
+	private void cleanupXORGates(Event rootevent) {
+		if (rootevent.getGate() == null) {
+			return;
+		}
+		List<Event> subEvents = rootevent.getGate().getEvents();
+		for (Event event : subEvents) {
+			if (event.getGate() != null) {
+				cleanupXORGates(event);
+			}
+		}
+		if (rootevent.getGate().getType() == GateType.XOR) {
+			removeCommonEventsFromSubgates(rootevent, GateType.OR);
+		}
+		return;
+	}
+
+	/**
+	 * recursively apply optimizations on subgates.
+	 * At the end optimize gate of rootevent.
+	 * This may result in a new rootevent
+	 * @param rootevent
+	 * @return Event original or new root event
+	 */
 	private Event optimizeGates(Event rootevent) {
 		if (rootevent.getGate() == null) {
 			return rootevent;
@@ -453,14 +432,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		if (res.getGate().getType() == GateType.AND) {
 			Event tmp = transformSubgates(rootevent, GateType.OR, res.getGate().getType());
-			if (tmp != res) {
-				res = tmp;
-				flattenSubgates(res.getGate());
-				removeZeroOneEventSubGates(res.getGate());
-			}
-		}
-		if (res.getGate().getType() == GateType.XOR) {
-			Event tmp = removeCommonEventsFromSubgates(rootevent, GateType.OR);
 			if (tmp != res) {
 				res = tmp;
 				flattenSubgates(res.getGate());
@@ -624,15 +595,15 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * @param gt
 	 * @return Event 
 	 */
-	private Event removeCommonEventsFromSubgates(Event topevent, GateType gt) {
+	private void removeCommonEventsFromSubgates(Event topevent, GateType gt) {
 		Gate topgate = topevent.getGate();
 		if (topgate == null)
-			return topevent;
+			return;
 		List<Event> subEvents = topgate.getEvents();
 		if (subEvents.isEmpty())
-			return topevent;
+			return;
 		if (subEvents.size() == 1) {
-			return topevent;// (Event) subEvents.get(0);
+			return;
 		}
 		Set<Event> intersection = null;
 		List<Event> todo = new LinkedList<Event>();
@@ -661,7 +632,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 					}
 					flattenSubgates(topgate);
 					removeZeroOneEventSubGates(topgate);
-					return topevent;
+					return;
 				} else {
 					// remove intersection fro subset of gates
 					for (Event se : todo) {
@@ -674,7 +645,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			} else {
 				flattenSubgates(topgate);
 				removeZeroOneEventSubGates(topgate);
-				return topevent;
+				return;
 			}
 		}
 	}
