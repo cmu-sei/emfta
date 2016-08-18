@@ -39,6 +39,7 @@ import org.osate.xtext.aadl2.errormodel.errorModel.ErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
 import org.osate.xtext.aadl2.errormodel.errorModel.TypeSet;
+import org.osate.xtext.aadl2.errormodel.util.AnalysisModel;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 import org.osate.xtext.aadl2.errormodel.util.PropagationGraphBackwardTraversal;
 
@@ -51,6 +52,7 @@ import edu.cmu.emfta.GateType;
 
 public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private edu.cmu.emfta.FTAModel emftaModel;
+	private ComponentInstance rootComponent;
 	private ErrorBehaviorState rootComponentState;
 	private ErrorPropagation rootComponentPropagation;
 	private ErrorTypes rootComponentTypes;
@@ -58,20 +60,28 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 
 	public Map<String, edu.cmu.emfta.Event> cache;
 
-	public EMFTAGenerator(ComponentInstance root, ErrorBehaviorState errorState, ErrorTypes errorTypes) {
-		super(root);
+	public EMFTAGenerator(AnalysisModel am, ComponentInstance root, ErrorBehaviorState errorState,
+			ErrorTypes errorTypes) {
+		super(am);
 		emftaModel = null;
 		cache = new HashMap<String, edu.cmu.emfta.Event>();
+		rootComponent = root;
 		rootComponentTypes = errorTypes;
 		rootComponentState = errorState;
 		rootComponentPropagation = null;
 	}
 
-	public EMFTAGenerator(ComponentInstance root, ErrorPropagation errorPropagation, ErrorTypes errorTypes) {
+	private ComponentInstance getRootComponent() {
+		return rootComponent;
+	}
+
+	public EMFTAGenerator(AnalysisModel am, ComponentInstance root, ErrorPropagation errorPropagation,
+			ErrorTypes errorTypes) {
 		// TOFIX
-		super(root);
+		super(am);
 		emftaModel = null;
 		cache = new HashMap<String, edu.cmu.emfta.Event>();
+		rootComponent = root;
 		rootComponentTypes = errorTypes;
 		rootComponentPropagation = errorPropagation;
 		rootComponentState = null;

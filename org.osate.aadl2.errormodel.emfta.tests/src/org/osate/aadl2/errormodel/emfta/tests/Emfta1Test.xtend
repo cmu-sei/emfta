@@ -48,7 +48,7 @@ class Emfta1Test extends OsateTest {
 //		assertEquals("fta_main_i_Instance", instance.name)
 
 		
-		val checker = new EMFTACreateModel()
+		val checker = new EMFTACreateModel(instance)
 		val testuri = checker.createModel(instance,state,false)
 		val file = workspaceRoot.getFile(new Path(testuri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)

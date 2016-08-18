@@ -61,7 +61,7 @@ class CommonError1Test extends OsateTest {
 		val instance = InstantiateModel::buildInstanceModelFile(sysImpl)
 //		assertEquals("fta_main_i_Instance", instance.name)
 		
-		val checker = new EMFTACreateModel()
+		val checker = new EMFTACreateModel(instance)
 		val uri =checker.createModel(instance,state,false)
 		
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))

@@ -140,7 +140,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		if (ERROR_STATE_NAME != null) {
 //			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
-			EMFTACreateModel doModel = new EMFTACreateModel();
+			EMFTACreateModel doModel = new EMFTACreateModel(si);
 			URI newURI = doModel.createModel(this.si, ERROR_STATE_NAME, FULL_TREE);
 			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
 			if ((newFile.exists())) {

@@ -26,22 +26,32 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.ui.util.ResourceUtil;
+import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
 import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
+import org.osate.xtext.aadl2.errormodel.util.AnalysisModel;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
 import edu.cmu.emfta.FTAModel;
 
 public final class EMFTACreateModel {
 
-	public static final String prefixState = "state ";
-	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
+	private static final String prefixState = "state ";
+	private static final String prefixOutgoingPropagation = "outgoing propagation on ";
 
-	public URI createModel(SystemInstance si, final String errorStateName, boolean fullTree) {
+	private ComponentInstance rootComponent;
+	private AnalysisModel currentAnalysisModel;
+
+	public EMFTACreateModel(SystemInstance root) {
+		rootComponent = root;
+		currentAnalysisModel = new AnalysisModel(root, false);
+	}
+
+	public URI createModel(ComponentInstance selection, final String errorStateName, boolean fullTree) {
 //		String errorStateName;
 //		String errorStateTypeName;
 		ErrorBehaviorState errorState;
@@ -55,7 +65,7 @@ public final class EMFTACreateModel {
 
 		if (errorStateName.startsWith(prefixState)) {
 			toProcess = errorStateName.replace(prefixState, "");
-			for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
+			for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(selection)) {
 				if (ebs.getName().equalsIgnoreCase(toProcess)) {
 					errorState = ebs;
 				}
@@ -65,7 +75,7 @@ public final class EMFTACreateModel {
 
 		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
 			toProcess = errorStateName.replace(prefixOutgoingPropagation, "");
-			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
+			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(selection)) {
 				String longName = EMV2Util.getPrintName(opc.getOutgoing()) + EMV2Util.getPrintName(opc.getTypeToken());
 				if (longName.equalsIgnoreCase(toProcess)) {
 					errorPropagation = opc.getOutgoing();
@@ -78,26 +88,27 @@ public final class EMFTACreateModel {
 		wrapper = null;
 		if ((errorState != null) || (errorPropagation != null)) {
 			if (errorState != null) {
-				wrapper = new EMFTAGenerator(si, errorState, errorType);
+				wrapper = new EMFTAGenerator(currentAnalysisModel, selection, errorState, errorType);
 			}
 			if (errorPropagation != null) {
-				wrapper = new EMFTAGenerator(si, errorPropagation, errorType);
+				wrapper = new EMFTAGenerator(currentAnalysisModel, selection, errorPropagation, errorType);
 			}
 			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
 			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
 			ftamodel.setName(rootname);
 
-			URI newURI = EcoreUtil.getURI(si).trimFragment().trimSegments(2).appendSegment("fta")
+			URI newURI = EcoreUtil.getURI(selection).trimFragment().trimSegments(2).appendSegment("fta")
 					.appendSegment(rootname + ".emfta");
 			AadlUtil.makeSureFoldersExist(new Path(newURI.toPlatformString(true)));
-			URI ftauri = serializeEmftaModel(ftamodel, newURI, ResourceUtil.getFile(si.eResource()).getProject());
+			URI ftauri = serializeEmftaModel(ftamodel, newURI,
+					ResourceUtil.getFile(selection.eResource()).getProject());
 			return ftauri;
 		} else {
 			return null;
 		}
 	}
 
-	public URI serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
+	private URI serializeEmftaModel(edu.cmu.emfta.FTAModel emftaModel, final URI newURI, final IProject activeProject) {
 
 		try {
 			ResourceSet set = new ResourceSetImpl();
