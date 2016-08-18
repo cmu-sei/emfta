@@ -50,7 +50,7 @@ class CommonError2Test extends OsateTest {
 //		assertEquals("fta_main_i_Instance", instance.name)
 
 		
-		val checker = new EMFTACreateModel()
+		val checker = new EMFTACreateModel(instance)
 		val uri=checker.createModel(instance,state,false)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
