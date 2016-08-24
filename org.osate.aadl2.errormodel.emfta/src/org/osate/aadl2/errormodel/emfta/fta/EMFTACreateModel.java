@@ -20,6 +20,7 @@ package org.osate.aadl2.errormodel.emfta.fta;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -32,8 +33,9 @@ import org.osate.aadl2.modelsupport.util.AadlUtil;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorTypes;
-import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
+import org.osate.xtext.aadl2.errormodel.errorModel.TypeToken;
 import org.osate.xtext.aadl2.errormodel.util.AnalysisModel;
+import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
 import edu.cmu.emfta.FTAModel;
@@ -75,11 +77,22 @@ public final class EMFTACreateModel {
 
 		if (errorStateName.startsWith(prefixOutgoingPropagation)) {
 			toProcess = errorStateName.replace(prefixOutgoingPropagation, "");
-			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(selection)) {
-				String longName = EMV2Util.getPrintName(opc.getOutgoing()) + EMV2Util.getPrintName(opc.getTypeToken());
-				if (longName.equalsIgnoreCase(toProcess)) {
-					errorPropagation = opc.getOutgoing();
-					errorType = opc.getTypeToken();
+//			for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(selection)) {
+//				String longName = EMV2Util.getPrintName(opc.getOutgoing()) + EMV2Util.getPrintName(opc.getTypeToken());
+//				if (longName.equalsIgnoreCase(toProcess)) {
+//					errorPropagation = opc.getOutgoing();
+//					errorType = opc.getTypeToken();
+//				}
+//			}
+			for (ErrorPropagation opc : EMV2Util.getAllOutgoingErrorPropagations(selection.getComponentClassifier())) {
+				EList<TypeToken> result = EM2TypeSetUtil.generateAllLeafTypeTokens(opc.getTypeSet(),
+						EMV2Util.getUseTypes(opc));
+				for (TypeToken tt : result) {
+					String longName = EMV2Util.getPrintName(opc) + EMV2Util.getPrintName(tt);
+					if (longName.equalsIgnoreCase(toProcess) && !tt.getType().isEmpty()) {
+						errorPropagation = opc;
+						errorType = tt.getType().get(0);
+					}
 				}
 			}
 		}

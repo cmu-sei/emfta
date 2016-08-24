@@ -21,17 +21,15 @@ package org.osate.aadl2.errormodel.emfta.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -50,13 +48,16 @@ import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
+import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.aadl2.util.OsateDebug;
 import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
-import org.osate.xtext.aadl2.errormodel.errorModel.OutgoingPropagationCondition;
+import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
+import org.osate.xtext.aadl2.errormodel.errorModel.TypeToken;
+import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
 import edu.cmu.emfta.FTAModel;
@@ -68,6 +69,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
+	ComponentInstance target;
 
 	@Override
 	protected String getMarkerType() {
@@ -88,17 +90,24 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 		if (obj instanceof InstanceObject) {
 			si = ((InstanceObject) obj).getSystemInstance();
+			if (obj instanceof ComponentInstance) {
+				target = (ComponentInstance) obj;
+			} else {
+				target = si;
+			}
 		}
 
 		if (si == null) {
 			Dialog.showInfo("Fault Tree Analysis", "Please choose an instance model");
 			monitor.done();
+			return;
 		}
 
-		if (!EMV2Util.hasCompositeErrorBehavior(si) && !EMV2Util.hasOutgoingPropagationCondition(si)) {
+		if (!EMV2Util.hasErrorBehaviorStates(target) && !EMV2Util.hasOutgoingPropagations(target)) {
 			Dialog.showInfo("Fault Tree Analysis",
-					"Your system instance must have a composite state or outgoing propagation condition declaration.");
+					"Your system instance or selected component instance must have error behavior states or outgoing propagations.");
 			monitor.done();
+			return;
 		}
 
 		final Display d = PlatformUI.getWorkbench().getDisplay();
@@ -113,25 +122,30 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				sh = window.getShell();
 
-				if (EMV2Util.hasCompositeErrorBehavior(si)) {
-					for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(si)) {
-						stateNames.add(prefixState + ebs.getName());
-					}
+				for (ErrorBehaviorState ebs : EMV2Util.getAllErrorBehaviorStates(target)) {
+					stateNames.add(prefixState + ebs.getName());
 				}
 
-				for (OutgoingPropagationCondition opc : EMV2Util.getAllOutgoingPropagationConditions(si)) {
-					if (!(opc.getOutgoing().getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
+				for (ErrorPropagation opc : EMV2Util.getAllOutgoingErrorPropagations(target.getComponentClassifier())) {
+					if (!(opc.getFeatureorPPRef().getFeatureorPP() instanceof Feature)) {
 						continue;
 					}
-					String epName = prefixOutgoingPropagation + EMV2Util.getPrintName(opc.getOutgoing())
-							+ EMV2Util.getPrintName(opc.getTypeToken());
-					if (!stateNames.contains(epName)) {
-						stateNames.add(epName);
+					EList<TypeToken> result = EM2TypeSetUtil.generateAllLeafTypeTokens(opc.getTypeSet(),
+							EMV2Util.getUseTypes(opc));
+					for (TypeToken tt : result) {
+						String epName = prefixOutgoingPropagation + EMV2Util.getPrintName(opc)
+								+ EMV2Util.getPrintName(tt);
+						if (!stateNames.contains(epName)) {
+							stateNames.add(epName);
+						}
 					}
 				}
 
 				FTADialog diag = new FTADialog(sh);
 				diag.setValues(stateNames);
+				diag.setTarget(
+						"'" + (target instanceof SystemInstance ? target.getName() : target.getComponentInstancePath())
+								+ "'");
 				diag.open();
 				ERROR_STATE_NAME = diag.getValue();
 				FULL_TREE = diag.getFullTree();
@@ -139,23 +153,14 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 		});
 
 		if (ERROR_STATE_NAME != null) {
-//			OsateDebug.osateDebug("Create FTA for|"+ERROR_STATE_NAME+"|");
 			EMFTACreateModel doModel = new EMFTACreateModel(si);
-			URI newURI = doModel.createModel(this.si, ERROR_STATE_NAME, FULL_TREE);
-			IFile newFile = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(newURI.toPlatformString(true)));
-			if ((newFile.exists())) {
-				/**
-				 * If the file exists, we show a dialog box.
-				 */
-//				OsateDebug.osateDebug("file exists");
-//				Dialog.showInfo("Fault Tree Analysis", "File already exists. Please delete if you want to re-generate");
+			URI newURI = doModel.createModel(target, ERROR_STATE_NAME, FULL_TREE);
+			if (newURI != null) {
+				autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
+				monitor.done();
+				return;
 			}
-			autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
-		} else {
-			Dialog.showInfo("Fault Tree Analysis",
-					"Unable to create the Fault Tree Analysis, please read the help content");
 		}
-
 		monitor.done();
 	}
 

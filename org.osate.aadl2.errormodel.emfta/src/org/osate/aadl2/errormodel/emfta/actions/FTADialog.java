@@ -37,6 +37,7 @@ public class FTADialog extends TitleAreaDialog {
 	private Combo errorMode;
 	private Button fullTreeBox;
 	private boolean fullTree;
+	private String target = "";
 
 	public FTADialog(Shell parentShell) {
 		super(parentShell);
@@ -44,14 +45,18 @@ public class FTADialog extends TitleAreaDialog {
 
 	public void setValues(java.util.List<String> v) {
 		values = v;
+	}
 
+	public void setTarget(String targetname) {
+		target = targetname;
 	}
 
 	@Override
 	public void create() {
 		super.create();
 		setTitle("Fault-Tree Analysis");
-		setMessage("Select the Failure Mode to Analyze (error state, propagation)", IMessageProvider.INFORMATION);
+		setMessage("Select the Failure Mode to Analyze (error state, propagation)"
+				+ (target.isEmpty() ? "" : " for " + target), IMessageProvider.INFORMATION);
 	}
 
 	@Override
