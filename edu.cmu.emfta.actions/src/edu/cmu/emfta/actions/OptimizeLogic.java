@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 import edu.cmu.emfta.EmftaFactory;
 import edu.cmu.emfta.Event;
+import edu.cmu.emfta.EventType;
 import edu.cmu.emfta.FTAModel;
 import edu.cmu.emfta.Gate;
 import edu.cmu.emfta.GateType;
@@ -22,15 +24,78 @@ public class OptimizeLogic {
 		this.rootEvent = root;
 		this.factorize = _factorize;
 		this.removeUselessOr = _removeUselessOr;
-		
-		browsedElements = new ArrayList<Event>();
 	}
+	
+	/**
+	 * return the FTAModel associated with an event
+	 * @param e
+	 * @return
+	 */
+	public FTAModel getModel (Event e)
+	{
+		Object o = e;
+		while (! (o instanceof FTAModel))
+		{
+			o = e.eContainer();
+		}
+		return (FTAModel) o;
+	}
+	
+	/**
+	 * return the max height of a subtree
+	 * @param e - the root of the subtree
+	 * @return the height of the new subtree
+	 */
+	public int getMaxHeight (Event e)
+	{
+		int max = 0;
+		if(e.getGate() == null)
+		{
+			return 0;
+		}
+		else
+		{
+			Gate gate = e.getGate();
+			for (Event subEvent : gate.getEvents())
+			{
+				max = Math.max(getMaxHeight(subEvent), max);
+			}
+		}
+		max++;
+		return max;
+		
+	}
+	
+	/**
+	 * isInList indicates if an event is in a list according
+	 * to the event named. Because list.contains(e) will do the
+	 * comparison according to the object reference, we would like
+	 * to do this according to the event name that should be
+	 * unique in the system.
+	 * @param event the event to test
+	 * @param list a list of event
+	 * @return true if the first parameter is in the list based on the event name
+	 */
+	public boolean isInList (Event event, List<Event> list)
+	{
+		for (Event e : list)
+		{
+			if (e.getName().equalsIgnoreCase(event.getName())) 
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	
 	
 	public void perform ()
 	{
 		if (this.removeUselessOr)
 		{
-			optimizeCommonOrEvents (rootEvent);
+			optimizeCommonOrEvents (rootEvent, new ArrayList<Event>() , new Stack<Event>());
 		}
 		
 		if (this.factorize)
@@ -57,7 +122,7 @@ public class OptimizeLogic {
 		FTAModel model;
 		
 		
-		model = (FTAModel) event.eContainer();
+		model = getModel(event);
 
 		
 		gate = event.getGate();
@@ -216,14 +281,18 @@ public class OptimizeLogic {
 	 * or gates.
 	 * 
 	 * @param event - the event under investigation. the code will browse sub-events.
+	 * @param browsedElements - all events that have been browsed during the optimization.
+	 * @param stack - stack of events that have been traversed so far. Used to see if after
+	 *                optimization, only one event remains and if we can then delete the
+	 *                intermediate event. This does not contains terminal elements/events.
 	 */
-	private void optimizeCommonOrEvents (Event event)
+	private void optimizeCommonOrEvents (Event event, List<Event> browsedElements, Stack<Event> stack)
 	{
-//		System.out.println("[OptimizationAction] process: "+event.getName());
 
 		Gate gate = event.getGate();
 		List<Event> toDelete = new ArrayList<Event>();
-
+		List<Event> gateEvents;
+		
 		/**
 		 * if there is no event, we do not go further
 		 */
@@ -232,6 +301,7 @@ public class OptimizeLogic {
 			return;
 		}
 		
+		gateEvents = gate.getEvents();
 
 		/**
 		 * We start to see if there is any redundant events in the sub-events.
@@ -239,10 +309,11 @@ public class OptimizeLogic {
 		 * directly, it might generate inconsistencies in the list members
 		 * and the iterator that browses the getEvents() call.
 		 */
-		for (Event subEvent : gate.getEvents())
+		for (Event subEvent : gateEvents)
 		{
-			if (browsedElements.contains(subEvent))
+			if (isInList(subEvent, browsedElements))
 			{
+//				System.out.println("[OptimizationAction] should delete: "+subEvent.getName());
 				toDelete.add(subEvent);
 			}
 		}
@@ -255,7 +326,8 @@ public class OptimizeLogic {
 			for (Event del : toDelete)
 			{
 //				System.out.println("[OptimizationAction] delete: "+del.getName());
-				gate.getEvents().remove(del);
+				gateEvents.remove(del);
+				getModel(event).getEvents().remove(del);
 			}
 		}
 		
@@ -265,22 +337,101 @@ public class OptimizeLogic {
 		 */
 		if (gate.getType() == GateType.OR)
 		{
-			for (Event subEvent : gate.getEvents())
+			for (Event subEvent : gateEvents)
 			{
-				if (! browsedElements.contains(subEvent))
+				if (! isInList(subEvent, browsedElements))
 				{
 					browsedElements.add(subEvent);
 				}
 			}
+			
+			/**
+			 * We continue and browse sub-events. We apply the optimization
+			 * logic. Then, if the resulting gate has only one event, we delete
+			 * the gate and add the number on the top-gate.
+			 */
+			stack.push(event);
+			for (int i = 0 ; i < gateEvents.size() ; i++)
+			{
+				Event subEvent = gateEvents.get(i);
+				optimizeCommonOrEvents (subEvent, browsedElements, stack);
+
+			}
+			stack.pop();
+			
+			if (gate.getEvents().size() == 1)
+			{
+				Event topEventWithOr = stack.peek();
+				if (topEventWithOr != null)
+				{
+					topEventWithOr.getGate().getEvents().addAll(gate.getEvents());
+					event.setGate (null); 
+				}
+			}
+			
+			/**
+			 * Clean the tree. If the tree has sub-events with only one child
+			 * or intermediate events that no longer have a gate, we remove
+			 * them automatically.
+			 */
+			for (Event subEvent : gateEvents)
+			{
+				if (
+						( (subEvent.getType() == EventType.INTERMEDIATE) && (subEvent.getGate() != null) && (subEvent.getGate().getEvents().size() == 0)) ||
+						( (subEvent.getType() == EventType.INTERMEDIATE) && (subEvent.getGate() == null))
+					)
+				{
+					gateEvents.remove(subEvent);
+					getModel(event).getEvents().remove(subEvent);
+				}	 
+			}
+//			System.out.println("event=" + event.getName() + " height=" + getMaxHeight(event));
+			
+			/**
+			 * Next, we "flatten" the FTA by removing intermediate event. 
+			 */
+			if (getMaxHeight(event) == 2)
+			{
+				List<Event> delete = new ArrayList<Event>();
+				
+				for (Event subEvent : gateEvents)
+				{
+					if (subEvent.getGate() == null)
+					{
+						continue;
+					}
+					
+					if (subEvent.getGate().getType() != GateType.OR)
+					{
+						continue;
+					}
+					
+					delete.add(subEvent);
+				}
+				
+				for (Event e : delete)
+				{
+					event.getGate().getEvents().remove(e);
+					getModel(event).getEvents().remove(e);
+					event.getGate().getEvents().addAll(e.getGate().getEvents());
+				}
+			}
 		}
 		
-		/**
-		 * We continue and browse sub-events.
-		 */
-		for (Event subEvent : gate.getEvents())
+		
+		if (gate.getType() == GateType.AND)
 		{
-			optimizeCommonOrEvents (subEvent);
+			/**
+			 * TODO - fix the AND gate. This code has been written bu not tested. One
+			 * should test it before release.
+			 * The idea here is that a AND gate is a new context. We cannot reuse the
+			 * same set of browsed element. So, we start a new context with an empty list
+			 * of browsed elements.
+			 */
+			for (Event subEvent : gateEvents)
+			{
+				optimizeCommonOrEvents  (subEvent, new ArrayList<Event> (), new Stack<Event>());
+			}
 		}
-		
 	}
 }

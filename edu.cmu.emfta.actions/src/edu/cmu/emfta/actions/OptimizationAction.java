@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.transaction.TransactionalEditingDomain;
+import org.eclipse.emf.transaction.util.TransactionUtil;
 import org.eclipse.sirius.business.api.action.AbstractExternalJavaAction;
 import org.eclipse.sirius.diagram.business.internal.metamodel.spec.DNodeSpec;
 import org.eclipse.sirius.diagram.business.internal.metamodel.spec.DSemanticDiagramSpec;
@@ -38,7 +40,7 @@ import edu.cmu.emfta.Event;
 import edu.cmu.emfta.FTAModel;
 import edu.cmu.emfta.Gate;
 import edu.cmu.emfta.GateType;
-
+import org.eclipse.emf.transaction.RecordingCommand;
 
 
 public class OptimizationAction extends AbstractExternalJavaAction {
@@ -64,15 +66,33 @@ public class OptimizationAction extends AbstractExternalJavaAction {
 			}
 
 			if (target != null) {
-				System.out.println("[OptimizationAction] Optimize from event = " + target);
-//				report.append("Event,declared,computed\n");
-//				performComputation((Event) target);
-//				Utils.writeFile(report, target);
-				new OptimizeLogic((Event)target, true, false).perform();
+//				System.out.println("[OptimizationAction] Optimize from event = " + target);
+				//				report.append("Event,declared,computed\n");
+				//				performComputation((Event) target);
+				//				Utils.writeFile(report, target);
+				final TransactionalEditingDomain editingDomain = TransactionUtil.getEditingDomain(target);
+				final EObject domainObject = target;
+				editingDomain.getCommandStack().execute(new RecordingCommand(editingDomain) {
+					/**
+					 {@inheritDoc}
+
+					 */
+					@Override
+					protected void doExecute() {
+						new OptimizeLogic((Event)domainObject, true, false).perform();
+					}
+				});
+
+
+				
 				Utils.refreshProject(target);
 				return;
 			}
 
+			/**
+			 * If we did not find the target element on which we should run
+			 * the optimize function, we explicitely return.
+			 */
 			MessageBox dialog = new MessageBox(Display.getDefault().getActiveShell(), SWT.ERROR | SWT.ICON_ERROR);
 			dialog.setText("Error");
 			dialog.setMessage("Please select an event in the FTA tree");
