@@ -186,13 +186,22 @@ public interface EmftaPackage extends EPackage {
 	int GATE__EVENTS = 2;
 
 	/**
+	 * The feature id for the '<em><b>Nb Occurrences</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int GATE__NB_OCCURRENCES = 3;
+
+	/**
 	 * The number of structural features of the '<em>Gate</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int GATE_FEATURE_COUNT = 3;
+	int GATE_FEATURE_COUNT = 4;
 
 	/**
 	 * The number of operations of the '<em>Gate</em>' class.
@@ -428,6 +437,17 @@ public interface EmftaPackage extends EPackage {
 	EReference getGate_Events();
 
 	/**
+	 * Returns the meta object for the attribute '{@link edu.cmu.emfta.Gate#getNbOccurrences <em>Nb Occurrences</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Nb Occurrences</em>'.
+	 * @see edu.cmu.emfta.Gate#getNbOccurrences()
+	 * @see #getGate()
+	 * @generated
+	 */
+	EAttribute getGate_NbOccurrences();
+
+	/**
 	 * Returns the meta object for class '{@link edu.cmu.emfta.FTAModel <em>FTA Model</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -634,6 +654,14 @@ public interface EmftaPackage extends EPackage {
 		 * @generated
 		 */
 		EReference GATE__EVENTS = eINSTANCE.getGate_Events();
+
+		/**
+		 * The meta object literal for the '<em><b>Nb Occurrences</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute GATE__NB_OCCURRENCES = eINSTANCE.getGate_NbOccurrences();
 
 		/**
 		 * The meta object literal for the '{@link edu.cmu.emfta.impl.FTAModelImpl <em>FTA Model</em>}' class.

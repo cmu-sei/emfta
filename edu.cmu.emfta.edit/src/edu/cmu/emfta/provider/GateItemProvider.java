@@ -63,6 +63,7 @@ public class GateItemProvider
 			addTypePropertyDescriptor(object);
 			addDescriptionPropertyDescriptor(object);
 			addEventsPropertyDescriptor(object);
+			addNbOccurrencesPropertyDescriptor(object);
 		}
 		return itemPropertyDescriptors;
 	}
@@ -134,6 +135,28 @@ public class GateItemProvider
 	}
 
 	/**
+	 * This adds a property descriptor for the Nb Occurrences feature.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected void addNbOccurrencesPropertyDescriptor(Object object) {
+		itemPropertyDescriptors.add
+			(createItemPropertyDescriptor
+				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
+				 getResourceLocator(),
+				 getString("_UI_Gate_nbOccurrences_feature"),
+				 getString("_UI_PropertyDescriptor_description", "_UI_Gate_nbOccurrences_feature", "_UI_Gate_type"),
+				 EmftaPackage.Literals.GATE__NB_OCCURRENCES,
+				 true,
+				 false,
+				 false,
+				 ItemPropertyDescriptor.INTEGRAL_VALUE_IMAGE,
+				 null,
+				 null));
+	}
+
+	/**
 	 * This returns Gate.gif.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -175,6 +198,7 @@ public class GateItemProvider
 			case EmftaPackage.GATE__TYPE:
 			case EmftaPackage.GATE__DESCRIPTION:
 			case EmftaPackage.GATE__EVENTS:
+			case EmftaPackage.GATE__NB_OCCURRENCES:
 				fireNotifyChanged(new ViewerNotification(notification, notification.getNotifier(), false, true));
 				return;
 		}

@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.util.EObjectResolvingEList;
  *   <li>{@link edu.cmu.emfta.impl.GateImpl#getType <em>Type</em>}</li>
  *   <li>{@link edu.cmu.emfta.impl.GateImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link edu.cmu.emfta.impl.GateImpl#getEvents <em>Events</em>}</li>
+ *   <li>{@link edu.cmu.emfta.impl.GateImpl#getNbOccurrences <em>Nb Occurrences</em>}</li>
  * </ul>
  *
  * @generated
@@ -79,6 +80,26 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 	 * @ordered
 	 */
 	protected EList<Event> events;
+
+	/**
+	 * The default value of the '{@link #getNbOccurrences() <em>Nb Occurrences</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getNbOccurrences()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final int NB_OCCURRENCES_EDEFAULT = 1;
+
+	/**
+	 * The cached value of the '{@link #getNbOccurrences() <em>Nb Occurrences</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getNbOccurrences()
+	 * @generated
+	 * @ordered
+	 */
+	protected int nbOccurrences = NB_OCCURRENCES_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -158,6 +179,27 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public int getNbOccurrences() {
+		return nbOccurrences;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setNbOccurrences(int newNbOccurrences) {
+		int oldNbOccurrences = nbOccurrences;
+		nbOccurrences = newNbOccurrences;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, EmftaPackage.GATE__NB_OCCURRENCES, oldNbOccurrences, nbOccurrences));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
@@ -167,6 +209,8 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 				return getDescription();
 			case EmftaPackage.GATE__EVENTS:
 				return getEvents();
+			case EmftaPackage.GATE__NB_OCCURRENCES:
+				return getNbOccurrences();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -190,6 +234,9 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 				getEvents().clear();
 				getEvents().addAll((Collection<? extends Event>)newValue);
 				return;
+			case EmftaPackage.GATE__NB_OCCURRENCES:
+				setNbOccurrences((Integer)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -211,6 +258,9 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 			case EmftaPackage.GATE__EVENTS:
 				getEvents().clear();
 				return;
+			case EmftaPackage.GATE__NB_OCCURRENCES:
+				setNbOccurrences(NB_OCCURRENCES_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -229,6 +279,8 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 				return DESCRIPTION_EDEFAULT == null ? description != null : !DESCRIPTION_EDEFAULT.equals(description);
 			case EmftaPackage.GATE__EVENTS:
 				return events != null && !events.isEmpty();
+			case EmftaPackage.GATE__NB_OCCURRENCES:
+				return nbOccurrences != NB_OCCURRENCES_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -247,6 +299,8 @@ public class GateImpl extends MinimalEObjectImpl.Container implements Gate {
 		result.append(type);
 		result.append(", description: ");
 		result.append(description);
+		result.append(", nbOccurrences: ");
+		result.append(nbOccurrences);
 		result.append(')');
 		return result.toString();
 	}
