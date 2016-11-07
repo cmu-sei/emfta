@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link edu.cmu.emfta.Gate#getType <em>Type</em>}</li>
  *   <li>{@link edu.cmu.emfta.Gate#getDescription <em>Description</em>}</li>
  *   <li>{@link edu.cmu.emfta.Gate#getEvents <em>Events</em>}</li>
+ *   <li>{@link edu.cmu.emfta.Gate#getNbOccurrences <em>Nb Occurrences</em>}</li>
  * </ul>
  *
  * @see edu.cmu.emfta.EmftaPackage#getGate()
@@ -94,5 +95,32 @@ public interface Gate extends EObject {
 	 * @generated
 	 */
 	EList<Event> getEvents();
+
+	/**
+	 * Returns the value of the '<em><b>Nb Occurrences</b></em>' attribute.
+	 * The default value is <code>"1"</code>.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Nb Occurrences</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Nb Occurrences</em>' attribute.
+	 * @see #setNbOccurrences(int)
+	 * @see edu.cmu.emfta.EmftaPackage#getGate_NbOccurrences()
+	 * @model default="1"
+	 * @generated
+	 */
+	int getNbOccurrences();
+
+	/**
+	 * Sets the value of the '{@link edu.cmu.emfta.Gate#getNbOccurrences <em>Nb Occurrences</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Nb Occurrences</em>' attribute.
+	 * @see #getNbOccurrences()
+	 * @generated
+	 */
+	void setNbOccurrences(int value);
 
 } // Gate

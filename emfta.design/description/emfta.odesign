@@ -64,6 +64,18 @@
               <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
             </style>
           </conditionnalStyles>
+          <conditionnalStyles predicateExpression="[self.type.toString().equalsIgnoreCase('ORMORE')/]">
+            <style xsi:type="style:WorkspaceImageDescription" showIcon="false" labelExpression="[nbOccurrences + ' or more'/]" sizeComputationExpression="-1" labelPosition="node" resizeKind="NSEW" workspacePath="/emfta.design/imgs/or.png">
+              <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            </style>
+          </conditionnalStyles>
+          <conditionnalStyles predicateExpression="[self.type.toString().equalsIgnoreCase('ORLESS')/]">
+            <style xsi:type="style:WorkspaceImageDescription" showIcon="false" labelExpression="[nbOccurrences + ' or less'/]" sizeComputationExpression="-1" labelPosition="node" resizeKind="NSEW" workspacePath="/emfta.design/imgs/or.png">
+              <borderColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+              <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
+            </style>
+          </conditionnalStyles>
         </nodeMappings>
         <nodeMappings name="EventNode" semanticCandidatesExpression="[eAllContents()/]" domainClass="emfta.Event">
           <style xsi:type="style:SquareDescription" borderSizeComputationExpression="1" showIcon="false" labelExpression="[name + 'bla'/]" sizeComputationExpression="6" labelPosition="node" resizeKind="NSEW" width="20" height="5">

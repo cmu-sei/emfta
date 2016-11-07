@@ -82,7 +82,23 @@ public enum GateType implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	INTERMEDIATE(6, "INTERMEDIATE", "INTERMEDIATE");
+	INTERMEDIATE(6, "INTERMEDIATE", "INTERMEDIATE"), /**
+	 * The '<em><b>ORMORE</b></em>' literal object.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #ORMORE_VALUE
+	 * @generated
+	 * @ordered
+	 */
+	ORMORE(7, "ORMORE", "ORMORE"), /**
+	 * The '<em><b>ORLESS</b></em>' literal object.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #ORLESS_VALUE
+	 * @generated
+	 * @ordered
+	 */
+	ORLESS(8, "ORLESS", "ORLESS");
 
 	/**
 	 * The '<em><b>OR</b></em>' literal value.
@@ -190,6 +206,36 @@ public enum GateType implements Enumerator {
 	public static final int INTERMEDIATE_VALUE = 6;
 
 	/**
+	 * The '<em><b>ORMORE</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>ORMORE</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #ORMORE
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int ORMORE_VALUE = 7;
+
+	/**
+	 * The '<em><b>ORLESS</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>ORLESS</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #ORLESS
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int ORLESS_VALUE = 8;
+
+	/**
 	 * An array of all the '<em><b>Gate Type</b></em>' enumerators.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -204,6 +250,8 @@ public enum GateType implements Enumerator {
 			INHIBIT,
 			PRIORITY_OR,
 			INTERMEDIATE,
+			ORMORE,
+			ORLESS,
 		};
 
 	/**
@@ -267,6 +315,8 @@ public enum GateType implements Enumerator {
 			case INHIBIT_VALUE: return INHIBIT;
 			case PRIORITY_OR_VALUE: return PRIORITY_OR;
 			case INTERMEDIATE_VALUE: return INTERMEDIATE;
+			case ORMORE_VALUE: return ORMORE;
+			case ORLESS_VALUE: return ORLESS;
 		}
 		return null;
 	}
