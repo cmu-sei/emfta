@@ -79,7 +79,14 @@ public class OptimizationAction extends AbstractExternalJavaAction {
 					 */
 					@Override
 					protected void doExecute() {
-						new OptimizeLogic((Event)domainObject, true, false).perform();
+						try
+						{
+							new OptimizeLogic((Event)domainObject, true, false, false).perform();
+						}
+						catch (Exception e)
+						{
+							e.printStackTrace();
+						}
 					}
 				});
 

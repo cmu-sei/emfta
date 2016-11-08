@@ -1,0 +1,118 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <LINK REL="STYLESHEET" HREF="style.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>FTA Optimization, Factorization and Expansion</title>
+</head>
+<body>
+
+
+<h1>About the Optimization/Factorization/Expansion feature</h1>
+<p>
+These functions help to to improve the representation of the tree.
+Often (especially when being generated from another notations),
+the Fault-Tree can be big and hard to read or understand.
+Our objective is to provide tools that help the user
+to remove useless or noisy information so that engineers
+can focus on the core issues of the model.
+</p>
+<p>
+We propose three ways to improve the fault-tree:
+</p>
+<ul>
+	<li><strong>Optimization</strong>: remove redundant events or gate in the tree</li>
+	<li><strong>Factorization</strong>: re-organize the tree in order to remove
+										events that occur several time in the same tree.</li>
+	<li><strong>Expansion</strong>: expand the <strong>orless</strong> or <strong>ormore</strong> gates</li>
+</ul>
+
+<h1>Optimization</h1>
+<p>
+Optimization removes redundant information in the Fault-Tree, when the same
+event is present in several gates in the tree hierarchy.Take for example
+the following tree (see picture below). The elements P1 or referenced by all
+the <strong>OR</strong> gates. It can be only in the first gate
+because no matter what, the event will trigger a failure. It does
+not need to be in the gates below. Once we remove the references
+in the gates below, the <strong>OR</strong> gates at the bottom
+are empty. We can then remove them and just keep the <strong>AND</strong>
+gate.</p>
+
+<img src="pics/optimize-before.png"/>
+
+<p>This results in the following FTA tree. It reduces two gates and improves it
+readability.
+</p>
+
+<img src="pics/optimize-after.png"/>
+
+<p>
+Currently, the tool can perform the optimization function with shared events
+on multiples <strong>OR</strong> gates. Gate types <strong>ORMORE</strong> or
+<strong>ORLESS</strong> are currently not supported. One workaround is to expand
+these gates first and then, perform the factorization. 
+</p>
+
+<p>
+In order to use the optimization, the user should click on the event to optimize,
+right click and select <em>optimize tree</em>, as shown below.
+The optimize operation can be performed on any event in the tree. The operation
+is performed within the leaves below the selected event.
+</p>
+
+<img src="pics/optimize.png"/>
+
+<p>
+The model examples used in this document are called
+ <em>multiple-ored-before.emfta</em> (before the transformation)
+and <em>multiple-ored-after.emfta</em> (after the transformation)
+and are available on 
+<a href="https://github.com/cmu-sei/emfta/tree/develop/example.emfta/optimizations">our github repository</a>.
+</p>
+
+
+<h1>Factorization</h1>
+<p>
+Factorization re-organizes the Fault-Tree, especially when sub-trees share events. The following picture shows an example of
+a tree with <strong>OR</strong> gates that share a common event: <strong>P1</strong>.</p>
+
+<img src="pics/refactor-and-before.png"/>
+
+<p>This tree can then be updated by putting the common error on top and have
+the <strong>AND</strong> gate under. This reduces the number of gates in the tree
+and facilitates its analysis.
+</p>
+
+<img src="pics/refactor-and-after.png"/>
+
+<p>
+Currently, the tool can perform the same operation for the <strong>AND</strong>
+and <strong>OR</strong> gates. Other types, such as <strong>ORMORE</strong> or
+<strong>ORLESS</strong> are currently not supported. One workaround is to expand
+these gates first and then, perform the factorization. 
+</p>
+
+<p>
+In order to use the factorization, the user should click on the event to optimize,
+right click and select <em>factorization</em>, as shown below.
+The factorization operation can be performed on any event in the tree. The operation
+is performed within the leaves below the selected event.
+</p>
+
+<img src="pics/factorize.png"/>
+
+
+<p>
+The model examples used in this document are called
+ <em>and-optimization-before.emfta</em> (before the transformation)
+and <em>and-optimization-after.emfta</em> (after the transformation)
+and are available on 
+<a href="https://github.com/cmu-sei/emfta/tree/develop/example.emfta/optimizations">our github repository</a>.
+</p>
+
+
+<h1>Expansion</h1>
+
+</body>
+</html>

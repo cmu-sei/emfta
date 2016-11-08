@@ -15,14 +15,15 @@ import edu.cmu.emfta.GateType;
 
 public class OptimizeLogic {
 	private Event 			rootEvent;
-	private List<Event> 	browsedElements;
 	private boolean 		removeUselessOr;
 	private boolean			factorize;
+	private boolean			expand;
 	
-	public OptimizeLogic (Event root, boolean _removeUselessOr, boolean _factorize)
+	public OptimizeLogic (Event root, boolean _removeUselessOr, boolean _factorize, boolean _expand)
 	{
 		this.rootEvent = root;
 		this.factorize = _factorize;
+		this.expand = _expand;
 		this.removeUselessOr = _removeUselessOr;
 	}
 	
@@ -91,8 +92,13 @@ public class OptimizeLogic {
 	
 	
 	
-	public void perform ()
+	public void perform () throws Exception
 	{
+		if (this.expand)
+		{
+			expand (rootEvent);
+		}
+		
 		if (this.removeUselessOr)
 		{
 			optimizeCommonOrEvents (rootEvent, new ArrayList<Event>() , new Stack<Event>());
@@ -104,6 +110,68 @@ public class OptimizeLogic {
 		}
 	}
 	
+	
+	private List<List<Event>> buildExpandedList (List<Event> events, int nbEventsPerList)
+	{
+		List<List<Event>> result = new ArrayList<List<Event>>();
+		
+		
+		
+		return result;
+	}
+	
+	/**
+	 * expand will expand the initial event that has a gate with ormore or orless
+	 * GateType. The ormore type will be expanded with a combination of AND gates.
+	 * In other words, it transforms a single ormore gate into a more complex
+	 * construct with OR and AND gates.
+	 * @param event
+	 */
+	private void expand (Event event) throws Exception
+	{
+		if (event == null)
+		{
+			return;
+		}
+		
+		Gate gate = event.getGate();
+		int nbOccurrences = gate.getNbOccurrences();
+		
+		if (gate == null)
+		{
+			return;
+		}
+		
+		if (gate.getType() == GateType.ORMORE)
+		{
+			if (nbOccurrences <= gate.getEvents().size())
+			{
+				throw new Exception ("Cannot expand - need more subevents");
+			}
+			
+			List<List<Event>> expandedLists = buildExpandedList (gate.getEvents(), nbOccurrences);
+
+			if ((expandedLists == null) || (expandedLists.size() == 0))
+			{
+				throw new Exception ("Cannot expand - need more subevents");	
+			}
+			
+			gate.setType(GateType.OR);
+			gate.getEvents().removeAll(null);
+			
+			for (List<Event> l : expandedLists)
+			{
+				Event intermediateEvent = EmftaFactory.eINSTANCE.createEvent();
+				gate.getEvents().add(intermediateEvent);
+				intermediateEvent.setName("Intermediate event");
+				Gate newGate = EmftaFactory.eINSTANCE.createGate();
+				intermediateEvent.setGate(newGate);
+				newGate.setType(GateType.AND);
+				newGate.getEvents().addAll(l);
+			}
+		}
+		
+	}
 	
 	
 	private void factorize (Event event)

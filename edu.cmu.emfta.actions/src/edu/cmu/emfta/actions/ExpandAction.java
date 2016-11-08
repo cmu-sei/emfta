@@ -41,7 +41,7 @@ import edu.cmu.emfta.GateType;
 
 
 
-public class FactorizationAction extends AbstractExternalJavaAction {
+public class ExpandAction extends AbstractExternalJavaAction {
 	private StringBuffer report;
 
 	@Override
@@ -64,18 +64,17 @@ public class FactorizationAction extends AbstractExternalJavaAction {
 			}
 
 			if (target != null) {
-				System.out.println("[FactorizeAction] Factorize from event = " + target);
-//				report.append("Event,declared,computed\n");
-//				performComputation((Event) target);
-//				Utils.writeFile(report, target);
+				System.out.println("[ExpandAction] Expand from event = " + target);
+				
 				try
 				{
-					new OptimizeLogic((Event)target, false, true, false).perform();
+					new OptimizeLogic((Event)target, false, false, true).perform();
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
+				
 				Utils.refreshProject(target);
 				return;
 			}

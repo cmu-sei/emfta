@@ -33,6 +33,9 @@
     <topic href="html/cutset.html" label="Cutset Generation">
     </topic>
     
+    <topic href="html/optimization.html" label="Tree Manipulation">
+    </topic>
+    
     <topic href="html/probability.html" label="Probability Consistency and Computation">
     </topic>
     
