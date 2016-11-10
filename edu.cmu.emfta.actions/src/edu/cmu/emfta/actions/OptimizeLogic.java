@@ -110,13 +110,55 @@ public class OptimizeLogic {
 		}
 	}
 	
+	/**
+	 * Build an expanded list with all the AND gates nodes below.
+	 * The result is a list of all potential list of event combination that
+	 * is possible for a particular set. The number of combination is given
+	 * with nbEventsPerList.
+	 * 
+	 * @param events - list of events to combine
+	 * @param nbEventsPerList - number of events per combination
+	 * @param result - the result
+	 * @param stack - temporary stack to process to compute the list.
+	 */
+	private void buildExpandedList (List<Event> events, int nbEventsPerList, List<List<Event>> result, Stack<Event> stack)
+	{
+		if (stack.size() == nbEventsPerList)
+		{
+			List<Event> l = new ArrayList<Event> (nbEventsPerList);
+			l.addAll(stack);
+			
+			/**
+			 * Check if the sub-tree was already added or not.
+			 * It avoids to add the following sub-tree: (B and C), (C and B) 
+			 */
+			for (List<Event> tmp : result)
+			{
+				if (tmp.containsAll(l) && l.containsAll(tmp))
+				{
+					return;
+				}
+			}
+			
+			result.add(l);
+			return;
+		}
+		
+		for (Event e : events)
+		{
+			if (! stack.contains(e))
+			{
+				stack.push(e);
+				buildExpandedList(events, nbEventsPerList, result, stack);
+				stack.pop();
+			}
+		}
+	}
 	
 	private List<List<Event>> buildExpandedList (List<Event> events, int nbEventsPerList)
 	{
 		List<List<Event>> result = new ArrayList<List<Event>>();
-		
-		
-		
+		buildExpandedList(events, nbEventsPerList, result, new Stack<Event> ());
 		return result;
 	}
 	
@@ -134,6 +176,7 @@ public class OptimizeLogic {
 			return;
 		}
 		
+		FTAModel model = getModel (event);
 		Gate gate = event.getGate();
 		int nbOccurrences = gate.getNbOccurrences();
 		
@@ -144,12 +187,18 @@ public class OptimizeLogic {
 		
 		if (gate.getType() == GateType.ORMORE)
 		{
-			if (nbOccurrences <= gate.getEvents().size())
+			List<Event> gateEvents = new ArrayList<Event> ();
+			for (Event e : gate.getEvents())
+			{
+				gateEvents.add(e);
+			}
+			
+			if (nbOccurrences >= gateEvents.size())
 			{
 				throw new Exception ("Cannot expand - need more subevents");
 			}
 			
-			List<List<Event>> expandedLists = buildExpandedList (gate.getEvents(), nbOccurrences);
+			List<List<Event>> expandedLists = buildExpandedList (gateEvents, nbOccurrences);
 
 			if ((expandedLists == null) || (expandedLists.size() == 0))
 			{
@@ -157,11 +206,15 @@ public class OptimizeLogic {
 			}
 			
 			gate.setType(GateType.OR);
-			gate.getEvents().removeAll(null);
+			for (Event e : gateEvents)
+			{
+				gate.getEvents().remove(e);
+			}
 			
 			for (List<Event> l : expandedLists)
 			{
 				Event intermediateEvent = EmftaFactory.eINSTANCE.createEvent();
+				model.getEvents().add(intermediateEvent);
 				gate.getEvents().add(intermediateEvent);
 				intermediateEvent.setName("Intermediate event");
 				Gate newGate = EmftaFactory.eINSTANCE.createGate();

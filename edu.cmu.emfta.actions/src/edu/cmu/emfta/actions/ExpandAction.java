@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Carnegie Mellon University.
+ * Copyright (c) 2016 Carnegie Mellon University.
  * All Rights Reserved.
  * 
  * THIS SOFTWARE IS PROVIDED "AS IS," WITH NO WARRANTIES WHATSOEVER.
@@ -42,11 +42,9 @@ import edu.cmu.emfta.GateType;
 
 
 public class ExpandAction extends AbstractExternalJavaAction {
-	private StringBuffer report;
-
+	
 	@Override
 	public void execute(Collection<? extends EObject> selections, Map<String, Object> parameters) {
-		report = new StringBuffer();
 
 //		System.out.println("[CutSetAction] calling execute");
 		for (EObject eo : selections) {
