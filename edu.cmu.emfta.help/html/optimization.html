@@ -146,8 +146,33 @@ and facilitates its analysis.
 
 <img src="pics/expand-after.png"/>
 
+
 <p>
-The resulting FTA is more dense and complex than the previous one. However, this should not
+The tool can also expand the <strong>ORLESS</strong> gate. Let's take the following FTA shown below.
+The FTA has a <strong>2 orless</strong> gate. It means that the even can be triggered
+if two events are received, one event is received but no more. It can be converted with the following
+conditions: <em>(A and B) or (A and C) or (B and C) or A or B or C</em>.
+</p>
+
+<img src="pics/expand-orless-before.png"/>
+
+<p>
+When running the expand function, it converts the FTA into the following graphic.
+</p>
+
+<img src="pics/expand-orless-after.png"/>
+
+<p>
+The graphic representation of the FTA can be confusing and not easy to get. The following picture
+show the expanded condition below.
+</p>
+
+<img src="pics/expand-orless-after-details.png"/>
+
+
+<p>
+In both cases (expansion of <strong>ORMORE</strong> or <strong>ORLESS</strong>),
+the resulting FTA is more dense and complex than the previous one. However, this should not
 be the resulting FTA. The expansion is an intermediate step before using optimization and 
 factorization functions.
 </p>
