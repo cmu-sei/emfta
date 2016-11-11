@@ -113,6 +113,73 @@ and are available on
 
 
 <h1>Expansion</h1>
+<p>
+Expansion will remove the <strong>orless</strong> or <strong>ormore</strong> operators
+from the Fault-Tree and transforms them into regular <strong>and</strong> or <strong>or</strong> 
+gates. The reason to do this replacement is that FTA optimization and refactoring is
+relying on pure <strong>and</strong> or <strong>or</strong> gates. When a Fault-Tree contains a <strong>ormore</strong>
+gate, it should be expanded before the Fault-Tree is optimized or factorized.
+The following picture shows a Fault-Tree with a <strong>ormore</strong> gate.
+In this example, the event <strong>EXPAND-BEFORE</strong> is triggered if
+at least two of the following events occurs: A, B or C. In other words, the top-level
+event is triggered is the following event combination is triggered: 
+</p>
+<ul>
+	<li>A and C</li>
+	<li>A and B</li>
+	<li>B and C</li>
+</ul>
+
+<p>
+In fact, this can be replaced by a bigger FTA that will create <strong>AND</strong> gates
+for each case and put them under a global <strong>OR</strong> gate. The following FTA is the
+expansion or the previous example.
+</p>
+
+</p> 
+<img src="pics/expand-before.png"/>
+
+<p>This tree can then be updated by putting the common error on top and have
+the <strong>AND</strong> gate under. This reduces the number of gates in the tree
+and facilitates its analysis.
+</p>
+
+<img src="pics/expand-after.png"/>
+
+<p>
+The resulting FTA is more dense and complex than the previous one. However, this should not
+be the resulting FTA. The expansion is an intermediate step before using optimization and 
+factorization functions.
+</p>
+
+<p>
+Currently, the tool can perform the same operation for the <strong>AND</strong>
+and <strong>OR</strong> gates. Other types, such as <strong>ORMORE</strong> or
+<strong>ORLESS</strong> are currently not supported. One workaround is to expand
+these gates first and then, perform the factorization. 
+</p>
+
+<p>
+In order to use the expand function, the user should click on the event to expand
+(the event associate with a <strong>ormore</strong> gate),
+right click and select <em>expand</em> menu option, as shown below.
+The expand operation is performed only on the selected node.
+</p>
+
+<img src="pics/expand.png"/>
+
+
+<p>
+The model examples used in this document are called
+ <em>expand-before.emfta</em> (before the expansion)
+and <em>expand-after.emfta</em> (after the expansion)
+and are available on 
+<a href="https://github.com/cmu-sei/emfta/tree/develop/example.emfta/optimizations">our github repository</a>.
+</p>
+
+
+
+
 
 </body>
 </html>
