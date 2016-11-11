@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" name="">
+  <events name="EXPAND-BEFORE" description="">
+    <gate type="ORLESS" description="" events="//@events.1 //@events.2 //@events.3" nbOccurrences="2"/>
+  </events>
+  <events name="A"/>
+  <events name="B"/>
+  <events name="C"/>
+</emfta:FTAModel>

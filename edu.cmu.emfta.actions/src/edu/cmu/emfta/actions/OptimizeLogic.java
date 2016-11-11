@@ -224,6 +224,47 @@ public class OptimizeLogic {
 			}
 		}
 		
+		if (gate.getType() == GateType.ORLESS)
+		{
+			List<Event> gateEvents = new ArrayList<Event> ();
+			for (Event e : gate.getEvents())
+			{
+				gateEvents.add(e);
+			}
+			
+			if (nbOccurrences >= gateEvents.size())
+			{
+				throw new Exception ("Cannot expand - need more subevents");
+			}
+			
+			List<List<Event>> expandedLists = new ArrayList<List<Event>> ();
+			for (int i = 2 ; i <= nbOccurrences ; i++)
+			{
+				expandedLists.addAll(buildExpandedList (gateEvents, i));
+			}
+			
+			
+			if ((expandedLists == null) || (expandedLists.size() == 0))
+			{
+				throw new Exception ("Cannot expand - need more subevents");	
+			}
+			
+			gate.setType(GateType.OR);
+
+			
+			for (List<Event> l : expandedLists)
+			{
+				Event intermediateEvent = EmftaFactory.eINSTANCE.createEvent();
+				model.getEvents().add(intermediateEvent);
+				gate.getEvents().add(intermediateEvent);
+				intermediateEvent.setName("Intermediate event");
+				Gate newGate = EmftaFactory.eINSTANCE.createGate();
+				intermediateEvent.setGate(newGate);
+				newGate.setType(GateType.AND);
+				newGate.getEvents().addAll(l);
+			}
+		}
+		
 	}
 	
 	

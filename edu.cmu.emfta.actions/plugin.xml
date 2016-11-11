@@ -61,7 +61,15 @@
            actionClass="edu.cmu.emfta.actions.FactorizationAction"
            id="edu.cmu.emfta.actions.FactorizationAction">
      </javaActions>
-  </extension> 
+  </extension>
+  
+  <extension
+        point="org.eclipse.sirius.externalJavaAction">
+     <javaActions
+           actionClass="edu.cmu.emfta.actions.ExpandAction"
+           id="edu.cmu.emfta.actions.ExpandAction">
+     </javaActions>
+  </extension>
 
 
   <extension
@@ -71,7 +79,8 @@
            id="edu.cmu.emfta.actions.UpdateProbabilityAction">
      </javaActions>
   </extension>   
-      <extension
+  
+  <extension
          point="org.eclipse.ui.preferencePages">
       <page
             
