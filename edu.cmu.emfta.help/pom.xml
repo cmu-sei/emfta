@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>emfta</groupId>
 		<artifactId>emfta.parent</artifactId>
-		<version>2.2.1.vupdate02</version>
+		<version>2.2.1.vupdate03</version>
 	</parent>
 	<groupId>emfta</groupId>
 	<artifactId>edu.cmu.emfta.help</artifactId>
