@@ -2,7 +2,9 @@
 
 
 ## Introduction
-In this write-up, we demonstrate on an example how architecture-led inductive and deductive fault impact analysis of a safety-critical system can be performed incrementally through the use of AADL, Error Model V2 (EMV2), and the analysis capabilities of OSATE. In particular we are highlighting recent enhancements to the safety analysis capabilities. The example is available on [this link](https://github.com/osate/examples/tree/master/SafetyTutorial).
+In this write-up, we demonstrate on an example how architecture-led inductive and deductive fault impact analysis of a safety-critical system can be performed incrementally through the use of AADL, Error Model V2 (EMV2), and the analysis capabilities of OSATE. In particular we are highlighting recent enhancements to the safety analysis capabilities. 
+
+The model example is available on Github as [Safety Tutorial](https://github.com/osate/examples/tree/master/SafetyTutorial).
 
 In inductive fault impact analysis the impact of fault occurrences on a system is determined through forward reasoning from an error source. One such form of inductive impact analysis is known as failure mode and effect analysis (FMEA). In OSATE it is supported by a Fault Impact Analysis (FIA) capability, found in the AADL Analyses/Fault Analyses menu.
 
