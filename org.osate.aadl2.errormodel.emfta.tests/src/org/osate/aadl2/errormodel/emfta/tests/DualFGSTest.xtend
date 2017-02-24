@@ -53,7 +53,7 @@ class DualFGSTest extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel(instance)
-		val uri = checker.createModel(instance, state,false)
+		val uri = checker.createModel(instance, state,true,false)
 		assertTrue('No FTA file was created', uri != null)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
@@ -298,24 +298,23 @@ end FGSErrorModelLibrary;
 	'''
 
 	val expected = '''
-<?xml version="1.0" encoding="ASCII"?>
-<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.7" name="dualfgs_fgs_composite-criticalmodefailure" description="Top Level Failure">
+<emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.6" name="dualfgs_fgs_composite-criticalmodefailure" description="Top Level Failure">
   <events name="ac-failure" description="Error event Failure on component AC"/>
   <events name="ap1-failure" description="Error event Failure on component AP1"/>
   <events name="fg1-failure" description="Error event Failure on component FG1"/>
   <events name="fg2-failure" description="Error event Failure on component FG2"/>
-  <events type="Intermediate" name="Intermediate2">
-    <gate type="AND" events="//@events.2 //@events.3"/>
-  </events>
   <events name="network-failure" description="Error event Failure on component network"/>
   <events type="Intermediate" name="Intermediate3">
-    <gate type="AND" events="//@events.5 //@events.8"/>
+    <gate type="AND" events="//@events.4 //@events.7"/>
   </events>
   <events type="Intermediate" name="dualfgs_fgs_composite-criticalmodefailure">
-    <gate type="XOR" events="//@events.0 //@events.6"/>
+    <gate type="XOR" events="//@events.0 //@events.5"/>
   </events>
   <events type="Intermediate" name="Intermediate5">
-    <gate events="//@events.4 //@events.1"/>
+    <gate events="//@events.1 //@events.8"/>
+  </events>
+  <events type="Intermediate" name="Intermediate6">
+    <gate type="AND" events="//@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>
 	'''
