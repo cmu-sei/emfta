@@ -35,8 +35,10 @@ public class FTADialog extends TitleAreaDialog {
 	private String value;
 	java.util.List<String> values;
 	private Combo errorMode;
-	private Button fullTreeBox;
-	private boolean fullTree;
+	private Button graphBox;
+	private boolean graph;
+	private Button optBox;
+	private boolean optimize;
 	private String target = "";
 
 	public FTADialog(Shell parentShell) {
@@ -79,10 +81,13 @@ public class FTADialog extends TitleAreaDialog {
 		errorMode.setItems(val);
 
 		errorMode.select(0);
-
-		fullTreeBox = new Button(container, SWT.CHECK);
-		fullTreeBox.setText("Full tree");
-		fullTreeBox.setSelection(false);
+// enable if we want to support showing shared events as fault graph instead of fault tree
+//		graphBox = new Button(container, SWT.CHECK);
+//		graphBox.setText("Fault graph");
+//		graphBox.setSelection(false);
+//		optBox = new Button(container, SWT.CHECK);
+//		optBox.setText("Minimize tree");
+//		optBox.setSelection(true);
 		return area;
 	}
 
@@ -93,7 +98,14 @@ public class FTADialog extends TitleAreaDialog {
 
 	private void saveInput() {
 		value = errorMode.getText();
-		fullTree = fullTreeBox.getSelection();
+		if (graphBox == null)
+			graph = false;
+		else
+			optimize = graphBox.getSelection();
+		if (optBox == null)
+			optimize = true;
+		else
+			optimize = optBox.getSelection();
 	}
 
 	@Override
@@ -106,8 +118,12 @@ public class FTADialog extends TitleAreaDialog {
 		return value;
 	}
 
-	public boolean getFullTree() {
-		return fullTree;
+	public boolean getSharedEventsAsGraph() {
+		return graph;
+	}
+
+	public boolean getMinimize() {
+		return optimize;
 	}
 
 }

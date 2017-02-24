@@ -27,7 +27,9 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.UniqueEList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.EcoreUtil2;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.SystemInstance;
@@ -56,7 +58,6 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private ErrorBehaviorState rootComponentState;
 	private ErrorPropagation rootComponentPropagation;
 	private ErrorTypes rootComponentTypes;
-	private boolean fullTree = false;
 
 	public Map<String, edu.cmu.emfta.Event> cache;
 
@@ -87,12 +88,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		rootComponentState = null;
 	}
 
-	public FTAModel getEmftaModel(boolean fullTree) {
-		this.fullTree = fullTree;
-		return getEmftaModel();
-	}
-
-	public FTAModel getEmftaModel() {
+	public FTAModel getEmftaModel(boolean minimizeTree, boolean sharedEventsAsGraph) {
 		if (emftaModel == null) {
 			edu.cmu.emfta.Event emftaRootEvent;
 
@@ -120,10 +116,15 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				topEvent.setGate(top);
 				emftaRootEvent = topEvent;
 			}
+			flattenGates(emftaRootEvent);
 			emftaModel.setRoot(emftaRootEvent);
-			if (!fullTree) {
+			if (minimizeTree) {
 				cleanupXORGates(emftaModel.getRoot());
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
+				flattenGates(emftaRootEvent);
+			}
+			if (!sharedEventsAsGraph) {
+				replicateSharedEvents(emftaModel.getRoot());
 			}
 			emftaModel.getRoot().setName(longName);
 			removeOrphans(emftaModel);
@@ -188,7 +189,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createBasicEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (!fullTree && result != null)
+		if (result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -207,7 +208,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private Event createIntermediateEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
 		Event result = findEvent(name);
-		if (!fullTree && result != null)
+		if (result != null)
 			return result;
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
 		emftaModel.getEvents().add(newEvent);
@@ -227,7 +228,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			eventname = "Intermediate" + count++;
 		} else {
 			Event result = findEvent(eventname);
-			if (!fullTree && result != null)
+			if (result != null)
 				return result;
 		}
 		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
@@ -244,6 +245,10 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			}
 		}
 		return null;
+	}
+
+	private boolean sameEvent(Event e1, Event e2) {
+		return e1.getName().equalsIgnoreCase(e2.getName());
 	}
 
 	/**
@@ -383,6 +388,68 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		if (!toAdd.isEmpty()) {
 			subEvents.addAll(toAdd);
+		}
+	}
+
+	/**
+	 * recursively flatten gates with same subgates
+	 * @param rootevent
+	 * @return Event original or new root event
+	 */
+	private void flattenGates(Event rootevent) {
+		if (rootevent.getGate() == null) {
+			return;
+		}
+		List<Event> subEvents = rootevent.getGate().getEvents();
+		for (Event event : subEvents) {
+			if (event.getGate() != null) {
+				flattenGates(event);
+			}
+		}
+		flattenSubgates(rootevent.getGate());
+		removeZeroOneEventSubGates(rootevent.getGate());
+		return;
+	}
+
+	/**
+	 * recursively flatten gates with same subgates
+	 * @param rootevent
+	 * @return Event original or new root event
+	 */
+	private void replicateSharedEvents(Event rootevent) {
+		UniqueEList<Event> found = new UniqueEList<Event>();
+		replicateSharedEvents(rootevent, found);
+	}
+
+	private void replicateSharedEvents(Event rootevent, UniqueEList<Event> found) {
+		if (rootevent.getGate() == null) {
+			return;
+		}
+		List<Event> subEvents = rootevent.getGate().getEvents();
+		List<Event> toAdd = new LinkedList<Event>();
+		List<Event> toRemove = new LinkedList<Event>();
+		for (Event event : subEvents) {
+			if (event.getGate() != null) {
+				replicateSharedEvents(event, found);
+			}
+			if (!found.add(event)) {
+				// make new event instance and link it in
+				Event newEvent = EcoreUtil2.copy(event);
+				emftaModel.getEvents().add(newEvent);
+				toAdd.add(newEvent);
+				toRemove.add(event);
+				tagAsSharedEvent(newEvent);
+				tagAsSharedEvent(event);
+			}
+		}
+		subEvents.removeAll(toRemove);
+		subEvents.addAll(toAdd);
+		return;
+	}
+
+	private void tagAsSharedEvent(Event ev) {
+		if (!ev.getName().endsWith("*")) {
+			ev.setName(ev.getName() + "*");
 		}
 	}
 

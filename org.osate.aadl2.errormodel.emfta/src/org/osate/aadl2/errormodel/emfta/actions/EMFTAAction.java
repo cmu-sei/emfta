@@ -65,7 +65,8 @@ import edu.cmu.emfta.FTAModel;
 public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 	private static String ERROR_STATE_NAME = null;
-	private static boolean FULL_TREE = false;
+	private static boolean GRAPH = false;
+	private static boolean MINIMIZE = true;
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
@@ -148,13 +149,14 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 								+ "'");
 				diag.open();
 				ERROR_STATE_NAME = diag.getValue();
-				FULL_TREE = diag.getFullTree();
+				GRAPH = diag.getSharedEventsAsGraph();
+				MINIMIZE = diag.getMinimize();
 			}
 		});
 
 		if (ERROR_STATE_NAME != null) {
 			EMFTACreateModel doModel = new EMFTACreateModel(si);
-			URI newURI = doModel.createModel(target, ERROR_STATE_NAME, FULL_TREE);
+			URI newURI = doModel.createModel(target, ERROR_STATE_NAME, MINIMIZE, GRAPH);
 			if (newURI != null) {
 				autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
 				monitor.done();

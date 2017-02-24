@@ -53,9 +53,7 @@ public final class EMFTACreateModel {
 		currentAnalysisModel = new AnalysisModel(root, false);
 	}
 
-	public URI createModel(ComponentInstance selection, final String errorStateName, boolean fullTree) {
-//		String errorStateName;
-//		String errorStateTypeName;
+	public URI createModel(ComponentInstance selection, final String errorStateName, boolean minimize, boolean graph) {
 		ErrorBehaviorState errorState;
 		ErrorTypes errorType;
 		ErrorPropagation errorPropagation;
@@ -106,8 +104,8 @@ public final class EMFTACreateModel {
 			if (errorPropagation != null) {
 				wrapper = new EMFTAGenerator(currentAnalysisModel, selection, errorPropagation, errorType);
 			}
-			FTAModel ftamodel = wrapper.getEmftaModel(fullTree);
-			String rootname = ftamodel.getName() + (fullTree ? "_fulltree" : "");
+			FTAModel ftamodel = wrapper.getEmftaModel(minimize, graph);
+			String rootname = ftamodel.getName() + (minimize ? "" : "_full") + (graph ? "_graph" : "");
 			ftamodel.setName(rootname);
 
 			URI newURI = EcoreUtil.getURI(selection).trimFragment().trimSegments(2).appendSegment("fta")
@@ -125,7 +123,7 @@ public final class EMFTACreateModel {
 
 		try {
 			ResourceSet set = new ResourceSetImpl();
-			Resource res = set.createResource(newURI);// XXX URI.createURI(newFile.toString()));
+			Resource res = set.createResource(newURI);
 			res.getContents().add(emftaModel);
 			res.save(null);
 			return EcoreUtil.getURI(emftaModel);
