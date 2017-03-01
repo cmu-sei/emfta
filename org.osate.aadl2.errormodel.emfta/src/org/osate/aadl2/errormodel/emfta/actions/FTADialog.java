@@ -85,9 +85,9 @@ public class FTADialog extends TitleAreaDialog {
 //		graphBox = new Button(container, SWT.CHECK);
 //		graphBox.setText("Fault graph");
 //		graphBox.setSelection(false);
-//		optBox = new Button(container, SWT.CHECK);
-//		optBox.setText("Minimize tree");
-//		optBox.setSelection(true);
+		optBox = new Button(container, SWT.CHECK);
+		optBox.setText("Minimize tree");
+		optBox.setSelection(true);
 		return area;
 	}
 
