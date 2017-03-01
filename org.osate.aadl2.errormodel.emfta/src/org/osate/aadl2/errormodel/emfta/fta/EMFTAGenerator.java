@@ -419,6 +419,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	private void replicateSharedEvents(Event rootevent) {
 		UniqueEList<Event> found = new UniqueEList<Event>();
 		replicateSharedEvents(rootevent, found);
+		return;
 	}
 
 	private void replicateSharedEvents(Event rootevent, UniqueEList<Event> found) {
@@ -434,20 +435,29 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			}
 			if (!found.add(event)) {
 				// make new event instance and link it in
-				Event newEvent = EcoreUtil2.copy(event);
-				emftaModel.getEvents().add(newEvent);
+				Event newEvent = recursiveCopy(event);
 				toAdd.add(newEvent);
 				toRemove.add(event);
-				tagAsSharedEvent(newEvent);
-				tagAsSharedEvent(event);
-				if (newEvent.getGate() != null) {
-					replicateSharedEvents(newEvent, found);
-				}
 			}
 		}
 		subEvents.removeAll(toRemove);
 		subEvents.addAll(toAdd);
 		return;
+	}
+
+	private Event recursiveCopy(Event event) {
+		Event newEvent = EcoreUtil2.copy(event);
+		emftaModel.getEvents().add(newEvent);
+		tagAsSharedEvent(newEvent);
+		tagAsSharedEvent(event);
+		if (event.getGate() != null) {
+			newEvent.getGate().getEvents().clear();
+			for (Event subevent : event.getGate().getEvents()) {
+				Event copy = recursiveCopy(subevent);
+				newEvent.getGate().getEvents().add(copy);
+			}
+		}
+		return newEvent;
 	}
 
 	private void tagAsSharedEvent(Event ev) {
