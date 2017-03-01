@@ -440,6 +440,9 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				toRemove.add(event);
 				tagAsSharedEvent(newEvent);
 				tagAsSharedEvent(event);
+				if (newEvent.getGate() != null) {
+					replicateSharedEvents(newEvent, found);
+				}
 			}
 		}
 		subEvents.removeAll(toRemove);
@@ -612,11 +615,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 					// transformed subtree to top gate replacing subset of events involved in transformation
 					Event newtopevent = this.createIntermediateEvent("");
 					Gate newxformgate = EmftaFactory.eINSTANCE.createGate();
-					if (!topevent.getName().startsWith("Intermediate")) {
-						String newname = newtopevent.getName();
-						newtopevent.setName(topevent.getName());
-						topevent.setName(newname);
-					}
+//					if (!topevent.getName().startsWith("Intermediate")) {
+//						String newname = newtopevent.getName();
+//						newtopevent.setName(topevent.getName());
+//						topevent.setName(newname);
+//					}
 					newxformgate.setType(gt);
 					newtopevent.setGate(newxformgate);
 					topgate.getEvents().add(newtopevent);
@@ -636,7 +639,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 					newsubtopgate.getEvents().addAll(todo);
 					topgate.getEvents().removeAll(todo);
 					newxformgate.getEvents().add(newsubtopevent);
-
+					removeCommonEventsFromSubgates(newsubtopevent, gt);
 					flattenSubgates(newsubtopgate);
 					removeZeroOneEventSubGates(newsubtopgate);
 					flattenSubgates(newxformgate);
@@ -744,7 +747,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		LinkedList<Event> toRemove = new LinkedList<Event>();
 		for (Event se : subEvents) {
 			for (Event subse : subEvents) {
-				if (subse.getGate() != null && (subse.getGate().getType() == gt)) {
+				if (subse != se && subse.getGate() != null && (subse.getGate().getType() == gt)) {
 					if (subse.getGate().getEvents().contains(se)) {
 						toRemove.add(subse);
 					}
