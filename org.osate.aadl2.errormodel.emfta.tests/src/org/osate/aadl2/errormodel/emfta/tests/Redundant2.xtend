@@ -445,8 +445,8 @@ end FTerrorlibrary;
   <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
-  <events name="voter.thr-failstop-itemomission" description="Error event Failure on component thr"/>
-  <events name="voter.thr-computeerror" description="Error event ComputeError on component thr"/>
+  <events name="voter.thr-failure" description="Error event Failure with types {ItemOmission} on component thr"/>
+  <events name="voter.thr-computeerror" description="Error event ComputeError with types {InconsistentValue} on component thr"/>
   <events name="mem-memfail-serviceerror" description="Error source memfail on component mem with types {ServiceError}"/>
   <events type="Intermediate" name="redundant2_main2_composite-failstop">
     <gate events="//@events.0 //@events.6 //@events.5 //@events.3 //@events.4"/>
@@ -476,13 +476,13 @@ end FTerrorlibrary;
 	val expected3 = '''
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.5" name="redundant2_main2_transition-externaleffect-serviceomission" description="Top Level Failure">
-  <events name="voter.thr-computeerror" description="Error event ComputeError on component thr"/>
+  <events name="voter.thr-computeerror" description="Error event ComputeError with types {ItemOmission} on component thr"/>
   <events name="sensor1-valueout-latedelivery,outofrange" description="component sensor1 with out propagation valueout"/>
   <events name="sensor2-valueout-latedelivery,outofrange" description="component sensor2 with out propagation valueout"/>
   <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
-  <events name="voter.thr-failstop-itemomission" description="Error event Failure on component thr"/>
+  <events name="voter.thr-failure" description="Error event Failure with types {ItemOmission} on component thr"/>
   <events type="Intermediate" name="redundant2_main2_transition-externaleffect-serviceomission">
     <gate events="//@events.0 //@events.3 //@events.4"/>
   </events>

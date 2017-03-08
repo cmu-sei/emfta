@@ -161,7 +161,7 @@ end common_error3;
 <?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.4" name="common_error3_main_commoneventssingleport-failstop" description="Top Level Failure">
   <events name="a0-failure" description="Error event Failure on component a0"/>
-  <events name="c0-failure" description="Error event Failure on component c0"/>
+  <events name="c0-failure" description="Error event Failure with types {ServiceError} on component c0"/>
   <events name="a1-failure" description="Error event Failure on component a1"/>
   <events type="Intermediate" name="Intermediate0">
     <gate type="AND" events="//@events.0 //@events.2"/>

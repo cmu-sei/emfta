@@ -298,6 +298,7 @@ end FGSErrorModelLibrary;
 	'''
 
 	val expected = '''
+<?xml version="1.0" encoding="ASCII"?>
 <emfta:FTAModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:emfta="http://cmu.edu/emfta" root="//@events.6" name="dualfgs_fgs_composite-criticalmodefailure" description="Top Level Failure">
   <events name="ac-failure" description="Error event Failure on component AC"/>
   <events name="ap1-failure" description="Error event Failure on component AP1"/>
