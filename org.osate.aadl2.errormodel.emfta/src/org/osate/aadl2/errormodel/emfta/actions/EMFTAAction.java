@@ -66,7 +66,8 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 	private static String ERROR_STATE_NAME = null;
 	private static boolean GRAPH = false;
-	private static boolean MINIMIZE = true;
+	private static boolean TRANSFORM = true;
+	private static boolean MINCUTSET = false;
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
@@ -150,13 +151,14 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				diag.open();
 				ERROR_STATE_NAME = diag.getValue();
 				GRAPH = diag.getSharedEventsAsGraph();
-				MINIMIZE = diag.getMinimize();
+				TRANSFORM = diag.getTransform();
+				MINCUTSET = diag.getMinCutSet();
 			}
 		});
 
 		if (ERROR_STATE_NAME != null) {
 			EMFTACreateModel doModel = new EMFTACreateModel(si);
-			URI newURI = doModel.createModel(target, ERROR_STATE_NAME, MINIMIZE, GRAPH);
+			URI newURI = doModel.createModel(target, ERROR_STATE_NAME, TRANSFORM, GRAPH, MINCUTSET);
 			if (newURI != null) {
 				autoOpenEmftaModel(newURI, ResourceUtil.getFile(si.eResource()).getProject());
 				monitor.done();

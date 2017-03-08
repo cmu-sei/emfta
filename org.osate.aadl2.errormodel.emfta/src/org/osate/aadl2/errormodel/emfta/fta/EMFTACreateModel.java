@@ -53,7 +53,16 @@ public final class EMFTACreateModel {
 		currentAnalysisModel = new AnalysisModel(root, false);
 	}
 
-	public URI createModel(ComponentInstance selection, final String errorStateName, boolean minimize, boolean graph) {
+	public URI createTransformedFTA(ComponentInstance selection, final String errorStateName) {
+		return createModel(selection, errorStateName, true, false, false);
+	}
+
+	public URI createMinimalCutSet(ComponentInstance selection, final String errorStateName) {
+		return createModel(selection, errorStateName, true, false, true);
+	}
+
+	public URI createModel(ComponentInstance selection, final String errorStateName, boolean transform, boolean graph,
+			boolean mincutset) {
 		ErrorBehaviorState errorState;
 		ErrorTypes errorType;
 		ErrorPropagation errorPropagation;
@@ -104,8 +113,9 @@ public final class EMFTACreateModel {
 			if (errorPropagation != null) {
 				wrapper = new EMFTAGenerator(currentAnalysisModel, selection, errorPropagation, errorType);
 			}
-			FTAModel ftamodel = wrapper.getEmftaModel(minimize, graph);
-			String rootname = ftamodel.getName() + (minimize ? "" : "_full") + (graph ? "_graph" : "");
+			FTAModel ftamodel = wrapper.getEmftaModel(transform, graph, mincutset);
+			String rootname = ftamodel.getName() + (mincutset ? "_cutset" : (transform ? "" : "_full"))
+					+ (graph ? "_graph" : "");
 			ftamodel.setName(rootname);
 
 			URI newURI = EcoreUtil.getURI(selection).trimFragment().trimSegments(2).appendSegment("fta")

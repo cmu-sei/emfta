@@ -38,7 +38,9 @@ public class FTADialog extends TitleAreaDialog {
 	private Button graphBox;
 	private boolean graph;
 	private Button optBox;
+	private Button cutsetBox;
 	private boolean optimize;
+	private boolean mincutset;
 	private String target = "";
 
 	public FTADialog(Shell parentShell) {
@@ -86,8 +88,11 @@ public class FTADialog extends TitleAreaDialog {
 //		graphBox.setText("Fault graph");
 //		graphBox.setSelection(false);
 		optBox = new Button(container, SWT.CHECK);
-		optBox.setText("Minimize tree");
-		optBox.setSelection(true);
+		optBox.setText("Transform tree (experimental)");
+		optBox.setSelection(false);
+		cutsetBox = new Button(container, SWT.CHECK);
+		cutsetBox.setText("Minimal Cut Set");
+		cutsetBox.setSelection(false);
 		return area;
 	}
 
@@ -106,6 +111,10 @@ public class FTADialog extends TitleAreaDialog {
 			optimize = true;
 		else
 			optimize = optBox.getSelection();
+		if (cutsetBox == null)
+			mincutset = false;
+		else
+			mincutset = cutsetBox.getSelection();
 	}
 
 	@Override
@@ -122,8 +131,12 @@ public class FTADialog extends TitleAreaDialog {
 		return graph;
 	}
 
-	public boolean getMinimize() {
+	public boolean getTransform() {
 		return optimize;
+	}
+
+	public boolean getMinCutSet() {
+		return mincutset;
 	}
 
 }
