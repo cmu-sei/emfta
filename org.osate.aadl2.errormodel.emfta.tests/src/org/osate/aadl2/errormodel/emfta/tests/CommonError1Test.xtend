@@ -62,14 +62,14 @@ class CommonError1Test extends OsateTest {
 //		assertEquals("fta_main_i_Instance", instance.name)
 		
 		val checker = new EMFTACreateModel(instance)
-		val uri =checker.createModel(instance,state,true,false)
+		val uri =checker.createTransformedFTA(instance,state)
 		
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
 		
 		val stateop = "state Operational"
-		val uriop=checker.createModel(instance, stateop,true,false)
+		val uriop=checker.createTransformedFTA(instance, stateop)
 		
 		val fileop = workspaceRoot.getFile(new Path(uriop.toPlatformString(true)))
 		val actualop = Files.readStreamIntoString(fileop.contents)

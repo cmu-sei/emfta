@@ -53,7 +53,7 @@ class Redundant2Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel(instance)
-		val uri =checker.createModel(instance,state, true,false)
+		val uri =checker.createTransformedFTA(instance,state)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
@@ -66,7 +66,7 @@ class Redundant2Test extends OsateTest {
 		val instance2 = InstantiateModel::buildInstanceModelFile(sysImpl2)
 		val state2 = "state FailStop"
 		val checker2 = new EMFTACreateModel(instance2)
-		val uri2 =checker2.createModel(instance2,state2,true,false)
+		val uri2 =checker2.createTransformedFTA(instance2,state2)
 		val file2 = workspaceRoot.getFile(new Path(uri2.toPlatformString(true)))
 		val actual2 = Files.readStreamIntoString(file2.contents)
 		assertEquals('error', expected2.trim, actual2.trim)
@@ -79,7 +79,7 @@ class Redundant2Test extends OsateTest {
 		val instance3 = InstantiateModel::buildInstanceModelFile(sysImpl3)
 		val state3 = "outgoing propagation on externaleffect{serviceomission}"
 		val checker3 = new EMFTACreateModel(instance3)
-		val uri3 = checker3.createModel(instance3,state3, true,false)
+		val uri3 = checker3.createTransformedFTA(instance3,state3)
 		val file3 = workspaceRoot.getFile(new Path(uri3.toPlatformString(true)))
 		val actual3 = Files.readStreamIntoString(file3.contents)
 		assertEquals('error', expected3.trim, actual3.trim)

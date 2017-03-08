@@ -50,7 +50,7 @@ class CommonError3Test extends OsateTest {
 
 		
 		val checker = new EMFTACreateModel(instance)
-		val uri = checker.createModel(instance, state,true,false)
+		val uri = checker.createTransformedFTA(instance, state)
 		
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
