@@ -144,7 +144,7 @@ public class EventImpl extends MinimalEObjectImpl.Container implements Event {
 	 * @generated
 	 * @ordered
 	 */
-	protected static final int REFERENCE_COUNT_EDEFAULT = 0;
+	protected static final int REFERENCE_COUNT_EDEFAULT = 1;
 
 	/**
 	 * The cached value of the '{@link #getReferenceCount() <em>Reference Count</em>}' attribute.

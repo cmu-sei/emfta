@@ -180,7 +180,7 @@ public interface Event extends EObject {
 
 	/**
 	 * Returns the value of the '<em><b>Reference Count</b></em>' attribute.
-	 * The default value is <code>"0"</code>.
+	 * The default value is <code>"1"</code>.
 	 * <!-- begin-user-doc -->
 	 * <p>
 	 * If the meaning of the '<em>Reference Count</em>' attribute isn't clear,
@@ -190,7 +190,7 @@ public interface Event extends EObject {
 	 * @return the value of the '<em>Reference Count</em>' attribute.
 	 * @see #setReferenceCount(int)
 	 * @see edu.cmu.emfta.EmftaPackage#getEvent_ReferenceCount()
-	 * @model default="0" required="true"
+	 * @model default="1" required="true"
 	 * @generated
 	 */
 	int getReferenceCount();
