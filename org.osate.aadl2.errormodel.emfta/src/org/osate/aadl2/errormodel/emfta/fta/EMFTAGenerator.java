@@ -133,6 +133,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
+			Utils.performUpdate(emftaModel.getRoot());
 		}
 		return emftaModel;
 	}
@@ -514,7 +515,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * eliminate AND with same or superset subevents
 	 */
 	private void minimalAndSet(Event rootevent) {
-		if (rootevent.getGate() != null && rootevent.getGate().getType() == GateType.XOR) {
+		if (rootevent.getGate() != null
+				&& (rootevent.getGate().getType() == GateType.XOR || rootevent.getGate().getType() == GateType.OR)) {
 			EList<Event> subevents = rootevent.getGate().getEvents();
 			List<Event> toRemove = new LinkedList<Event>();
 			for (int i = 0; i < subevents.size() - 1; i++) {
