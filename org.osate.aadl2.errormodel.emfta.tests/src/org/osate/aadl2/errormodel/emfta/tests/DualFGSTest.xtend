@@ -54,7 +54,7 @@ class DualFGSTest extends OsateTest {
 		
 		val checker = new EMFTACreateModel(instance)
 		val uri = checker.createTransformedFTA(instance, state)
-		assertTrue('No FTA file was created', uri != null)
+		assertTrue('No FTA file was created', uri !== null)
 		val file = workspaceRoot.getFile(new Path(uri.toPlatformString(true)))
 		val actual = Files.readStreamIntoString(file.contents)
 		assertEquals('error', expected.trim, actual.trim)
