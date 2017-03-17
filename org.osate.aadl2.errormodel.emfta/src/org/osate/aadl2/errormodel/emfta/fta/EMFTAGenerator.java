@@ -118,18 +118,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			flattenGates(emftaRootEvent);
 			emftaModel.setRoot(emftaRootEvent);
 			if (transformTree) {
-				cleanupXORGates(emftaRootEvent);
-				emftaRootEvent = optimizeGates(emftaRootEvent);
+				cleanupXORGates(emftaModel.getRoot());
+				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 				flattenGates(emftaRootEvent);
 			}
 			if (minimalCutSet) {
 				emftaRootEvent = normalize(emftaRootEvent);
+				emftaModel.setRoot(emftaRootEvent);
 				minimalAndSet(emftaRootEvent);
 			}
 			if (!sharedEventsAsGraph) {
-				replicateSharedEvents(emftaRootEvent);
+				replicateSharedEvents(emftaModel.getRoot());
 			}
-			emftaModel.setRoot(emftaRootEvent);
 			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
