@@ -146,7 +146,7 @@
           </style>
         </edgeMappings>
         <edgeMappings name="EventToGate" sourceMapping="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='EventNode']" targetMapping="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='GateNode']" targetFinderExpression="feature:gate">
-          <style targetArrow="NoDecoration" sizeComputationExpression="2" routingStyle="tree">
+          <style targetArrow="NoDecoration" sizeComputationExpression="2">
             <strokeColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='gray']"/>
             <centerLabelStyleDescription>
               <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
@@ -154,7 +154,7 @@
           </style>
         </edgeMappings>
         <edgeMappings name="TreeRootToGate" sourceMapping="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='TreeRootNode']" targetMapping="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='GateNode']">
-          <style sizeComputationExpression="2" routingStyle="tree">
+          <style sizeComputationExpression="2">
             <strokeColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='gray']"/>
             <centerLabelStyleDescription>
               <labelColor xsi:type="description:SystemColor" href="environment:/viewpoint#//@systemColors/@entries[name='black']"/>
