@@ -118,18 +118,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			flattenGates(emftaRootEvent);
 			emftaModel.setRoot(emftaRootEvent);
 			if (transformTree) {
-				cleanupXORGates(emftaRootEvent);
-				emftaRootEvent = optimizeGates(emftaRootEvent);
+				cleanupXORGates(emftaModel.getRoot());
+				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
 				flattenGates(emftaRootEvent);
 			}
 			if (minimalCutSet) {
 				emftaRootEvent = normalize(emftaRootEvent);
+				emftaModel.setRoot(emftaRootEvent);
 				minimalAndSet(emftaRootEvent);
 			}
 			if (!sharedEventsAsGraph) {
-				replicateSharedEvents(emftaRootEvent);
+				replicateSharedEvents(emftaModel.getRoot());
 			}
-			emftaModel.setRoot(emftaRootEvent);
 			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
@@ -465,8 +465,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		Gate altGate = EmftaFactory.eINSTANCE.createGate();
 		altGate.setType(GateType.XOR);
 		root.setGate(altGate);
-		if (rootevent.getGate().getType() == GateType.OR || rootevent.getGate().getType() == GateType.XOR
-				|| rootevent.getGate().getType() == GateType.ORMORE) {
+		if (rootevent.getGate().getType() == GateType.OR || rootevent.getGate().getType() == GateType.XOR) {
 			for (Event alt : rootevent.getGate().getEvents()) {
 				Event alternative = createIntermediateEvent("");
 				Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
@@ -477,13 +476,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				altGate.getEvents().addAll(toAdd);
 				toAdd.clear();
 			}
-		} else if (rootevent.getGate().getType() == GateType.AND
-				|| rootevent.getGate().getType() == GateType.PRIORITY_AND) {
-			Event alternative = createIntermediateEvent("");
-			Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
-			emftaGate.setType(GateType.AND);
-			alternative.setGate(emftaGate);
-			toAdd.add(alternative);
+		} else if (rootevent.getGate().getType() == GateType.AND) {
+			toAdd.add(rootevent);
 			normalizeEvent(rootevent, toAdd);
 			altGate.getEvents().addAll(toAdd);
 		}
@@ -497,12 +491,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			}
 			return;
 		}
-		if (event.getGate().getType() == GateType.AND || event.getGate().getType() == GateType.PRIORITY_AND) {
+		if (event.getGate().getType() == GateType.AND) {
 			for (Event subevent : event.getGate().getEvents()) {
 				normalizeEvent(subevent, alternatives);
 			}
-		} else if (event.getGate().getType() == GateType.OR || event.getGate().getType() == GateType.XOR
-				|| event.getGate().getType() == GateType.ORMORE) {
+		} else if (event.getGate().getType() == GateType.OR || event.getGate().getType() == GateType.XOR) {
 			List<Event> origalts = copy(alternatives);
 			boolean first = true;
 			for (Event subevent : event.getGate().getEvents()) {
