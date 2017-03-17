@@ -12,7 +12,7 @@ public class Services {
 
 	public EList<Event> getEvents(EObject context) {
 		EList<Event> eventsToReturn = new BasicEList<Event>();
-		if (context instanceof FTAModel){
+		if (context instanceof FTAModel) {
 			EList<Event> AllEvents = ((FTAModel)context).getEvents();
 			EList<Event> firstLevelEvents = new BasicEList<Event>();
 			firstLevelEvents.addAll(AllEvents);
@@ -24,9 +24,22 @@ public class Services {
 				}
 			}
 			eventsToReturn.addAll(firstLevelEvents);
-		}else if (context instanceof Gate){
-			eventsToReturn.addAll(((Gate)context).getEvents());
+		} else if (context instanceof Gate) {
+			eventsToReturn.addAll(((Gate) context).getEvents());
 		}
 		return eventsToReturn;
 	}
+
+	public EList<EObject> getChildren(EObject context) {
+		EList<EObject> childrenToReturn = new BasicEList<EObject>();
+		if (context instanceof FTAModel) {
+			childrenToReturn.add(((FTAModel) context).getRoot());
+		} else if (context instanceof Event) {
+			childrenToReturn.add(((Event) context).getGate());
+		} else if (context instanceof Gate) {
+			childrenToReturn.addAll(((Gate) context).getEvents());
+		}
+		return childrenToReturn;
+	}
+
 }
