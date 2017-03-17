@@ -118,18 +118,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			flattenGates(emftaRootEvent);
 			emftaModel.setRoot(emftaRootEvent);
 			if (transformTree) {
-				cleanupXORGates(emftaModel.getRoot());
-				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
+				cleanupXORGates(emftaRootEvent);
+				emftaRootEvent = optimizeGates(emftaRootEvent);
 				flattenGates(emftaRootEvent);
 			}
 			if (minimalCutSet) {
 				emftaRootEvent = normalize(emftaRootEvent);
-				emftaModel.setRoot(emftaRootEvent);
 				minimalAndSet(emftaRootEvent);
 			}
 			if (!sharedEventsAsGraph) {
-				replicateSharedEvents(emftaModel.getRoot());
+				replicateSharedEvents(emftaRootEvent);
 			}
+			emftaModel.setRoot(emftaRootEvent);
 			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
@@ -477,7 +477,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				toAdd.clear();
 			}
 		} else if (rootevent.getGate().getType() == GateType.AND) {
-			toAdd.add(rootevent);
+			Event alternative = createIntermediateEvent("");
+			Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
+			emftaGate.setType(GateType.AND);
+			alternative.setGate(emftaGate);
+			toAdd.add(alternative);
 			normalizeEvent(rootevent, toAdd);
 			altGate.getEvents().addAll(toAdd);
 		}

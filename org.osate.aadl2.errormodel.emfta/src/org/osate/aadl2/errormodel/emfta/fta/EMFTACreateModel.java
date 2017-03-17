@@ -114,7 +114,7 @@ public final class EMFTACreateModel {
 				wrapper = new EMFTAGenerator(currentAnalysisModel, selection, errorPropagation, errorType);
 			}
 			FTAModel ftamodel = wrapper.getEmftaModel(transform, graph, mincutset);
-			String rootname = ftamodel.getName() + (mincutset ? "_cutset" : (transform ? "" : "_full"))
+			String rootname = ftamodel.getName() + (mincutset ? "_cutset" : "") + ((transform ? "" : "_full"))
 					+ (graph ? "_graph" : "");
 			ftamodel.setName(rootname);
 
