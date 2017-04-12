@@ -90,10 +90,10 @@ public class FTADialog extends TitleAreaDialog {
 //		graphBox.setText("Fault graph");
 //		graphBox.setSelection(false);
 		basictreeBox = new Button(container, SWT.RADIO);
-		basictreeBox.setText("Generated Fault Tree (potentially with dependent events marked by *)");
+		basictreeBox.setText("Basic Fault Tree (dependent events marked by *)");
 		basictreeBox.setSelection(true);
 		optBox = new Button(container, SWT.RADIO);
-		optBox.setText("Transformed Fault Tree with Probabilities (transformation removes dependent events)");
+		optBox.setText("Transformed Fault Tree with Computed Probability");
 		optBox.setSelection(false);
 		cutsetBox = new Button(container, SWT.RADIO);
 		cutsetBox.setText("Minimal Cut Sets");
