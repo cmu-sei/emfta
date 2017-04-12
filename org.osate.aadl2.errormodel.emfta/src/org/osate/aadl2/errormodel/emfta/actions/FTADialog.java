@@ -39,8 +39,10 @@ public class FTADialog extends TitleAreaDialog {
 	private boolean graph;
 	private Button optBox;
 	private Button cutsetBox;
+	private Button basictreeBox;
 	private boolean optimize;
 	private boolean mincutset;
+	private boolean basictree;
 	private String target = "";
 
 	public FTADialog(Shell parentShell) {
@@ -87,11 +89,14 @@ public class FTADialog extends TitleAreaDialog {
 //		graphBox = new Button(container, SWT.CHECK);
 //		graphBox.setText("Fault graph");
 //		graphBox.setSelection(false);
-		optBox = new Button(container, SWT.CHECK);
-		optBox.setText("Transform tree (experimental)");
+		basictreeBox = new Button(container, SWT.RADIO);
+		basictreeBox.setText("Generated Fault Tree (potentially with dependent events marked by *)");
+		basictreeBox.setSelection(true);
+		optBox = new Button(container, SWT.RADIO);
+		optBox.setText("Transformed Fault Tree with Probabilities (transformation removes dependent events)");
 		optBox.setSelection(false);
-		cutsetBox = new Button(container, SWT.CHECK);
-		cutsetBox.setText("Minimal Cut Set");
+		cutsetBox = new Button(container, SWT.RADIO);
+		cutsetBox.setText("Minimal Cut Sets");
 		cutsetBox.setSelection(false);
 		return area;
 	}
@@ -115,6 +120,10 @@ public class FTADialog extends TitleAreaDialog {
 			mincutset = false;
 		else
 			mincutset = cutsetBox.getSelection();
+		if (basictreeBox == null)
+			basictree = true;
+		else
+			basictree = basictreeBox.getSelection();
 	}
 
 	@Override
@@ -137,6 +146,10 @@ public class FTADialog extends TitleAreaDialog {
 
 	public boolean getMinCutSet() {
 		return mincutset;
+	}
+
+	public boolean getBasicTree() {
+		return basictree;
 	}
 
 }

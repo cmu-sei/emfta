@@ -66,8 +66,9 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 
 	private static String ERROR_STATE_NAME = null;
 	private static boolean GRAPH = false;
-	private static boolean TRANSFORM = true;
+	private static boolean TRANSFORM = false;
 	private static boolean MINCUTSET = false;
+	private static boolean BASICTREE = true;
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
@@ -153,6 +154,7 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				GRAPH = diag.getSharedEventsAsGraph();
 				TRANSFORM = diag.getTransform();
 				MINCUTSET = diag.getMinCutSet();
+				BASICTREE = diag.getBasicTree();
 			}
 		});
 
