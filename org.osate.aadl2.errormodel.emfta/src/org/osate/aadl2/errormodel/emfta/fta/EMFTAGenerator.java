@@ -133,7 +133,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
-			if (transformTree) {
+			if (transformTree || minimalCutSet) {
 				Utils.performUpdate(emftaModel.getRoot());
 			}
 		}
@@ -465,7 +465,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		List<Event> toAdd = new LinkedList<Event>();
 		Event root = createIntermediateEvent("alternatives");
 		Gate altGate = EmftaFactory.eINSTANCE.createGate();
-		altGate.setType(GateType.XOR);
+		altGate.setType(GateType.OR);
 		root.setGate(altGate);
 		if (rootevent.getGate().getType() == GateType.OR || rootevent.getGate().getType() == GateType.XOR
 				|| rootevent.getGate().getType() == GateType.ORMORE) {
