@@ -115,8 +115,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				topEvent.setGate(top);
 				emftaRootEvent = topEvent;
 			}
-			flattenGates(emftaRootEvent);
 			emftaModel.setRoot(emftaRootEvent);
+			flattenGates(emftaRootEvent);
 			if (transformTree) {
 				cleanupXORGates(emftaModel.getRoot());
 				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
@@ -281,6 +281,17 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return null;
 	}
 
+	private Event findSharedSubtree(List<EObject> subEvents, GateType type) {
+		for (Event event : emftaModel.getEvents()) {
+			Gate gate = event.getGate();
+			if (gate != null && gate.getType() == type && gate.getEvents().size() == subEvents.size()
+					&& subEvents.containsAll(gate.getEvents())) {
+				return event;
+			}
+		}
+		return null;
+	}
+
 	private List<Event> copy(List<Event> alts) {
 		LinkedList<Event> altscopy = new LinkedList<Event>();
 		for (Event alt : alts) {
@@ -307,7 +318,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent(eventname);
+		Event combined = findSharedSubtree(subEvents, GateType.XOR);
+		if (combined != null) {
+			return combined;
+		}
+		combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.XOR);
 
@@ -326,7 +341,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent(eventName);
+		Event combined = findSharedSubtree(subEvents, GateType.OR);
+		if (combined != null) {
+			return combined;
+		}
+		combined = this.createIntermediateEvent(eventName);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.OR);
 
@@ -345,7 +364,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent(eventname);
+		Event combined = findSharedSubtree(subEvents, GateType.AND);
+		if (combined != null) {
+			return combined;
+		}
+		combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.AND);
 
@@ -363,7 +386,11 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		if (subEvents.size() == 1) {
 			return (Event) subEvents.get(0);
 		}
-		Event combined = this.createIntermediateEvent(eventname);
+		Event combined = findSharedSubtree(subEvents, GateType.PRIORITY_AND);
+		if (combined != null) {
+			return combined;
+		}
+		combined = this.createIntermediateEvent(eventname);
 		Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
 		emftaGate.setType(GateType.PRIORITY_AND);
 
@@ -648,19 +675,48 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			return rootevent;
 		}
 		String rootname = rootevent.getName();
-		List<Event> subEvents = rootevent.getGate().getEvents();
+		Event res = rootevent;
 		List<Event> toAdd = new LinkedList<Event>();
 		List<Event> toRemove = new LinkedList<Event>();
+		if (res.getGate().getType() == GateType.AND) {
+			Event tmp = transformSubgates(rootevent, GateType.OR, res.getGate().getType());
+			if (tmp != res) {
+				res = tmp;
+				flattenSubgates(res.getGate());
+				removeZeroOneEventSubGates(res.getGate());
+			}
+		}
+		if (res.getGate().getType() == GateType.OR || res.getGate().getType() == GateType.XOR) {
+			Event tmp = transformSubgates(res, GateType.AND, res.getGate().getType());
+			if (tmp != res) {
+				res = tmp;
+				flattenSubgates(res.getGate());
+				removeZeroOneEventSubGates(res.getGate());
+			}
+		}
+		if (res.getGate().getType() == GateType.AND || res.getGate().getType() == GateType.XOR) {
+			res = removeSubEventsCommonWithEnclosingEvents(res, GateType.OR);
+		}
+		if (res.getGate().getType() == GateType.OR) {
+			res = removeSubEventsCommonWithEnclosingEvents(res, GateType.AND);
+		}
+		if (res.getGate().getType() == GateType.OR) {
+			res = removeSubEventsCommonWithEnclosingEvents(res, GateType.PRIORITY_AND);
+		}
+		if (res.getGate().getType() == GateType.OR) {
+			res = removeSubEventsCommonWithEnclosingEvents(res, GateType.XOR);
+		}
+		// now we recurse to do bottom up transformation
+		List<Event> subEvents = res.getGate().getEvents();
 		for (Event event : subEvents) {
 			if (event.getGate() != null) {
-				Event res = optimizeGates(event);
-				if (res != event) {
-					toAdd.add(res);
+				Event tmp = optimizeGates(event);
+				if (tmp != event) {
+					toAdd.add(tmp);
 					toRemove.add(event);
 				}
 			}
 		}
-		Event res = rootevent;
 		if (!toAdd.isEmpty()) {
 			subEvents.removeAll(toRemove);
 			subEvents.addAll(toAdd);
