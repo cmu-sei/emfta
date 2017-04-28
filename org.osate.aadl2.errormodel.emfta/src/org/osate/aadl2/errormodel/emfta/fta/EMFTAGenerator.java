@@ -31,8 +31,10 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
+import org.osate.aadl2.instance.ConnectionInstance;
 import org.osate.aadl2.instance.SystemInstance;
 import org.osate.xtext.aadl2.errormodel.errorModel.ConditionExpression;
+import org.osate.xtext.aadl2.errormodel.errorModel.ConnectionErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
@@ -143,6 +145,30 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		return emftaModel;
 	}
 
+	private String buildName(ConnectionInstance conni, NamedElement namedElement, ErrorTypes type) {
+		String identifier;
+
+		identifier = conni.getName();
+		identifier += "-";
+
+		if (namedElement == null) {
+			identifier += "unidentified";
+
+		} else {
+			identifier += EMV2Util.getPrintName(namedElement);
+		}
+
+		if (type == null) {
+//			identifier+="-notypes";
+		} else if (type.getName() != null) {
+			identifier += "-" + type.getName();
+		} else {
+			identifier += "-" + EMV2Util.getPrintName(type);
+		}
+		identifier = identifier.replaceAll("\\{", "").replaceAll("\\}", "").toLowerCase();
+		return identifier;
+	}
+
 	private String buildName(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		return buildIdentifier(component, namedElement, type);
 	}
@@ -217,6 +243,18 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 */
 	private Event createBasicEvent(ComponentInstance component, NamedElement namedElement, ErrorTypes type) {
 		String name = buildName(component, namedElement, type);
+		Event result = findEvent(name);
+		if (result != null)
+			return result;
+		Event newEvent = EmftaFactory.eINSTANCE.createEvent();
+		emftaModel.getEvents().add(newEvent);
+		newEvent.setName(name);
+		newEvent.setType(EventType.BASIC);
+		return newEvent;
+	}
+
+	private Event createBasicEvent(ConnectionInstance conni, NamedElement namedElement, ErrorTypes type) {
+		String name = buildName(conni, namedElement, type);
 		Event result = findEvent(name);
 		if (result != null)
 			return result;
@@ -1039,6 +1077,14 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			TypeSet typeTokenConstraint) {
 		Event newEvent = this.createBasicEvent(component, errorSource, errorSource.getTypeTokenConstraint());
 		Utils.fillProperties(newEvent, component, errorSource, errorSource.getTypeTokenConstraint());
+		return newEvent;
+	}
+
+	@Override
+	protected EObject processConnectionErrorSource(ComponentInstance component, ConnectionErrorSource errorSource,
+			ErrorTypes typeTokenConstraint) {
+		Event newEvent = this.createBasicEvent(component, errorSource, typeTokenConstraint);
+		Utils.fillProperties(newEvent, component, errorSource, typeTokenConstraint);
 		return newEvent;
 	}
 

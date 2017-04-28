@@ -21,6 +21,7 @@ package org.osate.aadl2.errormodel.emfta.fta;
 import org.osate.aadl2.NamedElement;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.SystemInstance;
+import org.osate.xtext.aadl2.errormodel.errorModel.ConnectionErrorSource;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorEvent;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
@@ -60,6 +61,25 @@ public class Utils {
 	public static void fillProperties(Event event, ComponentInstance component, NamedElement errorModelArtifact,
 			ErrorTypes type) {
 		fillProperties(event, component, errorModelArtifact, type, 1);
+	}
+
+	public static void fillProperties(Event event, ComponentInstance component, ConnectionErrorSource ces,
+			ErrorTypes type, double scale) {
+		String propertyDescription;
+		propertyDescription = EMV2Properties.getDescription(ces, component);
+
+		if (propertyDescription == null) {
+			event.setDescription(getDescription(component, ces, type));
+		} else {
+			event.setDescription(propertyDescription + "(connection " + ces.getConnection().getName() + ")");
+		}
+
+		event.setProbability(EMV2Properties.getProbability(component, ces, type) * scale);
+	}
+
+	public static void fillProperties(Event event, ComponentInstance component, ConnectionErrorSource ces,
+			ErrorTypes type) {
+		fillProperties(event, component, ces, type, 1);
 	}
 
 	public static String getDescription(ComponentInstance component, NamedElement errorModelArtifact, ErrorTypes type) {
