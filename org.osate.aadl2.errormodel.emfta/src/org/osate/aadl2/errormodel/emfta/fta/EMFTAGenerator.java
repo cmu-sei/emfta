@@ -125,9 +125,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				flattenGates(emftaRootEvent);
 			}
 			if (minimalCutSet) {
-				emftaRootEvent = normalize(emftaRootEvent);
+				emftaRootEvent = minimalCutSet(emftaRootEvent);
 				emftaModel.setRoot(emftaRootEvent);
-				minimalAndSet(emftaRootEvent);
 			}
 			redoCount();
 			removeOrphans();
@@ -288,7 +287,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * create a generic intermediate Event
 	 * @return
 	 */
-	private int count = 0;
+	private int count = 1;
 
 	private Event createIntermediateEvent(String eventname) {
 		if (eventname.isEmpty()) {
@@ -519,7 +518,7 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	 * normalize graph
 	 */
 
-	private Event normalize(Event rootevent) {
+	private Event minimalCutSet(Event rootevent) {
 		if (rootevent.getGate() == null)
 			return rootevent;
 		List<Event> toAdd = new LinkedList<Event>();
@@ -540,7 +539,9 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				alternative.setGate(emftaGate);
 				toAdd.add(alternative);
 				normalizeEvent(alt, toAdd);
-				altGate.getEvents().addAll(toAdd);
+				for (Event addMe : toAdd) {
+					addAsMinimalAndSet(altGate, addMe);
+				}
 				toAdd.clear();
 			}
 		} else if (rootevent.getGate().getType() == GateType.AND
@@ -551,7 +552,13 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 			alternative.setGate(emftaGate);
 			toAdd.add(alternative);
 			normalizeEvent(rootevent, toAdd);
-			altGate.getEvents().addAll(toAdd);
+			for (Event addMe : toAdd) {
+				addAsMinimalAndSet(altGate, addMe);
+			}
+		}
+		int cutsetcount = 1;
+		for (Event alt : altGate.getEvents()) {
+			alt.setName("Cutset" + cutsetcount++);
 		}
 		return root;
 	}
@@ -584,42 +591,39 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 	}
 
-	/**
-	 * eliminate AND with same or superset subevents
-	 */
-	private void minimalAndSet(Event rootevent) {
-		if (rootevent.getGate() != null
-				&& (rootevent.getGate().getType() == GateType.XOR || rootevent.getGate().getType() == GateType.OR)) {
-			EList<Event> subevents = rootevent.getGate().getEvents();
-			List<Event> toRemove = new LinkedList<Event>();
-			for (int i = 0; i < subevents.size() - 1; i++) {
-				Event first = subevents.get(i);
-				for (int j = i + 1; j < subevents.size(); j++) {
-					Event second = subevents.get(j);
-					if (first.getGate() != null && second.getGate() != null && first.getGate().getType() == GateType.AND
-							&& second.getGate().getType() == GateType.AND) {
-						if (first.getGate().getEvents().containsAll(second.getGate().getEvents())) {
-							toRemove.add(first);
-						} else if (second.getGate().getEvents().containsAll(first.getGate().getEvents())) {
-							toRemove.add(second);
-						}
-					} else {
-						if (first.getGate() == null && second.getGate() != null
-								&& second.getGate().getType() == GateType.AND) {
-							if (second.getGate().getEvents().contains(first)) {
-								toRemove.add(second);
-							}
-						} else if (second.getGate() == null && first.getGate() != null
-								&& first.getGate().getType() == GateType.AND) {
-							if (first.getGate().getEvents().contains(second)) {
-								toRemove.add(first);
-							}
-						}
+	private void addAsMinimalAndSet(Gate altGate, Event altEvent) {
+		EList<Event> existingAlternatives = altGate.getEvents();
+		List<Event> toRemove = new LinkedList<Event>();
+		for (Event matchEvent : existingAlternatives) {
+			if (matchEvent.getGate() != null && altEvent.getGate() != null
+					&& matchEvent.getGate().getType() == GateType.AND && altEvent.getGate().getType() == GateType.AND) {
+				if (matchEvent.getGate().getEvents().containsAll(altEvent.getGate().getEvents())) {
+					toRemove.add(matchEvent);
+				} else if (altEvent.getGate().getEvents().containsAll(matchEvent.getGate().getEvents())) {
+					return;
+				}
+			} else {
+				if (matchEvent.getGate() == null && altEvent.getGate() != null
+						&& altEvent.getGate().getType() == GateType.AND) {
+					if (altEvent.getGate().getEvents().contains(matchEvent)) {
+						return;
+					}
+				} else if (altEvent.getGate() == null && matchEvent.getGate() != null
+						&& matchEvent.getGate().getType() == GateType.AND) {
+					if (matchEvent.getGate().getEvents().contains(altEvent)) {
+						toRemove.add(matchEvent);
+					}
+				} else if (altEvent.getGate() == null && matchEvent.getGate() == null) {
+					if (matchEvent == altEvent) {// matchEvent.equals(altEvent)) {
+						return;
 					}
 				}
 			}
-			subevents.removeAll(toRemove);
 		}
+		if (!toRemove.isEmpty()) {
+			existingAlternatives.removeAll(toRemove);
+		}
+		existingAlternatives.add(altEvent);
 	}
 
 	/**
