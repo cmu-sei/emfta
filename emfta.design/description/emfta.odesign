@@ -162,13 +162,8 @@
           </style>
         </edgeMappings>
         <toolSections name="TreeSection">
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="CutSet" label="Generate Cutset" id="edu.cmu.emfta.actions.CutsetAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="Consistency" label="Check Probability Consistency" id="edu.cmu.emfta.actions.ProbabilityConsistencyAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="GenerateProbability" label="Generate Events Probability" id="edu.cmu.emfta.actions.ComputeProbabilityAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="UpdateProbability" label="Update Probabilities" id="edu.cmu.emfta.actions.UpdateProbabilityAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="Optimization" label="Optimize Tree" id="edu.cmu.emfta.actions.OptimizationAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="Factorization" label="Factorize Tree" id="edu.cmu.emfta.actions.FactorizationAction"/>
-          <ownedTools xsi:type="tool:ExternalJavaAction" name="ExpandAction" label="Expand Tree" id="edu.cmu.emfta.actions.ExpandAction"/>
+          <ownedTools xsi:type="tool:ExternalJavaAction" name="GenerateProbability" label="Generate Events Probability Report" id="edu.cmu.emfta.actions.ComputeProbabilityAction"/>
+          <ownedTools xsi:type="tool:ExternalJavaAction" name="UpdateProbability" label="Compute Probabilities" id="edu.cmu.emfta.actions.UpdateProbabilityAction"/>
           <ownedTools xsi:type="tool_1:NodeCreationDescription" name="CreateEvent" label="Create Event" nodeMappings="//@ownedViewpoints[name='EMFTA']/@ownedRepresentations[name='Tree.diagram']/@defaultLayer/@nodeMappings[name='EventNode']">
             <variable name="container"/>
             <viewVariable name="containerView"/>
