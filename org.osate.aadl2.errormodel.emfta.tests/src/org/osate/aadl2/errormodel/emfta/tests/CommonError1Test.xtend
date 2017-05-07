@@ -174,7 +174,7 @@ end common_error1;
   <events name="a0-failure" description="Error event Failure on component a0"/>
   <events name="s0-ef0-latedelivery" description="Error source ef0 on component s0 from valueout with types {LateDelivery}"/>
   <events name="a1-failure" description="Error event Failure on component a1"/>
-  <events type="Intermediate" name="Intermediate0">
+  <events type="Intermediate" name="Intermediate1">
     <gate type="AND" events="//@events.0 //@events.2"/>
   </events>
   <events type="Intermediate" name="common_error1_main_commonsource-failstop">

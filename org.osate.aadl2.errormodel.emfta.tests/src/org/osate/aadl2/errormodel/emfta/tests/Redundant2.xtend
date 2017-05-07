@@ -442,7 +442,7 @@ end FTerrorlibrary;
   <events name="actuator-failure" description="Error event Failure on component actuator"/>
   <events name="sensor1-valueout-latedelivery,outofrange" description="component sensor1 with out propagation valueout"/>
   <events name="sensor2-valueout-latedelivery,outofrange" description="component sensor2 with out propagation valueout"/>
-  <events type="Intermediate" name="Intermediate0">
+  <events type="Intermediate" name="Intermediate1">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
   <events name="voter.thr-failure" description="Error event Failure with types {ItemOmission} on component thr"/>
@@ -479,7 +479,7 @@ end FTerrorlibrary;
   <events name="voter.thr-computeerror" description="Error event ComputeError with types {ItemOmission} on component thr"/>
   <events name="sensor1-valueout-latedelivery,outofrange" description="component sensor1 with out propagation valueout"/>
   <events name="sensor2-valueout-latedelivery,outofrange" description="component sensor2 with out propagation valueout"/>
-  <events type="Intermediate" name="Intermediate0">
+  <events type="Intermediate" name="Intermediate1">
     <gate type="AND" events="//@events.1 //@events.2"/>
   </events>
   <events name="voter.thr-failure" description="Error event Failure with types {ItemOmission} on component thr"/>
