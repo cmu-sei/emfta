@@ -305,16 +305,16 @@ end FGSErrorModelLibrary;
   <events name="fg1-failure" description="Error event Failure on component FG1"/>
   <events name="fg2-failure" description="Error event Failure on component FG2"/>
   <events name="network-failure" description="Error event Failure on component network"/>
-  <events type="Intermediate" name="Intermediate3">
+  <events type="Intermediate" name="Intermediate4">
     <gate type="AND" events="//@events.4 //@events.7"/>
   </events>
   <events type="Intermediate" name="dualfgs_fgs_composite-criticalmodefailure">
     <gate type="XOR" events="//@events.0 //@events.5"/>
   </events>
-  <events type="Intermediate" name="Intermediate5">
+  <events type="Intermediate" name="Intermediate6">
     <gate events="//@events.1 //@events.8"/>
   </events>
-  <events type="Intermediate" name="Intermediate6">
+  <events type="Intermediate" name="Intermediate7">
     <gate type="AND" events="//@events.2 //@events.3"/>
   </events>
 </emfta:FTAModel>

@@ -163,7 +163,7 @@ end common_error3;
   <events name="a0-failure" description="Error event Failure on component a0"/>
   <events name="c0-failure" description="Error event Failure with types {ServiceError} on component c0"/>
   <events name="a1-failure" description="Error event Failure on component a1"/>
-  <events type="Intermediate" name="Intermediate0">
+  <events type="Intermediate" name="Intermediate1">
     <gate type="AND" events="//@events.0 //@events.2"/>
   </events>
   <events type="Intermediate" name="common_error3_main_commoneventssingleport-failstop">
