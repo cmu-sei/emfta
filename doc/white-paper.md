@@ -75,6 +75,13 @@ This propagation represents the external effect a system function or service can
 The resulting fault tree is flattened during the generation. For example, the error source contributions of three successive components are represented as Events under a single OR gate instead of a right recursive tree of binary OR operators. Flattening has the effect that components may not show if they do not have fault contributors. For example, a software component itself may not show as contributor, if no error source or event has been specified for it, but the processor the software component is bound will show as contributor – illustrated in the example above by the event named Processing_processor_serviceomission
 Some components may be included multiple times in a fault tree. For example, a single source component whose output is fanned out along multiple paths and then brought together, or a processor with multiple software components bound to it. Such components are actually a single instance that is linked to by multiple gates in the fault tree. If the same component occurs multiple times directly under a gate it is listed only once. In our example above, the power supply is such a component.
 
+### Fault Trees, Dependent Events, and Minimal Cut Sets
+
+EMFTA produces a propagation graph from the AADL/EMV2 model. This graph reflects common cause elements (dependent events). Users can select the FTA representation resulting from this graph
+* Basic Fault Tree: A fault tree with dependent events marked by "\*". Such a fault tree most closely reflects the original paths through the system.
+* Transformed Fault Tree: Transformations applied to the basic fault tree to move common events "up the tree". The resultant fault tree does not have dependent events and is used for calculating occurrence probabilities.
+* Minimal cut sets: Minimal cut sets are generated from the graph. Occurrence probability is calculated from it as well.
+
 ## EMV2 and Fault Tree Logic
 
 The [EMFTA Editor](https://github.com/cmu-sei/emfta) supports creation of fault trees interactive. It works with files of the extension emfta. It supports the following fault tree Event types and Gate types.
