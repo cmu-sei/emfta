@@ -66,7 +66,7 @@ Note that a composite propagation declaration may include references to incoming
 
 Flow-based EMFTA utilizes error flows and propagation paths as well as component error behavior specifications. In its simplest form EMFTA traces back from a user identified outgoing error propagation and error type of interest for the top-level system. In our example, this is represented by the top-level system implementation gps.basic.
 
-![EMFTA menu](imgs/fta-menu2.png "EMFTA menu - flow based")
+![EMFTA menu](imgs/fta-menu3.png "EMFTA menu - flow based")
 
 This propagation represents the external effect a system function or service can have on its operational environment. The backward trace continues until it encounters an error source, or an incoming error propagation that does not have a propagation path due to an absent connection or binding. An example of an intentionally unconnected incoming error propagation is an incoming propagation of the top level system. An example is shown in the figure below for the satellite signal coming to the satellitesignalreceiver.
 
