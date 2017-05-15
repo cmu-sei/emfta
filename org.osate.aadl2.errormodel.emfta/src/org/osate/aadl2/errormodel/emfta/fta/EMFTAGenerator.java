@@ -117,24 +117,24 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				topEvent.setGate(top);
 				emftaRootEvent = topEvent;
 			}
-			emftaModel.setRoot(emftaRootEvent);
 			flattenGates(emftaRootEvent);
-			cleanupXORGates(emftaModel.getRoot());
+			cleanupXORGates(emftaRootEvent);
+//			xformXORtoOR(emftaRootEvent);
 			if (transformTree) {
-				emftaModel.setRoot(optimizeGates(emftaModel.getRoot()));
+				emftaRootEvent = optimizeGates(emftaRootEvent);
 				flattenGates(emftaRootEvent);
 			}
 			if (minimalCutSet) {
 				emftaRootEvent = minimalCutSet(emftaRootEvent);
-				emftaModel.setRoot(emftaRootEvent);
 			}
+			emftaRootEvent.setName(longName);
+			emftaModel.setRoot(emftaRootEvent);
 			redoCount();
 			removeOrphans();
 			boolean hasDependentEvents = hasSharedEvents();
 			if (!sharedEventsAsGraph) {
-				replicateSharedEvents(emftaModel.getRoot());
+				replicateSharedEvents(emftaRootEvent);
 			}
-			emftaModel.getRoot().setName(longName);
 			redoCount();
 			removeOrphans();
 			if (transformTree || minimalCutSet || !hasDependentEvents) {
@@ -703,6 +703,27 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 	}
 
 	/**
+	 * recursively remove common events from subgates of XOR gates
+	 * @param rootevent
+	 * @return Event original or new root event
+	 */
+	private void xformXORtoOR(Event rootevent) {
+		if (rootevent.getGate() == null) {
+			return;
+		}
+		List<Event> subEvents = rootevent.getGate().getEvents();
+		for (Event event : subEvents) {
+			if (event.getGate() != null) {
+				cleanupXORGates(event);
+			}
+		}
+		if (rootevent.getGate().getType() == GateType.XOR) {
+			doXformXORtoOR(rootevent);
+		}
+		return;
+	}
+
+	/**
 	 * recursively apply optimizations on subgates.
 	 * At the end optimize gate of rootevent.
 	 * This may result in a new rootevent
@@ -979,6 +1000,44 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 				removeZeroOneEventSubGates(topgate);
 				return;
 			}
+		}
+	}
+
+	/**
+	 * remove shared OR from AND if also as subevent of XOR
+	 * @param topevent
+	 * @param gt
+	 * @return Event 
+	 */
+	private void doXformXORtoOR(Event topevent) {
+		Gate topgate = topevent.getGate();
+		if (topgate == null)
+			return;
+		List<Event> subEvents = topgate.getEvents();
+		if (subEvents.isEmpty())
+			return;
+		if (subEvents.size() == 1) {
+			return;
+		}
+		Set<Event> intersection = null;
+		List<Event> todo = new LinkedList<Event>();
+		todo.clear();
+		for (Event se : subEvents) {
+			if (se.getGate() != null && (se.getGate().getType() == GateType.OR)) {
+				for (Event andevent : subEvents) {
+					Gate andGate = andevent.getGate();
+					if (andGate != null && (andGate.getType() == GateType.AND)) {
+						if (andGate.getEvents().contains(se)) {
+							andGate.getEvents().remove(se);
+							todo.add(se);
+						}
+					}
+				}
+			}
+		}
+		if (todo.size() > 0) {
+			topgate.setType(GateType.OR);
+			topgate.getEvents().removeAll(todo);
 		}
 	}
 
