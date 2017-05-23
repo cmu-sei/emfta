@@ -13,7 +13,7 @@ public class Services {
 	public EList<Event> getEvents(EObject context) {
 		EList<Event> eventsToReturn = new BasicEList<Event>();
 		if (context instanceof FTAModel) {
-			EList<Event> AllEvents = ((FTAModel)context).getEvents();
+			EList<Event> AllEvents = ((FTAModel) context).getEvents();
 			EList<Event> firstLevelEvents = new BasicEList<Event>();
 			firstLevelEvents.addAll(AllEvents);
 			for (Event event : AllEvents) {
@@ -26,6 +26,16 @@ public class Services {
 			eventsToReturn.addAll(firstLevelEvents);
 		} else if (context instanceof Gate) {
 			eventsToReturn.addAll(((Gate) context).getEvents());
+		}
+		return eventsToReturn;
+	}
+
+	public EList<Event> getCutsets(EObject context) {
+		EList<Event> eventsToReturn = new BasicEList<Event>();
+		if (context instanceof FTAModel) {
+			eventsToReturn.add(((FTAModel) context).getRoot());
+		} else if (context instanceof Event && ((Event) context).getGate() != null) {
+			eventsToReturn.addAll(((Event) context).getGate().getEvents());
 		}
 		return eventsToReturn;
 	}
