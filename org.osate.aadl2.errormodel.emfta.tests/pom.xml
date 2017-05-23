@@ -13,7 +13,7 @@
 	<repositories>
 		<repository>
 			<id>mars</id>
-			<url>http://download.eclipse.org/releases/mars/201510021000</url>
+			<url>http://download.eclipse.org/releases/mars/201602261000</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
