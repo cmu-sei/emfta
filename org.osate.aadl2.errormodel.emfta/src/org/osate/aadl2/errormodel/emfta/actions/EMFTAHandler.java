@@ -21,22 +21,31 @@ package org.osate.aadl2.errormodel.emfta.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.xtext.ui.util.ResourceUtil;
-import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.ui.actions.AaxlReadOnlyActionAsJob;
+import org.osate.aadl2.modelsupport.resources.OsateResourceUtil;
 import org.osate.ui.dialogs.Dialog;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
@@ -44,7 +53,7 @@ import org.osate.xtext.aadl2.errormodel.errorModel.TypeToken;
 import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
-public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
+public final class EMFTAHandler extends AbstractHandler {
 
 	private static String ERROR_STATE_NAME = null;
 	private static boolean GRAPH = false;
@@ -57,42 +66,23 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 	ComponentInstance target;
 
 	@Override
-	protected String getMarkerType() {
-		return "org.osate.analysis.errormodel.FaultTreeMarker";
-	}
-
-	@Override
-	protected String getActionName() {
-		return "FTA";
-	}
-
-	@Override
-	public void doAaxlAction(IProgressMonitor monitor, Element obj) {
-
-		monitor.beginTask("Fault Tree Analysis", IProgressMonitor.UNKNOWN);
-
-		si = null;
-
-		if (obj instanceof InstanceObject) {
-			si = ((InstanceObject) obj).getSystemInstance();
-			if (obj instanceof ComponentInstance) {
-				target = (ComponentInstance) obj;
-			} else {
-				target = si;
-			}
-		}
-
-		if (si == null) {
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		InstanceObject object = getTarget(HandlerUtil.getCurrentSelection(event));
+		if (object == null) {
 			Dialog.showInfo("Fault Tree Analysis", "Please choose an instance model");
-			monitor.done();
-			return;
+			return Status.ERROR;
+		}
+		si = object.getSystemInstance();
+		if (object instanceof ComponentInstance) {
+			target = (ComponentInstance) object;
+		} else {
+			target = si;
 		}
 
 		if (!EMV2Util.hasErrorBehaviorStates(target) && !EMV2Util.hasOutgoingPropagations(target)) {
 			Dialog.showInfo("Fault Tree Analysis",
 					"Your system instance or selected component instance must have error behavior states or outgoing propagations.");
-			monitor.done();
-			return;
+			return null;
 		}
 
 		final Display d = PlatformUI.getWorkbench().getDisplay();
@@ -147,17 +137,36 @@ public final class EMFTAAction extends AaxlReadOnlyActionAsJob {
 				if (MINCUTSET) {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
 							"viewpoint:/emfta.design/EMFTA", "Cutset.diagram", "Minimal Cutset");
-					monitor.done();
-					return;
+					return Status.OK_STATUS;
 				} else {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
 							"viewpoint:/emfta.design/EMFTA", "Tree.diagram", "Fault Tree");
-					monitor.done();
-					return;
+					return Status.OK_STATUS;
 				}
 			}
 		}
-		monitor.done();
+
+		return Status.ERROR;
+	}
+
+	private InstanceObject getTarget(ISelection currentSelection) {
+		if (currentSelection instanceof IStructuredSelection) {
+			IStructuredSelection iss = (IStructuredSelection) currentSelection;
+			if (iss.size() == 1) {
+				Object obj = iss.getFirstElement();
+				if (obj instanceof InstanceObject) {
+					return (InstanceObject) obj;
+				}
+				if (obj instanceof IFile) {
+					Resource res = OsateResourceUtil.getResource((IResource) obj);
+					EList<EObject> rl = res.getContents();
+					if (!rl.isEmpty()) {
+						return (InstanceObject) rl.get(0);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }

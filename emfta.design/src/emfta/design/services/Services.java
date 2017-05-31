@@ -52,4 +52,13 @@ public class Services {
 		return childrenToReturn;
 	}
 
+	public String ProbabilityToString(EObject context) {
+		if (context instanceof Event) {
+			double val = ((Event) context).getProbability();
+			String name = ((Event) context).getName();
+			return String.format("%1$s\n(%2$.3E)", name, val);
+		}
+		return "";
+	}
+
 }

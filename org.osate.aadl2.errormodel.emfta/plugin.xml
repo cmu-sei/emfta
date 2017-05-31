@@ -60,7 +60,7 @@
 
          <action
                id="org.osate.aadl2.errormodel.analysis.actions.EMFTA.action"
-               label="Generate EMFTA"
+               label="View FTA"
                tooltip="Generate EMFTA model from AADL/EMV2 model and open in Viewer"
                icon="icons/fta.png"
                class="org.osate.aadl2.errormodel.emfta.actions.EMFTAAction"
@@ -127,8 +127,8 @@
         
          <action
                id="org.osate.aadl2.errormodel.analysis.actions.EMFTA.popupAction"
-               label="EMFTA export"
-               tooltip="EMFTA export"
+               label="View FTA"
+               tooltip="Generate and view EMFTA"
                icon="icons/fta.png" 
                class="org.osate.aadl2.errormodel.emfta.actions.EMFTAAction"
                menubarPath="org.osate.ui.popupMenu.Analyses/org.osate.analysis.architecture.popupMenu.Fault/anal.grp"
@@ -147,19 +147,9 @@
      </category>
 
      <command categoryId="org.osate.emfta.category.commands"
-            id="org.osate.emfta.commands.GraphicFTA"
-            description="View Graphic FTA"
-            name="Graphic FTA">
-     </command>     
-     <command categoryId="org.osate.emfta.category.commands"
-            id="org.osate.emfta.commands.TableFTA"
-            description="View FTA Table"
-            name="FTA Table">
-     </command>     
-     <command categoryId="org.osate.emfta.category.commands"
-            id="org.osate.emfta.commands.CutsetReport"
-            description="View Minimal Cutset Report"
-            name="Minimal Cutset Report">
+            id="org.osate.emfta.commands.EMFTA"
+            description="View FTA graphically or as minimal cutset table"
+            name="View FTA">
      </command>     
 
     </extension>
@@ -168,79 +158,35 @@
     
     <extension point="org.eclipse.ui.menus">
          <menuContribution locationURI="popup:org.osate.ui.navigator.AadlNavigator?after=additions">
-			<command commandId="org.osate.emfta.commands.GraphicFTA" 
-				style="push" tooltip="Graphic View FTA">
-          <visibleWhen>
-            <reference definitionId="org.osate.emfta.compatibleElementSelected">
-            </reference>
-         </visibleWhen>
-			</command>
-         </menuContribution>
-         <menuContribution locationURI="popup:org.osate.ui.navigator.AadlNavigator?after=additions">
-			<command commandId="org.osate.emfta.commands.TableFTA" 
-				style="push" tooltip="Table View FTA">
-          <visibleWhen>
-            <reference definitionId="org.osate.emfta.compatibleElementSelected">
-            </reference>
-         </visibleWhen>
-			</command>
-         </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
-               id="org.osate.emftaviews.menus.main"
-               label="EMFTA Views">
-         <command
-               commandId="org.osate.emfta.commands.GraphicFTA"
-               icon="icons/fta.png"
-               id="org.osate.emfta.commands.GraphicFTA"
-               style="push">
-            <visibleWhen>
-               <reference
-                     definitionId="org.osate.emfta.compatibleElementSelected">
-               </reference>
-            </visibleWhen>
-         </command>
-        <command
-               commandId="org.osate.emfta.commands.TableFTA"
-               icon="icons/fta.png"
-               id="org.osate.emfta.commands.TableFTA"
-               style="push">
-            <visibleWhen>
-               <reference
-                     definitionId="org.osate.emfta.compatibleElementSelected">
-               </reference>
-            </visibleWhen>
-         </command>
-        <command
-               commandId="org.osate.emfta.commands.CutsetReport"
-               icon="icons/fta.png"
-               id="org.osate.emfta.commands.CutsetReport"
-               style="push">
-            <visibleWhen>
-               <reference
-                     definitionId="org.osate.emfta.compatibleElementSelected">
-               </reference>
-            </visibleWhen>
-         </command>
+               id="org.osate.ui.popupMenu.Analyses"
+               label="%popupMenu.analyses.label"
+               >
+        <menu
+               id="org.osate.analysis.architecture.popupMenu.Fault"
+               label="%popupMenu.Fault.label"
+               >
+			<command commandId="org.osate.emfta.commands.EMFTA" 
+              icon="icons/fta.png"
+				style="push" tooltip="View FTA">
+          <visibleWhen>
+            <reference definitionId="org.osate.emfta.compatibleElementSelected">
+            </reference>
+         </visibleWhen>
+			</command>
+
          </menu>
-      </menuContribution>
+ 
+         </menu>
+
+          </menuContribution>
  	</extension>
  	
    	<extension point="org.eclipse.ui.handlers">
 
         <handler
-            class="org.osate.aadl2.errormodel.emfta.actions.TreeViewFTAHandler" 
-            commandId="org.osate.emfta.commands.GraphicFTA">
-      </handler>
-       <handler
-            class="org.osate.aadl2.errormodel.emfta.actions.TableViewFTAHandler" 
-            commandId="org.osate.emfta.commands.TableFTA">
-      </handler>
-       <handler
-            class="org.osate.aadl2.errormodel.emfta.actions.MinimalCutsetViewHandler" 
-            commandId="org.osate.emfta.commands.CutsetReport">
+            class="org.osate.aadl2.errormodel.emfta.actions.EMFTAHandler" 
+            commandId="org.osate.emfta.commands.EMFTA">
       </handler>
 
      </extension>  
@@ -259,7 +205,7 @@
                           <test
                                 args="extension"
                                 property="org.eclipse.core.resources.extension"
-                                value="emfta">
+                                value="aaxl2">
                           </test>
                        </or>
 	                </adapt>
