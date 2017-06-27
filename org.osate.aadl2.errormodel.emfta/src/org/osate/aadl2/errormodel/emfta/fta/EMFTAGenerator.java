@@ -531,7 +531,8 @@ public class EMFTAGenerator extends PropagationGraphBackwardTraversal {
 		}
 		root.setGate(altGate);
 		if (rootevent.getGate().getType() == GateType.OR || rootevent.getGate().getType() == GateType.XOR
-				|| rootevent.getGate().getType() == GateType.ORMORE) {
+				|| rootevent.getGate().getType() == GateType.ORMORE
+				|| rootevent.getGate().getType() == GateType.INTERMEDIATE) {
 			for (Event alt : rootevent.getGate().getEvents()) {
 				Event alternative = createIntermediateEvent("");
 				Gate emftaGate = EmftaFactory.eINSTANCE.createGate();
