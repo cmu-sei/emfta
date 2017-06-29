@@ -16,7 +16,7 @@
  * DM-0003411
  */
 
-package org.osate.aadl2.errormodel.emfta.actions;
+package org.osate.aadl2.errormodel.emfta.handlers;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;

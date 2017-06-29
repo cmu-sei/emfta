@@ -16,73 +16,81 @@
  * DM-0003411
  */
 
-package org.osate.aadl2.errormodel.emfta.actions;
+package org.osate.aadl2.errormodel.emfta.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.xtext.ui.util.ResourceUtil;
+import org.osate.aadl2.Element;
 import org.osate.aadl2.Feature;
 import org.osate.aadl2.errormodel.emfta.fta.EMFTACreateModel;
 import org.osate.aadl2.errormodel.emfta.util.SiriusUtil;
 import org.osate.aadl2.instance.ComponentInstance;
 import org.osate.aadl2.instance.InstanceObject;
 import org.osate.aadl2.instance.SystemInstance;
-import org.osate.aadl2.modelsupport.resources.OsateResourceUtil;
 import org.osate.ui.dialogs.Dialog;
+import org.osate.ui.handlers.AaxlReadOnlyHandlerAsJob;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorBehaviorState;
 import org.osate.xtext.aadl2.errormodel.errorModel.ErrorPropagation;
 import org.osate.xtext.aadl2.errormodel.errorModel.TypeToken;
 import org.osate.xtext.aadl2.errormodel.util.EM2TypeSetUtil;
 import org.osate.xtext.aadl2.errormodel.util.EMV2Util;
 
-public final class EMFTAHandler extends AbstractHandler {
-
+public final class EMFTAHandler extends AaxlReadOnlyHandlerAsJob {
 	private static String ERROR_STATE_NAME = null;
 	private static boolean GRAPH = false;
 	private static boolean TRANSFORM = false;
 	private static boolean MINCUTSET = false;
-	private static boolean BASICTREE = true;
 	public static final String prefixState = "state ";
 	public static final String prefixOutgoingPropagation = "outgoing propagation on ";
 	SystemInstance si;
 	ComponentInstance target;
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		InstanceObject object = getTarget(HandlerUtil.getCurrentSelection(event));
-		if (object == null) {
-			Dialog.showInfo("Fault Tree Analysis", "Please choose an instance model");
-			return Status.ERROR;
+	protected String getMarkerType() {
+		return "org.osate.analysis.errormodel.FaultTreeMarker";
+	}
+
+	@Override
+	protected String getActionName() {
+		return "FTA";
+	}
+
+	@Override
+	public void doAaxlAction(IProgressMonitor monitor, Element obj) {
+
+		monitor.beginTask("Fault Tree Analysis", IProgressMonitor.UNKNOWN);
+
+		si = null;
+
+		if (obj instanceof InstanceObject) {
+			si = ((InstanceObject) obj).getSystemInstance();
+			if (obj instanceof ComponentInstance) {
+				target = (ComponentInstance) obj;
+			} else {
+				target = si;
+			}
 		}
-		si = object.getSystemInstance();
-		if (object instanceof ComponentInstance) {
-			target = (ComponentInstance) object;
-		} else {
-			target = si;
+
+		if (si == null) {
+			Dialog.showInfo("Fault Tree Analysis", "Please choose an instance model");
+			monitor.done();
+			return;
 		}
 
 		if (!EMV2Util.hasErrorBehaviorStates(target) && !EMV2Util.hasOutgoingPropagations(target)) {
 			Dialog.showInfo("Fault Tree Analysis",
 					"Your system instance or selected component instance must have error behavior states or outgoing propagations.");
-			return null;
+			monitor.done();
+			return;
 		}
 
 		final Display d = PlatformUI.getWorkbench().getDisplay();
@@ -126,7 +134,6 @@ public final class EMFTAHandler extends AbstractHandler {
 				GRAPH = diag.getSharedEventsAsGraph();
 				TRANSFORM = diag.getTransform();
 				MINCUTSET = diag.getMinCutSet();
-				BASICTREE = diag.getBasicTree();
 			}
 		});
 
@@ -137,36 +144,16 @@ public final class EMFTAHandler extends AbstractHandler {
 				if (MINCUTSET) {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
 							"viewpoint:/emfta.design/EMFTA", "Cutset.diagram", "Minimal Cutset");
-					return Status.OK_STATUS;
+					monitor.done();
+					return;
 				} else {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
 							"viewpoint:/emfta.design/EMFTA", "Tree.diagram", "Fault Tree");
-					return Status.OK_STATUS;
+					monitor.done();
+					return;
 				}
 			}
 		}
-
-		return Status.ERROR;
+		monitor.done();
 	}
-
-	private InstanceObject getTarget(ISelection currentSelection) {
-		if (currentSelection instanceof IStructuredSelection) {
-			IStructuredSelection iss = (IStructuredSelection) currentSelection;
-			if (iss.size() == 1) {
-				Object obj = iss.getFirstElement();
-				if (obj instanceof InstanceObject) {
-					return (InstanceObject) obj;
-				}
-				if (obj instanceof IFile) {
-					Resource res = OsateResourceUtil.getResource((IResource) obj);
-					EList<EObject> rl = res.getContents();
-					if (!rl.isEmpty()) {
-						return (InstanceObject) rl.get(0);
-					}
-				}
-			}
-		}
-		return null;
-	}
-
 }

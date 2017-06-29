@@ -22,212 +22,132 @@
 -->
 
 <plugin>
-
-
-       
-     <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            id="org.osate.analysis.emfta.actionSet"
-            label="%actionSet.label"
-            visible="false">
-
-         <menu
-               id="menu.osate"
-               label="%menu.osate.label"
-               path="project">
-            <groupMarker name="file.grp"/>
-            <separator name="instance.grp"/>
-            <separator name="general.grp"/>
-         </menu>
-
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="org.osate.aadl2.errormodel.emfta.category"
+            name="Commands related to EMFTA">
+      </category>
+      <command
+            categoryId="org.osate.aadl2.errormodel.emfta.category"
+            id="org.osate.aadl2.errormodel.emfta.emfta"
+            name="View FTA"
+            description="View FTA graphically or as minimal cutset table">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.osate.aadl2.errormodel.emfta.handlers.EMFTAHandler"
+            commandId="org.osate.aadl2.errormodel.emfta.emfta">
+         <enabledWhen>
+            <or>
+               <reference
+                     definitionId="org.osate.core.isInstanceFileSelected">
+               </reference>
+               <with
+                     variable="selection">
+                  <and>
+                     <count
+                           value="1">
+                     </count>
+                     <iterate>
+                        <instanceof
+                              value="org.osate.aadl2.instance.ComponentInstance">
+                        </instanceof>
+                     </iterate>
+                  </and>
+               </with>
+            </or>
+         </enabledWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.osate.aadl2.errormodel.emfta.emfta"
+            icon="icons/fta.png">
+      </image>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
          <menu
                id="menu.analyses"
-               label="%menu.analyses.label"
-               path="menu.osate">
-            <groupMarker name="top.grp"/>
-            <groupMarker name="bottom.grp"/>
-
+               label="%menu.analyses.label">
+            <menu
+                  id="menu.fault"
+                  label="%menu.fault.label">
+               <command
+                     commandId="org.osate.aadl2.errormodel.emfta.emfta">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.osate.ui.perspective.AadlPerspective">
+                        </equals>
+                     </with>
+                  </visibleWhen>
+               </command>
+            </menu>
          </menu>
-
-         <menu
-               id="menu.fault"
-               label="%menu.fault.label"
-               path="menu.analyses/top.grp">
-            <groupMarker name="stuff.grp"/>
-
-         </menu>
-
-         <action
-               id="org.osate.aadl2.errormodel.analysis.actions.EMFTA.action"
-               label="View FTA"
-               tooltip="Generate EMFTA model from AADL/EMV2 model and open in Viewer"
-               icon="icons/fta.png"
-               class="org.osate.aadl2.errormodel.emfta.actions.EMFTAAction"
-               menubarPath="menu.analyses/menu.fault/stuff.grp"
-               toolbarPath="fault.toolbar"
-               enablesFor="1">
-            <enablement>
-               <or>
-                  <and>
-                     <objectClass name="org.eclipse.core.resources.IFile"/>
-                     <objectState name="extension" value="aaxl2"/>
-                  </and>
-                   <objectClass name="org.osate.aadl2.instance.ComponentInstance"/>
-               </or>
-            </enablement>
-         </action>         
-     </actionSet>
-   </extension>
-
-
-   <extension
-   	   point="org.eclipse.ui.perspectiveExtensions">
-   	   <perspectiveExtension
-   		   targetID="org.osate.ui.perspective.AadlPerspective">
-   		   <actionSet
-   		 	   id="org.osate.analysis.emfta.actionSet"/>
-   	   </perspectiveExtension>
-   </extension>
-   
-   
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            id="org.osate.analysis.architecture.oc1"
-            objectClass="java.lang.Object">
-            
-         <visibility>
-         
-            <or>
-               <and>
-                  <objectClass name="org.eclipse.core.resources.IFile"/>
-                  <objectState name="extension" value="aaxl2"/>
-               </and>
-               <objectClass name="org.osate.aadl2.instance.SystemInstance"/>
-            </or>
-         </visibility> 
-
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="fault.toolbar">
+            <command
+                  commandId="org.osate.aadl2.errormodel.emfta.emfta"
+                  tooltip="Generate EMFTA model from AADL/EMV2 model and open in Viewer">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.osate.ui.perspective.AadlPerspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <menu
                id="org.osate.ui.popupMenu.Analyses"
-               label="%popupMenu.analyses.label"
-               path="additions">
-            <groupMarker name="anal.grp"/>
-            <groupMarker name="subMenus.grp"/>
-
+               label="%popupMenu.analyses.label">
+            <menu
+                  id="org.osate.analysis.architecture.popupMenu.Fault"
+                  label="%popupMenu.Fault.label">
+               <command
+                     commandId="org.osate.aadl2.errormodel.emfta.emfta">
+                  <visibleWhen
+                        checkEnabled="false">
+                     <with
+                           variable="selection">
+                        <iterate
+                              operator="and"
+                              ifEmpty="false">
+                           <or>
+                              <instanceof
+                                    value="org.osate.aadl2.instance.ComponentInstance">
+                              </instanceof>
+                              <adapt
+                                    type="org.eclipse.core.resources.IFile">
+                                 <test
+                                       property="org.eclipse.core.resources.contentTypeId"
+                                       value="org.osate.core.instanceModelFile">
+                                 </test>
+                              </adapt>
+                           </or>
+                        </iterate>
+                     </with>
+                  </visibleWhen>
+               </command>
+            </menu>
          </menu>
-
-         <menu
-               id="org.osate.analysis.architecture.popupMenu.Fault"
-               label="%popupMenu.Fault.label"
-               path="org.osate.ui.popupMenu.Analyses/subMenus.grp">
-            <groupMarker name="anal.grp"/>
-
-         </menu>
-        
-         <action
-               id="org.osate.aadl2.errormodel.analysis.actions.EMFTA.popupAction"
-               label="View FTA"
-               tooltip="Generate and view EMFTA"
-               icon="icons/fta.png" 
-               class="org.osate.aadl2.errormodel.emfta.actions.EMFTAAction"
-               menubarPath="org.osate.ui.popupMenu.Analyses/org.osate.analysis.architecture.popupMenu.Fault/anal.grp"
-               enablesFor="1"/>
-
-              
-      </objectContribution>
-
+      </menuContribution>
    </extension>
-   
-     <extension
-         point="org.eclipse.ui.commands">
-     <category
-            id="org.osate.emfta.category.commands"
-            name="Commands related to EMFTA">
-     </category>
-
-     <command categoryId="org.osate.emfta.category.commands"
-            id="org.osate.emfta.commands.EMFTA"
-            description="View FTA graphically or as minimal cutset table"
-            name="View FTA">
-     </command>     
-
-    </extension>
-    
-    
-    
-    <extension point="org.eclipse.ui.menus">
-         <menuContribution locationURI="popup:org.osate.ui.navigator.AadlNavigator?after=additions">
-         <menu
-               id="org.osate.ui.popupMenu.Analyses"
-               label="%popupMenu.analyses.label"
-               >
-        <menu
-               id="org.osate.analysis.architecture.popupMenu.Fault"
-               label="%popupMenu.Fault.label"
-               >
-			<command commandId="org.osate.emfta.commands.EMFTA" 
-              icon="icons/fta.png"
-				style="push" tooltip="View FTA">
-          <visibleWhen>
-            <reference definitionId="org.osate.emfta.compatibleElementSelected">
-            </reference>
-         </visibleWhen>
-			</command>
-
-         </menu>
- 
-         </menu>
-
-          </menuContribution>
- 	</extension>
- 	
-   	<extension point="org.eclipse.ui.handlers">
-
-        <handler
-            class="org.osate.aadl2.errormodel.emfta.actions.EMFTAHandler" 
-            commandId="org.osate.emfta.commands.EMFTA">
-      </handler>
-
-     </extension>  
-     <extension
-          point="org.eclipse.core.expressions.definitions">
-       <definition id="org.osate.emfta.compatibleElementSelected">
-       	<and>
-            <reference
-                  definitionId="oneElementSelected">
-            </reference>
-	        <with variable="selection">
-	           <iterate ifEmpty="false" operator="and">
-	              <or>
-	                <adapt type="org.eclipse.core.resources.IFile">
-                       <or>
-                          <test
-                                args="extension"
-                                property="org.eclipse.core.resources.extension"
-                                value="aaxl2">
-                          </test>
-                       </or>
-	                </adapt>
-	              </or>
-	           </iterate>
-	        </with>
-        </and>    
-       </definition>
-    </extension>
-  <extension
-       point="org.eclipse.core.expressions.definitions">
-    <definition
-          id="oneElementSelected">
-       <with
-             variable="selection">
-            <count
-                  value="1">
-            </count>
-             
-       </with>
-    </definition>
- </extension>
-   
-
 </plugin>
