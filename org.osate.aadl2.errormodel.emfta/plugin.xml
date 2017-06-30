@@ -95,23 +95,20 @@
          </menu>
       </menuContribution>
       <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar">
-         <toolbar
-               id="fault.toolbar">
-            <command
-                  commandId="org.osate.aadl2.errormodel.emfta.emfta"
-                  tooltip="Generate EMFTA model from AADL/EMV2 model and open in Viewer">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.osate.ui.perspective.AadlPerspective">
-                     </equals>
-                  </with>
-               </visibleWhen>
-            </command>
-         </toolbar>
+            locationURI="toolbar:org.osate.ui.toolbar?before=org.osate.aadl2.errormodel.analysis.implementationCompliance">
+         <command
+               commandId="org.osate.aadl2.errormodel.emfta.emfta"
+               tooltip="Generate EMFTA model from AADL/EMV2 model and open in Viewer">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.osate.ui.perspective.AadlPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
       </menuContribution>
       <menuContribution
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
