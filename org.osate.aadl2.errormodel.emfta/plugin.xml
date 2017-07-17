@@ -72,27 +72,19 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
-         <menu
-               id="menu.analyses"
-               label="%menu.analyses.label">
-            <menu
-                  id="menu.fault"
-                  label="%menu.fault.label">
-               <command
-                     commandId="org.osate.aadl2.errormodel.emfta.emfta">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.osate.ui.perspective.AadlPerspective">
-                        </equals>
-                     </with>
-                  </visibleWhen>
-               </command>
-            </menu>
-         </menu>
+            locationURI="menu:org.osate.aadl2.errormodel.analysis.faultAnalysesMenu?before=org.osate.aadl2.errormodel.analysis.implementationCompliance">
+         <command
+               commandId="org.osate.aadl2.errormodel.emfta.emfta">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.osate.ui.perspective.AadlPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
       </menuContribution>
       <menuContribution
             locationURI="toolbar:org.osate.ui.toolbar?before=org.osate.aadl2.errormodel.analysis.implementationCompliance">
