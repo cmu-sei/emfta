@@ -103,40 +103,32 @@
          </command>
       </menuContribution>
       <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <menu
-               id="org.osate.ui.popupMenu.Analyses"
-               label="%popupMenu.analyses.label">
-            <menu
-                  id="org.osate.analysis.architecture.popupMenu.Fault"
-                  label="%popupMenu.Fault.label">
-               <command
-                     commandId="org.osate.aadl2.errormodel.emfta.emfta">
-                  <visibleWhen
-                        checkEnabled="false">
-                     <with
-                           variable="selection">
-                        <iterate
-                              operator="and"
-                              ifEmpty="false">
-                           <or>
-                              <instanceof
-                                    value="org.osate.aadl2.instance.ComponentInstance">
-                              </instanceof>
-                              <adapt
-                                    type="org.eclipse.core.resources.IFile">
-                                 <test
-                                       property="org.eclipse.core.resources.contentTypeId"
-                                       value="org.osate.core.instanceModelFile">
-                                 </test>
-                              </adapt>
-                           </or>
-                        </iterate>
-                     </with>
-                  </visibleWhen>
-               </command>
-            </menu>
-         </menu>
+            locationURI="popup:org.osate.aadl2.errormodel.analysis.faultAnalysesPopupMenu?before=org.osate.aadl2.errormodel.analysis.implementationCompliance">
+         <command
+               commandId="org.osate.aadl2.errormodel.emfta.emfta">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <iterate
+                        operator="and"
+                        ifEmpty="false">
+                     <or>
+                        <instanceof
+                              value="org.osate.aadl2.instance.ComponentInstance">
+                        </instanceof>
+                        <adapt
+                              type="org.eclipse.core.resources.IFile">
+                           <test
+                                 property="org.eclipse.core.resources.contentTypeId"
+                                 value="org.osate.core.instanceModelFile">
+                           </test>
+                        </adapt>
+                     </or>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
 </plugin>
