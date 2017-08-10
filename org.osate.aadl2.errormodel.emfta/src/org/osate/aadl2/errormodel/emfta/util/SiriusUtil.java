@@ -1,5 +1,6 @@
 package org.osate.aadl2.errormodel.emfta.util;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -16,7 +17,6 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.transaction.RecordingCommand;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
-import org.eclipse.sirius.business.api.componentization.ViewpointRegistry;
 import org.eclipse.sirius.business.api.modelingproject.AbstractRepresentationsFileJob;
 import org.eclipse.sirius.business.api.modelingproject.ModelingProject;
 import org.eclipse.sirius.business.api.query.DViewQuery;
@@ -67,17 +67,12 @@ public class SiriusUtil {
 		}
 	}
 
-	/**
-	 * Retrieves a viewpoint from its URI
-	 * @param viewpointURI
-	 * @return Viewpoint from the viewpoints registry
-	 */
-	public Viewpoint getViewpointFromRegistry(URI viewpointURI) {
-		ViewpointRegistry registry = ViewpointRegistry.getInstance();
-		try {
-			return registry.getViewpoint(viewpointURI);
-		} catch (Exception e) {
-			// Unable to retrieve viewpoint
+	public Viewpoint getViewpointFromSession(Session session, String name) {
+		Collection<Viewpoint> viewpoints = session.getSelectedViewpoints(false);
+		for (Viewpoint viewpoint : viewpoints) {
+			if (viewpoint.getName().equals(name)) {
+				return viewpoint;
+			}
 		}
 		return null;
 	}
@@ -319,7 +314,6 @@ public class SiriusUtil {
 	 */
 	public void createAndOpenSiruisView(final URI ftamodelUri, final IProject project, String viewPoint,
 			String representation, IProgressMonitor monitor) {
-		URI emftaViewpointURI = URI.createURI(viewPoint);
 
 		URI semanticResourceURI = URI.createPlatformResourceURI(ftamodelUri.toPlatformString(true), true);
 		Session existingSession = getSessionForProjectAndResource(project, semanticResourceURI, monitor);
@@ -343,7 +337,7 @@ public class SiriusUtil {
 				OsateDebug.osateDebug("Could not find model for URI " + ftamodelUri.path());
 				return;
 			}
-			final Viewpoint emftaVP = getViewpointFromRegistry(emftaViewpointURI);
+			final Viewpoint emftaVP = getViewpointFromSession(existingSession, viewPoint);
 			final RepresentationDescription description = getRepresentationDescription(emftaVP, representation);
 			String modelRootName = getPrintName(model);
 			String representationName = modelRootName + " " + representation;
