@@ -1,8 +1,8 @@
 package org.osate.aadl2.errormodel.emfta.tests
 
-import com.itemis.xtext.testing.XtextRunner2
 import org.eclipse.core.runtime.Path
-import org.eclipse.xtext.junit4.InjectWith
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.util.Files
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,13 +17,12 @@ import org.osate.xtext.aadl2.errormodel.util.EMV2Util
 
 import static org.junit.Assert.*
 
-@RunWith(typeof(XtextRunner2))
-@InjectWith(typeof(ErrorModelUiInjectorProvider))
+@RunWith(XtextRunner)
+@InjectWith(ErrorModelUiInjectorProvider)
 class CommonError1Test extends OsateTest {
 	override getProjectName() {
 		"CommonError1Test"
 	}
-	
 	
 
 /**
