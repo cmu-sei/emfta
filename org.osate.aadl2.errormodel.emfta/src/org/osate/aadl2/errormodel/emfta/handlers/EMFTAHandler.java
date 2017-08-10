@@ -143,12 +143,12 @@ public final class EMFTAHandler extends AaxlReadOnlyHandlerAsJob {
 			if (newURI != null) {
 				if (MINCUTSET) {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
-							"EMFTA", "Cutset.diagram", "Minimal Cutset");
+							"viewpoint:/emfta.design/EMFTA", "Cutset.diagram", "Minimal Cutset");
 					monitor.done();
 					return;
 				} else {
 					SiriusUtil.INSTANCE.autoOpenModel(newURI, ResourceUtil.getFile(si.eResource()).getProject(),
-							"EMFTA", "Tree.diagram", "Fault Tree");
+							"viewpoint:/emfta.design/EMFTA", "Tree.diagram", "Fault Tree");
 					monitor.done();
 					return;
 				}

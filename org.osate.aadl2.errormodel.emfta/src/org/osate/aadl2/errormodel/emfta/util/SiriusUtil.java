@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.transaction.RecordingCommand;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
+import org.eclipse.sirius.business.api.componentization.ViewpointRegistry;
 import org.eclipse.sirius.business.api.modelingproject.AbstractRepresentationsFileJob;
 import org.eclipse.sirius.business.api.modelingproject.ModelingProject;
 import org.eclipse.sirius.business.api.query.DViewQuery;
@@ -67,12 +68,63 @@ public class SiriusUtil {
 		}
 	}
 
-	public Viewpoint getViewpointFromSession(Session session, String name) {
+	public Viewpoint getViewpoint(final Session session, URI viewpointURI, final IProgressMonitor monitor) {
+		Viewpoint result = getViewpointFromSession(session, viewpointURI);
+		if (result != null)
+			return result;
+		ViewpointRegistry registry = ViewpointRegistry.getInstance();
+		try {
+			final Viewpoint regViewpoint = registry.getViewpoint(viewpointURI);
+			// make sure it is selected
+			if (regViewpoint != null) {
+
+				IEditingSession uiSession = SessionUIManager.INSTANCE.getOrCreateUISession(session);
+				uiSession.open();
+
+				// Ensure the viewpoint is selected for the session
+				session.getTransactionalEditingDomain().getCommandStack()
+						.execute(new RecordingCommand(session.getTransactionalEditingDomain()) {
+
+							@Override
+							protected void doExecute() {
+
+								// Check if already selected
+								Collection<Viewpoint> sel = session.getSelectedViewpoints(false);
+								if (!session.getSelectedViewpoints(false).contains(regViewpoint)) {
+									ViewpointSelectionCallback selection = new ViewpointSelectionCallback();
+									selection.selectViewpoint(regViewpoint, session, monitor);
+								}
+							}
+						});
+			}
+		} catch (Exception e) {
+			// Unable to retrieve viewpoint
+		}
+		return getViewpointFromSession(session, viewpointURI);
+	}
+
+	public Viewpoint getViewpointFromSession(Session session, URI viewpointURI) {
+		String viewpointName = viewpointURI.lastSegment();
 		Collection<Viewpoint> viewpoints = session.getSelectedViewpoints(false);
 		for (Viewpoint viewpoint : viewpoints) {
-			if (viewpoint.getName().equals(name)) {
+			if (viewpointName.endsWith(viewpoint.getName())) {
 				return viewpoint;
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieves a viewpoint from its URI
+	 * @param viewpointURI
+	 * @return Viewpoint from the viewpoints registry
+	 */
+	public Viewpoint getViewpointFromRegistry(URI viewpointURI) {
+		ViewpointRegistry registry = ViewpointRegistry.getInstance();
+		try {
+			return registry.getViewpoint(viewpointURI);
+		} catch (Exception e) {
+			// Unable to retrieve viewpoint
 		}
 		return null;
 	}
@@ -123,26 +175,6 @@ public class SiriusUtil {
 	public void createAndOpenRepresentation(final Session existingSession, final Viewpoint viewpoint,
 			final RepresentationDescription description, final String representationName, final EObject object,
 			final IProgressMonitor monitor) {
-		if (viewpoint != null) {
-
-			IEditingSession uiSession = SessionUIManager.INSTANCE.getOrCreateUISession(existingSession);
-			uiSession.open();
-
-			// Ensure the viewpoint is selected for the session
-			existingSession.getTransactionalEditingDomain().getCommandStack()
-					.execute(new RecordingCommand(existingSession.getTransactionalEditingDomain()) {
-
-						@Override
-						protected void doExecute() {
-
-							// Check if already selected
-							if (!existingSession.getSelectedViewpoints(false).contains(viewpoint)) {
-								ViewpointSelectionCallback selection = new ViewpointSelectionCallback();
-								selection.selectViewpoint(viewpoint, existingSession, monitor);
-							}
-						}
-					});
-		}
 
 		// Create and open the representation
 		Display.getDefault().syncExec(new Runnable() {
@@ -192,9 +224,9 @@ public class SiriusUtil {
 
 				if (existingSession == null) {
 					loadSession(modelingProject, monitor);
+					waitWhileSessionLoads(monitor);
+					existingSession = modelingProject.getSession();
 				}
-				waitWhileSessionLoads(monitor);
-				existingSession = modelingProject.getSession();
 				if (existingSession != null) {
 					addSemanticResource(existingSession, semanticResourceURI, monitor);
 				}
@@ -314,6 +346,7 @@ public class SiriusUtil {
 	 */
 	public void createAndOpenSiruisView(final URI ftamodelUri, final IProject project, String viewPoint,
 			String representation, IProgressMonitor monitor) {
+		URI viewpointURI = URI.createURI(viewPoint);
 
 		URI semanticResourceURI = URI.createPlatformResourceURI(ftamodelUri.toPlatformString(true), true);
 		Session existingSession = getSessionForProjectAndResource(project, semanticResourceURI, monitor);
@@ -337,7 +370,7 @@ public class SiriusUtil {
 				OsateDebug.osateDebug("Could not find model for URI " + ftamodelUri.path());
 				return;
 			}
-			final Viewpoint emftaVP = getViewpointFromSession(existingSession, viewPoint);
+			final Viewpoint emftaVP = getViewpoint(existingSession, viewpointURI, monitor);
 			final RepresentationDescription description = getRepresentationDescription(emftaVP, representation);
 			String modelRootName = getPrintName(model);
 			String representationName = modelRootName + " " + representation;
