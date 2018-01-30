@@ -25,7 +25,7 @@ Most Fault-Tree Analysis tools are commercial and few open-source projects
 are commercial and/or platform-dependent. Having an eclipse project
 is way more convenient to interface with other modeling projects, 
 especially the [OSATE](https://github.com/osate) tools used in many
-of my research projects (yes, I did not do it for the safe of science).
+of my research projects (yes, I did not do it for the sake of science).
 
 Also, another reason was to try [Sirius](https://www.eclipse.org/sirius/), it
 seems a nice way to design diagrams easily using EMF-based models. So, I wanted
